@@ -1,5 +1,5 @@
 /**
- * Kinetic Studio Landing Page
+ * Solivate Studio Landing Page
  * Full-Stack Premium UI/UX Design & High-Performance IT Agency Code
  */
 

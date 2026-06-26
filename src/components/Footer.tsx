@@ -15,7 +15,7 @@ export default function Footer() {
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Thank you for subscribing to Kinetic Insights! Our tech newsletters are dispatched bi-weekly.');
+    alert('Thank you for subscribing to Solivate Insights! Our tech newsletters are dispatched bi-weekly.');
   };
 
   return (
@@ -32,7 +32,7 @@ export default function Footer() {
             <div className="flex items-center gap-2 cursor-pointer" onClick={scrollToTop}>
               <img src="/images/logosvg.svg" alt="" className='w-10' />
               <span className="font-serif text-xl tracking-tight text-white font-bold">
-                Kinetic <span className="text-slate-300 font-sans font-light text-lg">Studio</span>
+                Solivate <span className="text-slate-300 font-sans font-light text-lg">Studio</span>
               </span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
@@ -41,10 +41,10 @@ export default function Footer() {
 
             {/* Social icons */}
             <div className="flex gap-4 pt-2">
-              <a href="https://www.youtube.com/@KineticStudioID" className="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-[#023E8A] transition-all flex items-center justify-center">
+              <a href="https://www.youtube.com/@SolivateStudioID" className="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-[#023E8A] transition-all flex items-center justify-center">
                 <Youtube className="w-4 h-4" />
               </a>
-              <a href="https://www.instagram.com/kineticstudio._/" className="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-[#023E8A] transition-all flex items-center justify-center">
+              <a href="https://www.instagram.com/solivatestudio._/" className="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-[#023E8A] transition-all flex items-center justify-center">
                 <Instagram className="w-4 h-4" />
               </a>
             </div>

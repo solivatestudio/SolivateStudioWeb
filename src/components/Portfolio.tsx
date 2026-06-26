@@ -25,7 +25,7 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
   },
   {
     id: 'workspace-mobile',
-    title: 'Kinetic Shift Enterprise Mobile Hub',
+    title: 'Solivate Shift Enterprise Mobile Hub',
     category: 'Mobile Apps',
     description: 'A premium native mobile workspace facilitating secure corporate chats, tasks syncing, offline databases, and swift notifications.',
     image: '/images/portfolio_mobile_1781799748021.jpg',

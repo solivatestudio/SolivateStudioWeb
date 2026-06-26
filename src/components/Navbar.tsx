@@ -57,7 +57,7 @@ export default function Navbar({ onCtaClick }: NavbarProps) {
           >
             <img src="/images/logosvg.svg" alt="" className="w-10" />
             <span className="font-serif text-xl tracking-tight text-[#023E8A] font-bold">
-              Kinetic <span className="text-slate-800 font-sans font-light text-lg">Studio</span>
+              Solivate <span className="text-slate-800 font-sans font-light text-lg">Studio</span>
               <p className="text-slate-800 font-sans italic font-light text-xs">Let's Upgrade Your Brand</p>
             </span>
           </div>
