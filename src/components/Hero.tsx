@@ -41,7 +41,7 @@ export default function Hero({ onCtaClick, onExploreClick }: HeroProps) {
               >
                 {t('hero.title1')}{' '}
                 <span className="text-[#023E8A] italic relative">
-                  Kinetic
+                  Solivate
                   <span className="absolute bottom-1 left-0 w-full h-[6px] bg-[#E5FAFF] -z-10" />
                 </span>{' '}
                 {t('hero.title2')}
@@ -114,7 +114,7 @@ export default function Hero({ onCtaClick, onExploreClick }: HeroProps) {
             >
               <img
                 src="/images/hero.svg"
-                alt="Kinetic Studio Abstract 3D Artwork"
+                alt="Solivate Studio Abstract 3D Artwork"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover object-center select-none pointer-events-none"
               />

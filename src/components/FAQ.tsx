@@ -7,7 +7,7 @@ import { useLanguage } from '../context/LanguageContext';
 const FAQ_ITEMS: FAQItem[] = [
   {
     id: 'pricing',
-    question: 'How does Kinetic Studio price its agency projects?',
+    question: 'How does Solivate Studio price its agency projects?',
     answer: 'We provide itemized, milestone-based pricing. We strictly avoid surprise extensions or vague retainer schemes. Every quote features flat fees linked to transparent functional outputs (e.g., Figma deliverables, database clusters, ready-to-test MVPs). If the product scope remains stable, your price stays exactly identical.'
   },
   {
