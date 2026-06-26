@@ -1,185 +1,121 @@
-import React from 'react';
+import type React from 'react';
 import { motion } from 'motion/react';
 import { Search, PenTool, Braces, Sparkles, AlertCircle } from 'lucide-react';
 import { ProcessStep } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 
-const PROCESS_STEPS: (ProcessStep & { icon: string; bulletColor: string })[] = [
+const PROCESS_STEPS: (ProcessStep & { icon: string })[] = [
   {
     stepNumber: 1,
     title: 'Discovery & Strategy',
-    description: 'We host interactive alignment sessions, draft comprehensive technical flowcharts, refine custom user stories, and outline the precise project scope bounds. No guesswork allowed.',
+    description: 'Interactive alignment sessions, technical flowcharts, custom user stories, and precise scope bounds.',
     duration: 'Week 1',
-    icon: 'Search',
-    bulletColor: 'bg-indigo-500'
+    icon: 'Search'
   },
   {
     stepNumber: 2,
     title: 'Design & Architecture',
-    description: 'Our team crafts high-fidelity, interactive viewport prototypes in Figma. Simultaneously, our cloud engineers draft system schematics, cluster topologies, and entity relationship diagrams.',
+    description: 'High-fidelity Figma prototypes alongside system schematics and entity relationship diagrams.',
     duration: 'Weeks 2-3',
-    icon: 'PenTool',
-    bulletColor: 'bg-emerald-500'
+    icon: 'PenTool'
   },
   {
     stepNumber: 3,
     title: 'Agile Software Development',
-    description: 'We code in bi-weekly sprints, continuously shipping modular features to a secure private staging server. You receive transparent sprint review recordings and demo links.',
+    description: 'Bi-weekly sprints shipping modular features to a secure private staging server with demo links.',
     duration: 'Weeks 4-8',
-    icon: 'Braces',
-    bulletColor: 'bg-[#023E8A]'
+    icon: 'Braces'
   },
   {
     stepNumber: 4,
     title: 'Pristine QA & Deployment',
-    description: 'We trigger automated testing models, perform penetration testing sweeps, audit responsive viewports, set up clean cloud monitoring dashboards, and carry out a seamless launch.',
+    description: 'Automated testing, penetration sweeps, responsive audits, monitoring dashboards, and a seamless launch.',
     duration: 'Weeks 9+',
-    icon: 'Sparkles',
-    bulletColor: 'bg-amber-500'
+    icon: 'Sparkles'
   }
 ];
 
-const iconMap: { [key: string]: React.ComponentType<any> } = {
-  Search: Search,
-  PenTool: PenTool,
-  Braces: Braces,
-  Sparkles: Sparkles
+const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
+  Search,
+  PenTool,
+  Braces,
+  Sparkles
 };
 
 export default function ProcessTimeline() {
   const { t } = useLanguage();
 
   return (
-    <section className="py-24 bg-[#E5FAFF]/50 relative overflow-hidden">
-      {/* Decorative vertical pattern */}
-      <div className="absolute right-0 top-1/4 w-96 h-96 bg-sky-50/30 rounded-full blur-3xl pointer-events-none" />
+    <section className="py-28 bg-cloud relative overflow-hidden font-body">
+      <div className="absolute inset-0 bg-line-grid opacity-50 pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
-          <span className="text-sm font-semibold uppercase tracking-wider text-[#023E8A]">{t('process.badge')}</span>
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900">
+        <div className="max-w-3xl mx-auto text-center mb-20 space-y-5">
+          <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-navy">
+            <span className="w-8 h-px bg-navy" />
+            {t('process.badge')}
+            <span className="w-8 h-px bg-navy" />
+          </span>
+          <h2 className="font-display tracking-display text-4xl sm:text-5xl font-semibold text-ink leading-[1.06]">
             {t('process.title')}
           </h2>
-          <div className="w-16 h-1 bg-[#023E8A] mx-auto rounded-full" />
-          <p className="text-slate-600 font-light text-base sm:text-lg">
+          <p className="text-mute text-lg">
             {t('process.subtitle')}
           </p>
         </div>
 
-        {/* Timeline Stack */}
-        <div className="relative max-w-4xl mx-auto">
-          
-          {/* Central Connecting Track Line (Desktop and Mobile left) */}
-          <div className="absolute left-[24px] md:left-1/2 top-4 bottom-4 w-0.5 bg-slate-100 -translate-x-1/2" />
+        {/* Timeline */}
+        <div className="relative max-w-3xl mx-auto">
+          <div className="absolute left-[27px] top-4 bottom-4 w-px bg-gradient-to-b from-navy/40 via-navy to-navy/40" />
 
-          <div className="space-y-12">
+          <div className="space-y-10">
             {PROCESS_STEPS.map((step, index) => {
               const IconComponent = iconMap[step.icon] || Search;
-              const isEven = index % 2 === 0;
 
               return (
-                <div
+                <motion.div
                   key={step.stepNumber}
-                  className="relative flex flex-col md:flex-row items-start md:items-center"
+                  initial={{ opacity: 0, x: 24 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: '-80px' }}
+                  transition={{ duration: 0.6, delay: index * 0.05 }}
+                  className="relative flex items-start gap-6"
                 >
-                  {/* Timeline Badge (Chronological Orb) */}
-                  <div className="absolute left-[24px] md:left-1/2 top-1.5 md:top-1/2 -translate-y-1/2 -translate-x-1/2 z-20">
-                    <motion.div
-                      whileInView={{ scale: [0.8, 1.1, 1] }}
-                      viewport={{ once: true, margin: '-50px' }}
-                      className={`w-12 h-12 rounded-full border-4 border-white shadow-md flex items-center justify-center text-white ${step.bulletColor}`}
-                    >
-                      <IconComponent className="w-5 h-5 stroke-[2.5]" />
-                    </motion.div>
+                  <div className="relative z-10 shrink-0">
+                    <div className="w-14 h-14 rounded-2xl bg-navy border border-navy-deep shadow-[0_12px_24px_-12px_rgba(2,42,94,0.6)] flex items-center justify-center text-lime">
+                      <IconComponent className="w-5 h-5" />
+                    </div>
+                    <span className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-lime text-ink text-[11px] font-display font-bold flex items-center justify-center border-2 border-cloud">
+                      {step.stepNumber}
+                    </span>
                   </div>
 
-                  {/* Spacer or Left Card context */}
-                  <div className={`w-full md:w-1/2 pr-0 md:pr-16 pl-14 md:pl-0 text-left ${
-                    isEven ? 'md:text-right md:block hidden' : 'md:block hidden'
-                  }`}>
-                    {isEven && (
-                      <motion.div
-                        initial={{ opacity: 0, x: -30 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true, margin: '-100px' }}
-                        transition={{ duration: 0.6 }}
-                        className="space-y-3"
-                      >
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E5FAFF] text-[#023E8A] text-xs font-semibold tracking-wide">
-                          {t(`process.items.${index}.duration`)}
-                        </span>
-                        <h3 className="font-serif text-2xl font-bold text-slate-800">
-                          {t(`process.items.${index}.title`)}
-                        </h3>
-                        <p className="text-slate-600 font-light text-sm leading-relaxed">
-                          {t(`process.items.${index}.desc`)}
-                        </p>
-                      </motion.div>
-                    )}
+                  <div className="flex-1 surface-card rounded-2xl p-6 text-left">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-navy/8 text-navy text-[10px] font-bold uppercase tracking-[0.16em] mb-3">
+                      {t(`process.items.${index}.duration`)}
+                    </span>
+                    <h3 className="font-display text-xl font-semibold text-ink mb-1.5">
+                      {t(`process.items.${index}.title`)}
+                    </h3>
+                    <p className="text-mute text-sm leading-relaxed">
+                      {t(`process.items.${index}.desc`)}
+                    </p>
                   </div>
-
-                  {/* Divider line for desktop center visual spacing */}
-                  <div className="hidden md:block w-0 h-4" />
-
-                  {/* Right Card context or Mobile Card */}
-                  <div className={`w-full md:w-1/2 pl-14 md:pl-16 text-left ${
-                    !isEven ? 'md:block' : 'md:hidden block'
-                  }`}>
-                    <motion.div
-                      initial={{ opacity: 0, x: 30 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.6 }}
-                      className="space-y-3"
-                    >
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E5FAFF] text-[#023E8A] text-xs font-semibold tracking-wide">
-                        {t(`process.items.${index}.duration`)}
-                      </span>
-                      <h3 className="font-serif text-2xl font-bold text-slate-800">
-                        {t(`process.items.${index}.title`)}
-                      </h3>
-                      <p className="text-slate-600 font-light text-sm leading-relaxed">
-                        {t(`process.items.${index}.desc`)}
-                      </p>
-                    </motion.div>
-                  </div>
-
-                  {/* Even Card displayed on mobile left-bound alignment */}
-                  <div className={`w-full pl-14 md:hidden block mt-1 text-left ${
-                    isEven ? 'block' : 'hidden'
-                  }`}>
-                    <motion.div
-                      initial={{ opacity: 0, x: 30 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.6 }}
-                      className="space-y-3"
-                    >
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E5FAFF] text-[#023E8A] text-xs font-semibold tracking-wide">
-                        {t(`process.items.${index}.duration`)}
-                      </span>
-                      <h3 className="font-serif text-2xl font-bold text-slate-800">
-                        {t(`process.items.${index}.title`)}
-                      </h3>
-                      <p className="text-slate-600 font-light text-sm leading-relaxed">
-                        {t(`process.items.${index}.desc`)}
-                      </p>
-                    </motion.div>
-                  </div>
-
-                </div>
+                </motion.div>
               );
             })}
           </div>
-
         </div>
 
-        <div className="mt-16 max-w-2xl mx-auto bg-slate-50 border border-slate-100 p-4 rounded-xl flex items-center gap-4 text-left">
-          <AlertCircle className="w-5 h-5 text-[#023E8A] shrink-0" />
-          <p className="text-xs text-slate-500 font-light">
-            <strong>{t('process.warning_bold')}</strong> {t('process.warning').replace('Need express delivery? ', '').replace('Butuh pengiriman kilat? ', '')}
+        {/* Warning */}
+        <div className="mt-16 max-w-2xl mx-auto surface-card rounded-2xl p-5 flex items-center gap-4 text-left">
+          <div className="w-9 h-9 rounded-xl bg-navy/8 text-navy flex items-center justify-center shrink-0">
+            <AlertCircle className="w-4 h-4" />
+          </div>
+          <p className="text-xs text-mute">
+            <strong className="text-ink font-semibold">{t('process.warning_bold')}</strong> {t('process.warning_desc')}
           </p>
         </div>
 

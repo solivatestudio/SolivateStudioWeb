@@ -1,7 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Mail, Phone, MapPin, ShieldCheck, Clock, Send, CheckCircle2, Sparkles } from 'lucide-react';
+import { Mail, Phone, MapPin, ShieldCheck, Send, CheckCircle2, ArrowUpRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+
+const BUDGETS = [
+  '< Rp.500.000 (Short MVP)',
+  'Rp.500.000 - Rp.1.000.000 (Standard Product)',
+  'Rp.1.000.000 - Rp.3.000.000 (Enterprise Suite)',
+  '> Rp.3.000.000 (Dedicated Team / Multi-Cloud)'
+];
 
 export default function ContactForm() {
   const { t } = useLanguage();
@@ -9,19 +17,12 @@ export default function ContactForm() {
     name: '',
     email: '',
     company: '',
-    budget: 'Rp.300k - Rp.800k',
+    budget: BUDGETS[0],
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formError, setFormError] = useState('');
-
-  const BUDGETS = [
-    '< Rp.500.000 (Short MVP)',
-    'Rp.500.000 - Rp.1.000.000 (Standard Product)',
-    'Rp.1.000.000 - Rp.3.000.000 (Enterprise Suite)',
-    '> Rp.3.000.000 (Dedicated Team / Multi-Cloud)'
-  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +33,6 @@ export default function ContactForm() {
       return;
     }
 
-    // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email.trim())) {
       setFormError('Please enter a valid business email address.');
@@ -40,113 +40,104 @@ export default function ContactForm() {
     }
 
     setIsSubmitting(true);
-
-    // Simulate high-end backend delivery API
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSubmitted(true);
-      setFormData({
-        name: '',
-        email: '',
-        company: '',
-        budget: '< Rp.500.000',
-        message: ''
-      });
+      setFormData({ name: '', email: '', company: '', budget: BUDGETS[0], message: '' });
     }, 1200);
   };
 
-  return (
-    <section id="contact-us" className="py-24 bg-gradient-to-b from-white to-[#E5FAFF]/40 relative scroll-mt-20">
-      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-[#E1F7FC]/50 rounded-full blur-3xl -z-10 translate-x-1/3 translate-y-1/3" />
+  const inputClass = 'w-full px-4 py-3 rounded-xl border border-line bg-zinc focus:border-navy focus:ring-2 focus:ring-navy/15 focus:outline-none text-ink transition-all placeholder-mute/60 text-sm';
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+  return (
+    <section id="contact-us" className="py-28 bg-cloud relative scroll-mt-20 font-body overflow-hidden">
+      <div className="absolute inset-0 bg-dot-grid opacity-50 pointer-events-none" />
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <span className="text-sm font-semibold uppercase tracking-wider text-[#023E8A]">{t('contact.badge')}</span>
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900">
+        <div className="text-center max-w-2xl mx-auto mb-16 space-y-5">
+          <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-navy">
+            <span className="w-8 h-px bg-navy" />
+            {t('contact.badge')}
+            <span className="w-8 h-px bg-navy" />
+          </span>
+          <h2 className="font-display tracking-display text-4xl sm:text-5xl font-semibold text-ink leading-[1.06]">
             {t('contact.title')}
           </h2>
-          <div className="w-16 h-1 bg-[#023E8A] mx-auto rounded-full" />
-          <p className="text-slate-600 font-light text-base sm:text-lg">
+          <p className="text-mute text-lg">
             {t('contact.subtitle')}
           </p>
         </div>
 
-        {/* Dual Panel Grid */}
-        <div className="grid lg:grid-cols-12 gap-12 items-stretch mt-8">
+        {/* Dual panel */}
+        <div className="grid lg:grid-cols-12 gap-10 items-stretch">
 
-          {/* Agency coordinates Column */}
+          {/* Coordinates */}
           <div className="lg:col-span-5 space-y-8 flex flex-col justify-between">
             <div className="space-y-6">
               <div className="space-y-3 text-left">
-                <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest block">{t('contact.status')}</span>
-                <h3 className="font-serif text-2xl sm:text-3xl font-bold text-slate-800">
+                <span className="text-xs font-bold text-navy uppercase tracking-[0.18em] flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-navy animate-pulse" />
+                  {t('contact.status')}
+                </span>
+                <h3 className="font-display text-2xl sm:text-3xl font-semibold text-ink">
                   {t('contact.hq_title')}
                 </h3>
-                <p className="text-slate-500 font-light text-sm">
+                <p className="text-mute text-sm">
                   {t('contact.hq_desc')}
                 </p>
               </div>
 
-              {/* Coordinates List */}
-              <div className="space-y-4">
-                <div className="flex gap-4 p-4 rounded-xl bg-white/70 border border-slate-100 shadow-sm text-left items-center">
-                  <div className="w-10 h-10 rounded-lg bg-[#E5FAFF] text-[#023E8A] flex items-center justify-center shrink-0">
-                    <MapPin className="w-5 h-5" />
+              <div className="space-y-3">
+                {[
+                  { Icon: MapPin, label: t('contact.office_label'), value: 'Harvest City, Jl. Orchid Raya A, Ragemanunggal, Setu, Bekasi Regency, West Java 17320', href: null },
+                  { Icon: Mail, label: t('contact.email_label'), value: 'imammka23@gmail.com', href: 'mailto:imammka23@gmail.com' },
+                  { Icon: Phone, label: t('contact.phone_label'), value: '+62 812-1911-8993', href: 'https://wa.me/6281219118993' }
+                ].map(({ Icon, label, value, href }) => (
+                  <div key={label} className="flex gap-4 p-4 rounded-2xl surface-card text-left items-center">
+                    <div className="w-10 h-10 rounded-xl bg-navy/8 text-navy flex items-center justify-center shrink-0">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="block text-[10px] uppercase font-bold text-mute tracking-wider">{label}</span>
+                      {href ? (
+                        <a
+                          href={href}
+                          target={href.startsWith('http') ? '_blank' : undefined}
+                          rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                          className="text-sm font-semibold text-ink hover:text-navy transition-colors break-words"
+                        >
+                          {value}
+                        </a>
+                      ) : (
+                        <span className="text-sm font-medium text-ink/90">{value}</span>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <span className="block text-[10px] uppercase font-bold text-slate-400 tracking-wider">{t('contact.office_label')}</span>
-                    <span className="text-sm font-medium text-slate-800">Harvest City, Jl. Orchid Raya A, Ragemanunggal, Setu, Bekasi Regency, West Java 17320</span>
-                  </div>
-                </div>
-
-                <div className="flex gap-4 p-4 rounded-xl bg-white/70 border border-slate-100 shadow-sm text-left items-center">
-                  <div className="w-10 h-10 rounded-lg bg-[#E5FAFF] text-[#023E8A] flex items-center justify-center shrink-0">
-                    <Mail className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <span className="block text-[10px] uppercase font-bold text-slate-400 tracking-wider">{t('contact.email_label')}</span>
-                    <a href="mailto:imammka23@gmail.com" className="text-sm font-semibold text-[#023E8A] hover:underline">
-                      imammka23@gmail.com
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex gap-4 p-4 rounded-xl bg-white/70 border border-slate-100 shadow-sm text-left items-center">
-                  <div className="w-10 h-10 rounded-lg bg-[#E5FAFF] text-[#023E8A] flex items-center justify-center shrink-0">
-                    <Phone className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <span className="block text-[10px] uppercase font-bold text-slate-400 tracking-wider">{t('contact.phone_label')}</span>
-                    <a href="wa.me/6281219118993" className="text-sm font-semibold text-slate-800 hover:text-[#023E8A] transition-colors">
-                      +62 812-1911-8993
-                    </a>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
-            {/* Compliance Info box */}
-            <div className="bg-[#023E8A]/5 p-6 rounded-2xl border border-[#023E8A]/10 space-y-4 text-left">
-              <h4 className="text-xs font-bold uppercase text-[#023E8A] tracking-wider flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-500 fill-emerald-100" />
+            {/* Compliance box */}
+            <div className="navy-card p-6 space-y-4 text-left relative overflow-hidden">
+              <h4 className="relative text-xs font-bold uppercase text-lime tracking-[0.18em] flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4" />
                 <span>{t('contact.nda_title')}</span>
               </h4>
-              <p className="text-xs text-slate-600 font-light leading-relaxed">
+              <p className="relative text-xs text-paper/90 leading-relaxed">
                 {t('contact.nda_desc')}
               </p>
-
-              <div className="pt-2 border-t border-slate-200/50 flex flex-wrap gap-4 text-[10px] font-semibold text-slate-400">
-                <span className="flex items-center gap-1">🛡️ ISO 27001 SECURE</span>
-                <span className="flex items-center gap-1">🏢 SOC2 TYPE II COMPLIANT</span>
+              <div className="relative pt-3 border-t border-white/10 flex flex-wrap gap-4 text-[10px] font-semibold text-paper/70">
+                <span>ISO 27001 SECURE</span>
+                <span>SOC2 TYPE II COMPLIANT</span>
               </div>
             </div>
           </div>
 
-          {/* Form Column */}
+          {/* Form */}
           <div className="lg:col-span-7">
-            <div className="sleek-card rounded-3xl p-8 sm:p-10 relative overflow-hidden shadow-xl">
+            <div className="surface-card rounded-[1.75rem] p-8 sm:p-10 relative overflow-hidden">
               <AnimatePresence mode="wait">
                 {!isSubmitted ? (
                   <motion.form
@@ -158,10 +149,9 @@ export default function ContactForm() {
                     className="space-y-6 text-left"
                   >
                     <div className="grid sm:grid-cols-2 gap-6">
-                      {/* Name input */}
                       <div className="space-y-2">
-                        <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                          {t('contact.form.name_label')} <span className="text-[#023E8A]">*</span>
+                        <label className="block text-xs font-semibold text-ink uppercase tracking-wider">
+                          {t('contact.form.name_label')} <span className="text-navy">*</span>
                         </label>
                         <input
                           type="text"
@@ -169,14 +159,12 @@ export default function ContactForm() {
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                           placeholder={t('contact.form.name_placeholder')}
-                          className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#023E8A] focus:ring-2 focus:ring-[#E5FAFF] focus:outline-none text-slate-800 transition-all placeholder-slate-400 bg-[#FCFDFE] text-sm"
+                          className={inputClass}
                         />
                       </div>
-
-                      {/* Email input */}
                       <div className="space-y-2">
-                        <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                          {t('contact.form.email_label')} <span className="text-[#023E8A]">*</span>
+                        <label className="block text-xs font-semibold text-ink uppercase tracking-wider">
+                          {t('contact.form.email_label')} <span className="text-navy">*</span>
                         </label>
                         <input
                           type="email"
@@ -184,15 +172,14 @@ export default function ContactForm() {
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                           placeholder={t('contact.form.email_placeholder')}
-                          className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#023E8A] focus:ring-2 focus:ring-[#E5FAFF] focus:outline-none text-slate-800 transition-all placeholder-slate-400 bg-[#FCFDFE] text-sm"
+                          className={inputClass}
                         />
                       </div>
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-6">
-                      {/* Company input */}
                       <div className="space-y-2">
-                        <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                        <label className="block text-xs font-semibold text-ink uppercase tracking-wider">
                           {t('contact.form.company_label')}
                         </label>
                         <input
@@ -200,33 +187,28 @@ export default function ContactForm() {
                           value={formData.company}
                           onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                           placeholder={t('contact.form.company_placeholder')}
-                          className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#023E8A] focus:ring-2 focus:ring-[#E5FAFF] focus:outline-none text-slate-800 transition-all placeholder-slate-400 bg-[#FCFDFE] text-sm"
+                          className={inputClass}
                         />
                       </div>
-
-                      {/* Budget selector */}
                       <div className="space-y-2">
-                        <label className="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider">
+                        <label className="block text-xs font-semibold text-ink uppercase tracking-wider">
                           {t('contact.form.budget_label')}
                         </label>
                         <select
                           value={formData.budget}
                           onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                          className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#023E8A] focus:ring-2 focus:ring-[#E5FAFF] focus:outline-none text-slate-800 transition-all bg-[#FCFDFE] text-sm"
+                          className={inputClass}
                         >
                           {BUDGETS.map((bg) => (
-                            <option key={bg} value={bg}>
-                              {bg}
-                            </option>
+                            <option key={bg} value={bg} className="bg-paper text-ink">{bg}</option>
                           ))}
                         </select>
                       </div>
                     </div>
 
-                    {/* Message description box */}
                     <div className="space-y-2">
-                      <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                        {t('contact.form.message_label')} <span className="text-[#023E8A]">*</span>
+                      <label className="block text-xs font-semibold text-ink uppercase tracking-wider">
+                        {t('contact.form.message_label')} <span className="text-navy">*</span>
                       </label>
                       <textarea
                         required
@@ -234,27 +216,25 @@ export default function ContactForm() {
                         value={formData.message}
                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                         placeholder={t('contact.form.message_placeholder')}
-                        className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#023E8A] focus:ring-2 focus:ring-[#E5FAFF] focus:outline-none text-slate-800 transition-all placeholder-slate-400 bg-[#FCFDFE] text-sm resize-none leading-relaxed"
+                        className={`${inputClass} resize-none leading-relaxed`}
                       />
                     </div>
 
-                    {/* Form Error Notice */}
                     {formError && (
-                      <div className="p-3 bg-red-50 border border-red-150 rounded-lg text-xs font-medium text-red-700 flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-red-600 rounded-full shrink-0" />
+                      <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs font-medium text-rose-600 flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 bg-rose-500 rounded-full shrink-0" />
                         <span>{formError}</span>
                       </div>
                     )}
 
-                    {/* Submit Button */}
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-[#023E8A] hover:bg-[#023E8A]/95 text-white font-semibold text-base rounded-xl transition-all shadow-lg hover:shadow-[#023E8A]/15 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed group"
+                      className="group w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-navy hover:bg-navy-deep text-paper font-semibold text-base rounded-full transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       {isSubmitting ? (
                         <>
-                          <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                          <svg className="animate-spin h-5 w-5 text-paper" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                           </svg>
@@ -262,13 +242,13 @@ export default function ContactForm() {
                         </>
                       ) : (
                         <>
-                          <Send className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                           <span>{t('contact.form.submit_btn')}</span>
+                          <Send className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                         </>
                       )}
                     </button>
 
-                    <div className="text-center font-light text-slate-400 text-[11px] leading-normal pt-2">
+                    <div className="text-center text-mute text-[11px] leading-normal pt-1">
                       {t('contact.form.nda_notice')}
                     </div>
                   </motion.form>
@@ -280,29 +260,26 @@ export default function ContactForm() {
                     exit={{ opacity: 0 }}
                     className="py-12 px-6 flex flex-col items-center justify-center text-center space-y-6"
                   >
-                    <div className="w-16 h-16 rounded-full bg-[#E5FAFF] text-[#023E8A] flex items-center justify-center shadow-lg">
-                      <CheckCircle2 className="w-10 h-10 stroke-[2.5]" />
+                    <div className="w-16 h-16 rounded-2xl bg-navy text-paper flex items-center justify-center">
+                      <CheckCircle2 className="w-9 h-9" />
                     </div>
-
                     <div className="space-y-3">
-                      <h4 className="font-serif text-3xl font-bold text-[#023E8A]">
+                      <h4 className="font-display text-3xl font-semibold text-navy">
                         {t('contact.success.title')}
                       </h4>
-                      <p className="text-slate-600 max-w-md font-light text-sm sm:text-base leading-relaxed">
+                      <p className="text-mute max-w-md text-sm sm:text-base leading-relaxed">
                         {t('contact.success.desc')}
                       </p>
                     </div>
-
-                    <div className="bg-[#E5FAFF]/40 border border-[#E5FAFF] p-4 rounded-xl text-left max-w-md flex gap-3 text-xs text-slate-600">
-                      <Sparkles className="w-5 h-5 text-[#023E8A] shrink-0" />
+                    <div className="bg-zinc border border-line p-4 rounded-xl text-left max-w-md flex gap-3 text-xs text-mute">
+                      <ArrowUpRight className="w-5 h-5 text-navy shrink-0" />
                       <p>
-                        <strong>{t('contact.success.next_steps').split('**')[1]}</strong> {t('contact.success.next_steps').split('**')[2]}
+                        <strong className="text-ink">{t('contact.success.next_steps').split('**')[1]}</strong> {t('contact.success.next_steps').split('**')[2]}
                       </p>
                     </div>
-
                     <button
                       onClick={() => setIsSubmitted(false)}
-                      className="text-xs font-semibold uppercase text-slate-400 hover:text-[#023E8A] transition-colors hover:underline cursor-pointer pt-4"
+                      className="text-xs font-semibold uppercase text-mute hover:text-navy transition-colors cursor-pointer pt-2"
                     >
                       {t('contact.success.reset_btn')}
                     </button>
@@ -313,7 +290,6 @@ export default function ContactForm() {
           </div>
 
         </div>
-
       </div>
     </section>
   );

@@ -1,142 +1,163 @@
-import React from 'react';
 import { motion } from 'motion/react';
-import { Layers, ShieldCheck, Eye, Clock, Check } from 'lucide-react';
-import { Strength } from '../types';
+import { Layers, ArrowUpRight, ShieldCheck, Database } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-
-const STRENGTHS: Strength[] = [
-  {
-    id: 'scalable-solutions',
-    title: 'Scalable Solutions',
-    description: 'We build with high-velocity backends and cloud native frameworks engineered to handle sudden spikes and endless organic growth organically.',
-    icon: 'Layers'
-  },
-  {
-    id: 'expert-developers',
-    title: 'Expert Developers',
-    description: 'Our engineers are senior product minds who understand business workflows, code cleanliness, testing paradigms, and secure containerization.',
-    icon: 'ShieldCheck'
-  },
-  {
-    id: 'transparent-process',
-    title: 'Transparent Process',
-    description: 'Track daily progress on virtual boards and see live software staging updates. We speak clearly, report early, and run regular agile sprint reviews.',
-    icon: 'Eye'
-  },
-  {
-    id: 'on-time-delivery',
-    title: 'On-Time Delivery',
-    description: 'No broken promises or endless rollouts. Our modern estimation engine and focused scope controls get your software polished and shipped right.',
-    icon: 'Clock'
-  }
-];
-
-// Helper to map icon string to Component
-const iconMap: { [key: string]: React.ComponentType<any> } = {
-  Layers: Layers,
-  ShieldCheck: ShieldCheck,
-  Eye: Eye,
-  Clock: Clock
-};
 
 export default function WhyChooseUs() {
   const { t } = useLanguage();
 
+  const scrollToContact = () => {
+    const element = document.getElementById('contact-us');
+    if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
-    <section id="about" className="py-24 bg-[#E5FAFF]/40 relative scroll-mt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <span className="text-sm font-semibold uppercase tracking-wider text-[#023E8A]">{t('why.badge')}</span>
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900">
+    <section id="about" className="py-28 bg-cloud relative scroll-mt-20 font-body overflow-hidden">
+      <div className="absolute inset-0 bg-line-grid opacity-60 pointer-events-none" />
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+        {/* Header */}
+        <div className="max-w-3xl mb-16 space-y-5">
+          <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-navy">
+            <span className="w-8 h-px bg-navy" />
+            {t('why.badge')}
+          </span>
+          <h2 className="font-display tracking-display text-4xl sm:text-5xl font-semibold text-ink leading-[1.06]">
             {t('why.title')}
           </h2>
-          <div className="w-16 h-1 bg-[#023E8A] mx-auto rounded-full" />
-          <p className="text-[#023E8A]/80 font-light text-base sm:text-lg">
+          <p className="text-mute text-lg max-w-2xl">
             {t('why.subtitle')}
           </p>
         </div>
 
-        {/* Benefits Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {STRENGTHS.map((strength, idx) => {
-            const IconComponent = iconMap[strength.icon] || Layers;
-            return (
-              <motion.div
-                key={strength.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-100px' }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className="group relative p-8 sleek-card rounded-3xl flex flex-col justify-between"
-              >
-                {/* Accent Top Border Hover Effect */}
-                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#023E8A] to-sky-400 rounded-t-3xl scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300" />
-                
-                <div className="space-y-6">
-                  {/* Icon Wrapper */}
-                  <div className="w-12 h-12 bg-[#E5FAFF] text-[#023E8A] rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 duration-300">
-                    <IconComponent className="w-6 h-6 stroke-[2]" />
-                  </div>
+        {/* Bento 3-col */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                  <div className="space-y-2">
-                    <h3 className="font-serif text-xl font-bold text-[#023E8A] transition-colors">
-                      {t(`why.items.${strength.id}.title`)}
-                    </h3>
-                    <p className="text-slate-600 text-sm font-normal leading-relaxed">
-                      {t(`why.items.${strength.id}.desc`)}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center text-xs font-semibold text-[#023E8A] opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0">
-                  <span>{t('why.guarantee')}</span>
-                  <Check className="w-3.5 h-3.5 ml-1.5 stroke-[3]" />
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Bottom Callout Banner */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="mt-16 bg-gradient-to-r from-[#023E8A] to-[#012A5E] p-8 sm:p-12 rounded-3xl text-white shadow-xl relative overflow-hidden"
-        >
-          {/* subtle noise/light shapes */}
-          <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-white/5 rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute left-10 top-0 w-40 h-40 bg-[#E5FAFF]/10 rounded-full blur-2xl pointer-events-none" />
-          
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="space-y-3 text-center md:text-left max-w-2xl">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-[#E5FAFF] text-xs font-semibold uppercase tracking-wider">
-                {t('why.cta_badge')}
+          {/* Card 1: navy accent card, lime number */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="navy-card relative w-full p-8 overflow-hidden h-[380px] lg:h-[420px] flex flex-col justify-between shadow-[0_30px_60px_-30px_rgba(2,42,94,0.55)] text-left"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:18px_18px] pointer-events-none" />
+            <div className="relative space-y-4">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-lime/20 text-lime text-[10px] font-bold uppercase tracking-[0.18em]">
+                {t('why.guarantee')}
               </span>
-              <h3 className="font-serif text-2xl sm:text-3xl font-bold leading-tight">
-                {t('why.cta_title')}
+              <h3 className="font-display text-3xl font-semibold leading-tight max-w-xs">
+                {t('why.cards.card1_title')}
               </h3>
-              <p className="text-sky-100 font-light text-sm max-w-xl">
-                {t('why.cta_desc')}
+            </div>
+
+            <div className="relative rounded-2xl bg-navy-deep/50 border border-white/10 p-5 backdrop-blur-sm">
+              <div className="flex items-end justify-between">
+                <div>
+                  <span className="block text-5xl font-display font-semibold text-lime">99.4%</span>
+                  <span className="text-[10px] text-paper/70 uppercase font-bold tracking-[0.18em] mt-1 block">{t('why.cards.card1_metric_label')}</span>
+                </div>
+                <div className="w-11 h-11 rounded-xl bg-white/10 text-lime flex items-center justify-center">
+                  <Layers className="w-5 h-5" />
+                </div>
+              </div>
+              <p className="mt-3 text-xs text-paper/80 leading-relaxed">
+                {t('why.cards.card1_desc')}
               </p>
             </div>
-            
-            <button
-              onClick={() => {
-                const element = document.getElementById('contact-us');
-                if (element) {
-                  element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-              }}
-              className="bg-white text-[#023E8A] hover:bg-[#E5FAFF] px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-white/15 transition-all w-full md:w-auto text-center cursor-pointer hover:-translate-y-0.5 shrink-0"
-            >
-              {t('why.cta_btn')}
-            </button>
-          </div>
-        </motion.div>
+          </motion.div>
 
+          {/* Card 2: light surface + system mockup */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="surface-card relative w-full p-8 overflow-hidden h-[380px] lg:h-[420px] flex flex-col justify-between text-left"
+          >
+            <div className="space-y-3">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-navy/8 text-navy text-[10px] font-bold uppercase tracking-[0.18em]">
+                {t('why.badge')}
+              </span>
+              <h3 className="font-display text-2xl font-semibold text-ink leading-snug">
+                {t('why.cards.card2_title')}
+              </h3>
+              <p className="text-mute text-sm leading-relaxed">
+                {t('why.cards.card2_desc')}
+              </p>
+            </div>
+
+            <div className="relative rounded-2xl bg-zinc border border-line p-4 w-full space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-line">
+                <div className="flex items-center gap-2">
+                  <Database className="w-3.5 h-3.5 text-navy" />
+                  <span className="text-[9px] font-mono text-mute">system_schema.ts</span>
+                </div>
+                <div className="flex gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-lime" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-indigo" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-navy" />
+                </div>
+              </div>
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between text-[10px] text-mute font-mono">
+                  <span>fast_loading_index</span>
+                  <span className="text-navy font-semibold">99%</span>
+                </div>
+                <div className="h-1.5 w-full bg-line rounded-full overflow-hidden">
+                  <div className="h-full bg-navy w-[92%]" />
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-mute font-mono">
+                  <span>database_replica_sync</span>
+                  <span className="text-indigo font-semibold">87%</span>
+                </div>
+                <div className="h-1.5 w-full bg-line rounded-full overflow-hidden">
+                  <div className="h-full bg-indigo w-[87%]" />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Card 3: consultation + tags */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="surface-card relative w-full p-8 overflow-hidden h-[380px] lg:h-[420px] flex flex-col justify-between text-left"
+          >
+            <div className="space-y-4">
+              <div className="w-11 h-11 rounded-xl bg-navy/8 text-navy flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <h3 className="font-display text-2xl font-semibold text-ink leading-snug">
+                {t('why.cards.card3_title')}
+              </h3>
+              <p className="text-mute text-sm leading-relaxed">
+                {t('why.cards.card3_desc')}
+              </p>
+
+              <button
+                onClick={scrollToContact}
+                className="group inline-flex gap-2 pl-5 pr-2 py-2 items-center justify-center bg-navy hover:bg-navy-deep text-paper text-xs font-semibold rounded-full transition-all cursor-pointer"
+              >
+                {t('why.cards.card3_cta')}
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-lime text-ink transition-transform duration-300 group-hover:rotate-45">
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </span>
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2 mt-auto">
+              {['#Web Development', '#UI/UX Design', '#Cloud & DevOps', '#Custom SaaS'].map((tag) => (
+                <span key={tag} className="text-[10px] text-mute px-3 py-1.5 rounded-full border border-line bg-zinc font-medium">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+
+        </div>
       </div>
     </section>
   );

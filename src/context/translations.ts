@@ -58,6 +58,16 @@ export const translations = {
       cta_title: 'Ready to build robust software systems tailored to your workflows?',
       cta_desc: 'We create secure, fast, and reliable digital systems for businesses of all sizes. Let\'s talk about your needs.',
       cta_btn: 'Get Started Now',
+      cards: {
+        card1_title: 'Client Success & Retention Rate',
+        card1_metric_label: 'Success Metric',
+        card1_desc: 'Solivate Studio builds deep trust and technical excellence that we maintain in every sprint.',
+        card2_title: 'Maximizing Your Business Potential',
+        card2_desc: 'We help businesses overcome digital obstacles through robust, modern software solutions.',
+        card3_title: 'Tailoring Your Business Character',
+        card3_desc: 'Eye-catching visuals to take your business to the next level.',
+        card3_cta: 'Try a Consultation',
+      },
     },
     services: {
       badge: 'Our Services',
@@ -119,7 +129,7 @@ export const translations = {
     },
     process: {
       badge: 'Our Execution System',
-      title: 'How We Partner: The Kinetic Pipeline',
+      title: 'How We Partner: The Solivate Pipeline',
       subtitle: 'We believe in working fast and keeping you in the loop. Our simple 4-step process ensures top quality without the wait.',
       items: [
         {
@@ -143,8 +153,8 @@ export const translations = {
           duration: 'Weeks 9+',
         }
       ],
-      warning: 'Need express delivery? We offer expedited sprint pipelines for critical funding/launch timelines. Reach out directly to discuss our priority staging SLA slots.',
       warning_bold: 'Need express delivery?',
+      warning_desc: 'We offer expedited sprint pipelines for critical funding/launch timelines. Reach out directly to discuss our priority staging SLA slots.',
     },
     portfolio: {
       badge: 'Our Work',
@@ -166,7 +176,7 @@ export const translations = {
           desc: 'A large-scale hosting solution designed to keep data secure and ensure the system runs smoothly at all times.',
         },
         'workspace-mobile': {
-          title: 'Kinetic Shift Enterprise Mobile Hub',
+          title: 'Solivate Shift Enterprise Mobile Hub',
           desc: 'A business app that helps teams communicate safely, manage tasks, and work even without an internet connection.',
         }
       },
@@ -181,7 +191,7 @@ export const translations = {
       subtitle: 'Everything you need to know about our workflow, legal provisions, technical capabilities, and pricing protocols.',
       items: {
         'pricing': {
-          question: 'How does Kinetic Studio price its agency projects?',
+          question: 'How does Solivate Studio price its agency projects?',
           answer: 'We offer clear, fixed pricing based on the features you need. There are no hidden fees or surprise costs. As long as the project requirements do not change, the price stays exactly the same.',
         },
         'timeline': {
@@ -209,7 +219,7 @@ export const translations = {
       title: 'Let’s Design Your System Architecture',
       subtitle: 'Ready to start? Fill out our short form below. Our team will review your needs and get back to you with a clear plan and pricing within 24 hours.',
       status: 'ONLINE CORE STATUS',
-      hq_title: 'Kinetic Studio HQ',
+      hq_title: 'Solivate Studio HQ',
       hq_desc: 'Our core engineers operate in Bekasi, Indonesia, assisting global clients across Asian, European, and Pacific tech zones.',
       office_label: 'HEAD OFFICE',
       email_label: 'PROJECT OFFERS',
@@ -232,7 +242,7 @@ export const translations = {
       },
       success: {
         title: 'Brief Transmitted Securely!',
-        desc: 'Thank you for reaching out to Kinetic Studio! We have received your request and will get back to you via email within 24 hours.',
+        desc: 'Thank you for reaching out to Solivate Studio! We have received your request and will get back to you via email within 24 hours.',
         next_steps: '**What happens next?** We are reviewing your details and preparing a plan with estimated costs. Please keep an eye on your inbox.',
         reset_btn: 'Send Another Request',
       }
@@ -253,12 +263,12 @@ export const translations = {
       },
       hiring: 'WE ARE HIRING',
       newsletter: {
-        title: 'Kinetic Insights newsletter',
+        title: 'Solivate Insights newsletter',
         desc: 'Subscribe to stay updated with cloud security checklists, speed architecture breakdowns, and tech strategy reports.',
         placeholder: 'Business email...',
         submit: 'Subscribe',
       },
-      copyright: 'Kinetic Studio (PT Kinetic Teknologi Solusi). All rights reserved.',
+      copyright: 'Solivate Studio (PT Solivate Teknologi Solusi). All rights reserved.',
       privacy: 'Privacy Policy',
       terms: 'Terms of Service',
       nda: 'IP Agreement Guidelines',
@@ -278,7 +288,7 @@ export const translations = {
       badge: 'Solusi Digital Terbaik untuk Anda',
       title1: 'Kembangkan bisnis anda menjadi lebih profesional bersama',
       title2: '',
-      subtitle: 'Kami membuat website dan aplikasi berkualitas tinggi yang mudah digunakan. Kinetic Studio siap membantu mewujudkan ide digital Anda dengan cepat dan tanpa ribet.',
+      subtitle: 'Kami membuat website dan aplikasi berkualitas tinggi yang mudah digunakan. Solivate Studio siap membantu mewujudkan ide digital Anda dengan cepat dan tanpa ribet.',
       cta1: 'Mulai Proyek Anda',
       cta2: 'Jelajahi Layanan',
       stat1_val: '99.4%',
@@ -321,6 +331,16 @@ export const translations = {
       cta_title: 'Siap memiliki sistem dan website canggih untuk bisnis Anda?',
       cta_desc: 'Kami menciptakan solusi digital yang aman, cepat, dan bisa diandalkan untuk semua jenis bisnis. Mari bicarakan kebutuhan Anda.',
       cta_btn: 'Mulai Sekarang',
+      cards: {
+        card1_title: 'Tingkat Kesuksesan & Retensi Klien',
+        card1_metric_label: 'Metrik Keberhasilan',
+        card1_desc: 'Solivate Studio membangun kepercayaan tinggi dan keunggulan teknis yang selalu kami jaga di setiap sprint.',
+        card2_title: 'Memaksimalkan Potensi Bisnis Anda',
+        card2_desc: 'Kami membantu bisnis mengatasi kendala digital melalui solusi perangkat lunak yang tangguh dan modern.',
+        card3_title: 'Menyesuaikan Karakter Bisnis Anda',
+        card3_desc: 'Tampilan visual yang eye-catching untuk menaikkan level bisnis Anda ke tingkat selanjutnya.',
+        card3_cta: 'Coba Konsultasi',
+      },
     },
     services: {
       badge: 'Apa Yang Kami Lakukan',
@@ -382,7 +402,7 @@ export const translations = {
     },
     process: {
       badge: 'Sistem Eksekusi Kami',
-      title: 'Bagaimana Kami Bermitra: Kinetic Pipeline',
+      title: 'Bagaimana Kami Bermitra: Solivate Pipeline',
       subtitle: 'Kami percaya pada kerja cepat dengan komunikasi yang baik. Proses 4 langkah kami memastikan kualitas terbaik tanpa perlu menunggu lama.',
       items: [
         {
@@ -406,8 +426,8 @@ export const translations = {
           duration: 'Minggu 9+',
         }
       ],
-      warning: 'Butuh selesai lebih cepat? Kami bisa mempercepat proses pengerjaan untuk jadwal peluncuran yang mendesak. Hubungi kami untuk info lebih lanjut.',
       warning_bold: 'Butuh pengiriman kilat?',
+      warning_desc: 'Kami bisa mempercepat proses pengerjaan untuk jadwal peluncuran yang mendesak. Hubungi kami untuk info lebih lanjut.',
     },
     portfolio: {
       badge: 'Pekerjaan Kami',
@@ -429,7 +449,7 @@ export const translations = {
           desc: 'Solusi hosting skala besar yang menjaga data tetap aman dan memastikan sistem berjalan lancar setiap saat.',
         },
         'workspace-mobile': {
-          title: 'Kinetic Shift Enterprise Mobile Hub',
+          title: 'Solivate Shift Enterprise Mobile Hub',
           desc: 'Aplikasi bisnis yang membantu tim berkomunikasi dengan aman, mengatur tugas, dan bisa digunakan tanpa internet.',
         }
       },
@@ -444,7 +464,7 @@ export const translations = {
       subtitle: 'Semua yang perlu Anda ketahui tentang alur kerja, ketentuan hukum, kapabilitas teknis, dan protokol harga kami.',
       items: {
         'pricing': {
-          question: 'Bagaimana Kinetic Studio memberi harga pada proyek agensinya?',
+          question: 'Bagaimana Solivate Studio memberi harga pada proyek agensinya?',
           answer: 'Kami menawarkan harga yang jelas dan tetap sesuai dengan fitur yang Anda butuhkan. Tidak ada biaya tersembunyi. Selama kebutuhan proyek tidak berubah, harganya tetap sama.',
         },
         'timeline': {
@@ -472,7 +492,7 @@ export const translations = {
       title: 'Mari Rancang Arsitektur Sistem Anda',
       subtitle: 'Siap untuk memulai? Isi formulir singkat di bawah ini. Tim kami akan meninjau kebutuhan Anda dan memberikan rencana serta perkiraan harga dalam waktu 24 jam.',
       status: 'KAMI SEDANG ONLINE',
-      hq_title: 'Pusat Kinetic Studio',
+      hq_title: 'Pusat Solivate Studio',
       hq_desc: 'Tim kami berbasis di Bekasi, Indonesia, dan siap membantu klien dari berbagai penjuru dunia.',
       office_label: 'KANTOR PUSAT',
       email_label: 'PENAWARAN PROYEK',
@@ -495,7 +515,7 @@ export const translations = {
       },
       success: {
         title: 'Pesan Berhasil Terkirim!',
-        desc: 'Terima kasih telah menghubungi Kinetic Studio! Kami telah menerima pesan Anda dan akan membalas melalui email dalam waktu 24 jam.',
+        desc: 'Terima kasih telah menghubungi Solivate Studio! Kami telah menerima pesan Anda dan akan membalas melalui email dalam waktu 24 jam.',
         next_steps: '**Apa selanjutnya?** Kami sedang membaca detail dari Anda dan menyiapkan rencana beserta perkiraan biaya. Silakan cek kotak masuk email Anda nanti.',
         reset_btn: 'Kirim Permintaan Lain',
       }
@@ -521,7 +541,7 @@ export const translations = {
         placeholder: 'Email bisnis...',
         submit: 'Berlangganan',
       },
-      copyright: 'Kinetic Studio (PT Kinetic Teknologi Solusi). Hak cipta dilindungi.',
+      copyright: 'Solivate Studio (PT Solivate Teknologi Solusi). Hak cipta dilindungi.',
       privacy: 'Kebijakan Privasi',
       terms: 'Syarat Layanan',
       nda: 'Panduan Perjanjian IP',

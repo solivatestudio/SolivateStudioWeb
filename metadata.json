@@ -1,6 +1,6 @@
 {
-  "name": "Kinetic Studio",
-  "description": "Kinetic Studio is a premium IT Agency specializing in Custom Software, Cloud Architecture, and DevOps Automation. We deliver scale, velocity, and pristine engineering.",
+  "name": "Solivate Studio",
+  "description": "Solivate Studio is a premium IT Agency specializing in Custom Software, Cloud Architecture, and DevOps Automation. We deliver scale, velocity, and pristine engineering.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

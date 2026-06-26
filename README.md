@@ -1,6 +1,6 @@
-# Kinetic Studio
+# Solivate Studio
 
-Kinetic Studio is a premium landing page built for a Full-Stack UI/UX Design & High-Performance IT Agency. It features a modern, high-converting, interactive user interface crafted with React and Tailwind CSS.
+Solivate Studio is a premium landing page built for a Full-Stack UI/UX Design & High-Performance IT Agency. It features a modern, high-converting, interactive user interface crafted with React and Tailwind CSS.
 
 ## 🚀 Tech Stack / Teknologi yang Dipakai
 
@@ -20,18 +20,19 @@ Berikut adalah gambaran struktur direktori dari kode sumber (`src`) proyek ini:
 KinetcStudio/
 ├── package.json          # Konfigurasi dependensi dan skrip proyek
 ├── vite.config.ts        # Konfigurasi bundler Vite
-├── tailwind.config.js    # (Jika ada) Konfigurasi Tailwind CSS
+├── index.html            # File HTML utama (entry point)
+├── public/               # Aset publik statis (tidak diproses oleh bundler)
+│   └── images/
+│       ├── hero.svg
+│       ├── logosvg.svg
+│       ├── portfolio_cloud_1781799732798.jpg
+│       ├── portfolio_mobile_1781799748021.jpg
+│       └── portfolio_saas_1781799718522.jpg
 └── src/
     ├── main.tsx          # Entry point utama aplikasi React
     ├── App.tsx           # Komponen utama yang menyusun layout landing page
     ├── index.css         # File CSS global (mengimpor base Tailwind)
     ├── types.ts          # Definisi tipe (TypeScript interfaces/types) global
-    ├── assets/           # Berisi aset statis seperti gambar
-    │   └── images/
-    │       ├── kinetic_hero_1781799699348.jpg
-    │       ├── portfolio_cloud_1781799732798.jpg
-    │       ├── portfolio_mobile_1781799748021.jpg
-    │       └── portfolio_saas_1781799718522.jpg
     └── components/       # Komponen UI terpisah (Modular)
         ├── Navbar.tsx          # Navigasi sticky di bagian atas
         ├── Hero.tsx            # Bagian atas (Hero Section) landing page

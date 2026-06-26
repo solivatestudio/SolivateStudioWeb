@@ -1,5 +1,5 @@
 /**
- * Types & Interfaces for Kinetic Studio
+ * Types & Interfaces for Solivate Studio
  */
 
 export interface Service {
