@@ -1303,8 +1303,8 @@ h2:hover {
   box-shadow: 0 34px 110px -54px rgba(0, 0, 0, 0.95);
 }
 
-.pricing-quote-card span,
-.custom-price-box span {
+.pricing-quote-card > span,
+.custom-price-box > span {
   display: block;
   margin-bottom: 12px;
   color: var(--cyan);
