@@ -361,36 +361,11 @@ a {
 }
 
 .arrow {
-  position: relative;
-  display: inline-grid;
-  width: 18px;
-  height: 18px;
-  flex: 0 0 18px;
-  place-items: center;
-  border-radius: 999px;
-  overflow: hidden;
+  display: block;
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
   transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.arrow::before {
-  position: absolute;
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-top: 2px solid currentColor;
-  border-right: 2px solid currentColor;
-  transform: translate(1px, -1px);
-}
-
-.arrow::after {
-  content: "";
-  position: absolute;
-  width: 11px;
-  height: 2px;
-  border-radius: 999px;
-  background: currentColor;
-  transform: translate(-1px, 1px) rotate(-45deg);
-  transform-origin: center;
 }
 
 .nav-cta,
@@ -920,6 +895,11 @@ a {
 
 .contact h2 {
   max-width: 620px;
+  margin-bottom: 20px;
+}
+
+.contact h2 + .lead {
+  max-width: 560px;
 }
 
 .eyebrow {
