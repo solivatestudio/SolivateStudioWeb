@@ -148,46 +148,46 @@ a {
 
 .header .brand {
   display: inline-flex;
-  align-items: baseline;
-  gap: 2px;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   border: 0;
   background: transparent;
-  color: var(--white);
   cursor: pointer;
-  direction: ltr;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(20px, 1.3vw + 0.8rem, 28px);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  unicode-bidi: isolate;
-  white-space: nowrap;
-  transition: color 0.3s var(--ease-out), transform 0.35s var(--ease-expo);
-}
-
-.header .brand span {
-  font-style: italic;
-  font-weight: 400;
-}
-
-.header .brand em {
-  color: var(--lime);
-  font-style: italic;
+  padding: 0;
+  transition: transform 0.35s var(--ease-expo), filter 0.3s var(--ease-out);
 }
 
 .header .brand:hover {
-  color: var(--cyan);
+  filter: brightness(1.18);
   transform: translateY(-1px);
+}
+
+.header .brand img {
+  display: block;
+  width: auto;
+  height: 38px;
+  filter: brightness(1.35) saturate(1.18) drop-shadow(0 0 12px rgba(0, 180, 216, 0.16));
+  object-fit: contain;
 }
 
 .footer .brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  color: var(--white);
-  text-align: left;
+  width: fit-content;
+  overflow: hidden;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 8px 10px;
   transition: transform 220ms ease;
+}
+
+.footer .brand img {
+  display: block;
+  width: auto;
+  height: 58px;
+  filter: brightness(1.35) saturate(1.18);
+  object-fit: contain;
 }
 
 .brand-mark {
@@ -2096,7 +2096,11 @@ h2:hover {
   }
 
   .header .brand {
-    font-size: 16px;
+    max-width: 132px;
+  }
+
+  .header .brand img {
+    height: 30px;
   }
 
   .nav {
