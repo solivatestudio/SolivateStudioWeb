@@ -1,6 +1,11 @@
 ---
 import "../index.css";
 
+type LocaleCopy = {
+  id: string;
+  en: string;
+};
+
 const personalPlans = [
   {
     name: "Birthday Website (Basic)",
@@ -89,6 +94,21 @@ const comparisonRows = [
   { feature: "Harga", basic: price("Rp 249.000"), standard: price("Rp 299.000"), premium: price("Rp 499.000") }
 ];
 
+const comparisonFeatureKeys = ["compare.pages", "compare.whatsapp", "compare.responsive", "compare.seo", "compare.speed", "compare.domain", "compare.extra", "compare.revision", "compare.warranty", "compare.price"];
+const comparisonValueKeys = [
+  ["compare.basicPages", "compare.standardPages", "compare.premiumPages"],
+  ["compare.basicWhatsapp", "compare.autoTemplate", "compare.autoTemplate"],
+  ["compare.included", "compare.included", "compare.included"],
+  ["compare.meta", "compare.search", "compare.analytics"],
+  ["compare.speedStandard", "compare.speedHigh", "compare.speedUltra"],
+  ["compare.notIncluded", "compare.notIncluded", "compare.freeYear"],
+  ["compare.notIncluded", "compare.notIncluded", "compare.extraPremium"],
+  ["compare.revision2", "compare.revision5", "compare.revision7"],
+  ["compare.month1", "compare.month5", "compare.year1"],
+  ["compare.priceBasic", "compare.priceStandard", "compare.pricePremium"]
+];
+const planKeys = ["basic", "standard", "premium"] as const;
+
 const customFeatures = [
   "Desain UI/UX premium & eksklusif bukan template",
   "Integrasi pembayaran otomatis Midtrans/Xendit",
@@ -98,6 +118,143 @@ const customFeatures = [
   "Dashboard manajemen lengkap untuk laporan, user, dan log aktivitas",
   "Dukungan maintenance prioritas"
 ];
+
+const pricingI18n: Record<string, LocaleCopy> = {
+  "meta.description": {
+    id: "Daftar harga layanan pembuatan website Solivate Studio untuk personal, UMKM, company profile, landing page, dan website custom eksklusif.",
+    en: "Solivate Studio website pricing for personal sites, SMEs, company profiles, landing pages, and exclusive custom websites."
+  },
+  "nav.about": { id: "Tentang", en: "About" },
+  "nav.services": { id: "Layanan", en: "Services" },
+  "nav.pricing": { id: "Harga", en: "Pricing" },
+  "nav.work": { id: "Karya", en: "Work" },
+  "nav.process": { id: "Proses", en: "Process" },
+  "nav.contact": { id: "Kontak", en: "Contact" },
+  "nav.cta": { id: "Mulai Proyek", en: "Start Project" },
+  "hero.eyebrow": { id: "Daftar Harga Layanan", en: "Service Pricing" },
+  "hero.title": { id: "Jasa Pembuatan Website untuk personal, UMKM, hingga korporat.", en: "Website development for personal needs, SMEs, and companies." },
+  "hero.lead": {
+    id: "Pilih paket yang paling dekat dengan kebutuhan. Untuk website custom, harga final ditentukan berdasarkan blueprint dan scope of work yang disepakati.",
+    en: "Choose the package closest to your needs. For custom websites, final pricing is based on the agreed blueprint and scope of work."
+  },
+  "quote.label": { id: "Mulai dari", en: "Starting from" },
+  "quote.desc": { id: "Website sederhana untuk ucapan, event, landing page bisnis, sampai sistem custom skala perusahaan.", en: "Simple greeting sites, event pages, business landing pages, and company-scale custom systems." },
+  "quote.cta": { id: "Konsultasi Gratis", en: "Free Consultation" },
+  "personal.eyebrow": { id: "01 / Personal & Event", en: "01 / Personal & Event" },
+  "personal.title": { id: "Website sederhana untuk momen personal dan undangan digital.", en: "Simple websites for personal moments and digital invitations." },
+  "personal.lead": { id: "Cocok untuk hadiah ulang tahun, kartu ucapan, party, wedding, dan event kecil.", en: "Suitable for birthday gifts, greeting cards, parties, weddings, and small events." },
+  "business.eyebrow": { id: "02 / Landing & Multi-Page", en: "02 / Landing & Multi-Page" },
+  "business.title": { id: "Paket website bisnis yang paling sering dipakai UMKM dan organisasi.", en: "Business website packages commonly used by SMEs and organizations." },
+  "business.lead": { id: "Untuk school profile, company profile, UMKM, event, konser, komunitas, dan landing page promosi.", en: "For school profiles, company profiles, SMEs, events, concerts, communities, and promotional landing pages." },
+  "comparison.eyebrow": { id: "Perbandingan Paket", en: "Package Comparison" },
+  "comparison.title": { id: "Bandingkan fitur utama sebelum memilih paket.", en: "Compare key features before choosing a package." },
+  "custom.eyebrow": { id: "03 / Custom Eksklusif", en: "03 / Exclusive Custom" },
+  "custom.title": { id: "Solusi advanced untuk sistem yang butuh fitur khusus.", en: "Advanced solutions for systems that need custom features." },
+  "custom.lead": {
+    id: "Cocok untuk marketplace, payment gateway, event skala besar, toko online kompleks, ERP, CRM, dan sistem informasi manajemen perusahaan.",
+    en: "Suitable for marketplaces, payment gateways, large events, complex online stores, ERP, CRM, and company management systems."
+  },
+  "custom.priceLabel": { id: "Harga mulai dari", en: "Starting price" },
+  "custom.priceNote": { id: "Harga akhir ditentukan berdasarkan blueprint dan scope of work yang disepakati.", en: "Final pricing is based on the agreed blueprint and scope of work." },
+  "label.personal": { id: "Personal", en: "Personal" },
+  "personal.0.fit": { id: "Untuk hadiah ulang tahun simpel yang tetap terasa personal.", en: "For simple birthday gifts that still feel personal." },
+  "personal.1.fit": { id: "Untuk ucapan ulang tahun yang lebih hidup dengan visual dan video.", en: "For richer birthday greetings with visuals and video." },
+  "personal.2.fit": { id: "Untuk undangan digital party atau wedding yang bisa dipersonalisasi.", en: "For personalized party or wedding digital invitations." },
+  "business.0.badge": { id: "Mulai Online", en: "Start Online" },
+  "business.1.badge": { id: "Paling Populer", en: "Most Popular" },
+  "business.2.badge": { id: "All-in-One", en: "All-in-One" },
+  "business.0.note": { id: "Cocok untuk bisnis yang butuh landing page rapi dan cepat live.", en: "For businesses that need a clean landing page and fast launch." },
+  "business.1.note": { id: "Best value: beda Rp 50.000 dari Basic, sudah dapat multi-page dan speed optimal.", en: "Best value: only Rp 50,000 more than Basic, with multi-page structure and optimized speed." },
+  "business.2.note": { id: "Terima beres: domain, hosting, fitur premium, SEO, analytics, dan garansi paling panjang.", en: "Done-for-you: domain, hosting, premium features, SEO, analytics, and the longest warranty." },
+  "personal.0.item.0": { id: "Landing page", en: "Landing page" },
+  "personal.0.item.1": { id: "Kartu ucapan", en: "Greeting card" },
+  "personal.0.item.2": { id: "Maksimal 3 foto", en: "Up to 3 photos" },
+  "personal.1.item.0": { id: "Landing page", en: "Landing page" },
+  "personal.1.item.1": { id: "Digital bucket flower", en: "Digital bucket flower" },
+  "personal.1.item.2": { id: "Kartu ucapan", en: "Greeting card" },
+  "personal.1.item.3": { id: "1 video", en: "1 video" },
+  "personal.2.item.0": { id: "Landing page", en: "Landing page" },
+  "personal.2.item.1": { id: "Custom name nama tamu", en: "Custom guest name" },
+  "personal.2.item.2": { id: "Maksimal 3 foto & 1 video", en: "Up to 3 photos & 1 video" },
+  "business.0.item.0": { id: "1 landing page utama", en: "1 main landing page" },
+  "business.0.item.1": { id: "Integrasi media sosial dasar & 1 tombol WhatsApp", en: "Basic social media integration & 1 WhatsApp button" },
+  "business.0.item.2": { id: "Desain responsive mobile friendly", en: "Mobile-friendly responsive design" },
+  "business.0.item.3": { id: "Optimasi SEO dasar meta tag standar", en: "Basic SEO optimization with standard meta tags" },
+  "business.0.item.4": { id: "Revisi maksimal 2x", en: "Up to 2 revisions" },
+  "business.0.item.5": { id: "Garansi 1 bulan setelah go-live", en: "1-month warranty after go-live" },
+  "business.1.item.0": { id: "Multi-page maksimal 5 halaman", en: "Multi-page site up to 5 pages" },
+  "business.1.item.1": { id: "Advanced WhatsApp integration dengan template chat otomatis", en: "Advanced WhatsApp integration with automatic chat template" },
+  "business.1.item.2": { id: "High performance & speed optimization", en: "High performance & speed optimization" },
+  "business.1.item.3": { id: "SEO menyeluruh termasuk Google Search Console & Maps", en: "Comprehensive SEO including Google Search Console & Maps" },
+  "business.1.item.4": { id: "Desain responsive mobile friendly", en: "Mobile-friendly responsive design" },
+  "business.1.item.5": { id: "Revisi maksimal 5x", en: "Up to 5 revisions" },
+  "business.1.item.6": { id: "Garansi 5 bulan bebas eror & bug", en: "5-month error and bug warranty" },
+  "business.2.item.0": { id: "Multi-page eksklusif maksimal 10 halaman", en: "Exclusive multi-page site up to 10 pages" },
+  "business.2.item.1": { id: "FREE custom domain .com/.id selama 1 tahun", en: "FREE .com/.id custom domain for 1 year" },
+  "business.2.item.2": { id: "FREE high-speed hosting selama 1 tahun", en: "FREE high-speed hosting for 1 year" },
+  "business.2.item.3": { id: "Google Form, animasi interaktif, & copywriting dasar", en: "Google Form, interactive animation, & basic copywriting" },
+  "business.2.item.4": { id: "Google Analytics untuk pantau pengunjung", en: "Google Analytics to monitor visitors" },
+  "business.2.item.5": { id: "Ultra high performance Google PageSpeed", en: "Ultra high Google PageSpeed performance" },
+  "business.2.item.6": { id: "Revisi maksimal 7x", en: "Up to 7 revisions" },
+  "business.2.item.7": { id: "Garansi 1 tahun penuh", en: "1 full year warranty" },
+  "compare.feature": { id: "Fitur", en: "Feature" },
+  "compare.plan1": { id: "Paket 1", en: "Package 1" },
+  "compare.plan2": { id: "Paket 2", en: "Package 2" },
+  "compare.plan3": { id: "Paket 3", en: "Package 3" },
+  "compare.basic": { id: "Basic", en: "Basic" },
+  "compare.standard": { id: "Standard", en: "Standard" },
+  "compare.premium": { id: "Premium", en: "Premium" },
+  "compare.pages": { id: "Jumlah Halaman", en: "Page Count" },
+  "compare.whatsapp": { id: "Integrasi WhatsApp", en: "WhatsApp Integration" },
+  "compare.responsive": { id: "Desain Responsive", en: "Responsive Design" },
+  "compare.seo": { id: "SEO", en: "SEO" },
+  "compare.speed": { id: "Speed Optimization", en: "Speed Optimization" },
+  "compare.domain": { id: "Custom Domain & Hosting", en: "Custom Domain & Hosting" },
+  "compare.extra": { id: "Fitur Tambahan", en: "Extra Features" },
+  "compare.revision": { id: "Revisi", en: "Revisions" },
+  "compare.warranty": { id: "Garansi", en: "Warranty" },
+  "compare.price": { id: "Harga", en: "Price" },
+  "compare.included": { id: "Termasuk", en: "Included" },
+  "compare.notIncluded": { id: "Tidak termasuk", en: "Not included" },
+  "compare.basicPages": { id: "1 Landing Page", en: "1 Landing Page" },
+  "compare.standardPages": { id: "Maks. 5 Halaman", en: "Max. 5 Pages" },
+  "compare.premiumPages": { id: "Maks. 10 Halaman", en: "Max. 10 Pages" },
+  "compare.basicWhatsapp": { id: "Tombol dasar", en: "Basic button" },
+  "compare.autoTemplate": { id: "Template otomatis", en: "Auto template" },
+  "compare.meta": { id: "Meta tag dasar", en: "Basic meta tags" },
+  "compare.search": { id: "Search Console & Maps", en: "Search Console & Maps" },
+  "compare.analytics": { id: "Analytics lanjutan", en: "Advanced analytics" },
+  "compare.speedStandard": { id: "Standar", en: "Standard" },
+  "compare.speedHigh": { id: "High performance", en: "High performance" },
+  "compare.speedUltra": { id: "Ultra high performance", en: "Ultra high performance" },
+  "compare.freeYear": { id: "Free 1 tahun", en: "Free 1 year" },
+  "compare.extraPremium": { id: "Google Form, animasi, copywriting", en: "Google Form, animation, copywriting" },
+  "compare.revision2": { id: "Maks. 2x", en: "Up to 2x" },
+  "compare.revision5": { id: "Maks. 5x", en: "Up to 5x" },
+  "compare.revision7": { id: "Maks. 7x", en: "Up to 7x" },
+  "compare.month1": { id: "1 bulan", en: "1 month" },
+  "compare.month5": { id: "5 bulan", en: "5 months" },
+  "compare.year1": { id: "1 tahun penuh", en: "1 full year" },
+  "compare.priceBasic": { id: "Rp 249.000", en: "Rp 249,000" },
+  "compare.priceStandard": { id: "Rp 299.000", en: "Rp 299,000" },
+  "compare.pricePremium": { id: "Rp 499.000", en: "Rp 499,000" },
+  "custom.feature.0": { id: "Desain UI/UX premium & eksklusif bukan template", en: "Premium exclusive UI/UX design, not a template" },
+  "custom.feature.1": { id: "Integrasi pembayaran otomatis Midtrans/Xendit", en: "Automatic payment integration with Midtrans/Xendit" },
+  "custom.feature.2": { id: "Integrasi cek ongkir otomatis RajaOngkir", en: "Automatic shipping rate integration with RajaOngkir" },
+  "custom.feature.3": { id: "Sistem manajemen inventaris/stok barang", en: "Inventory and stock management system" },
+  "custom.feature.4": { id: "Sistem keamanan tinggi & enkripsi data", en: "High-security system and data encryption" },
+  "custom.feature.5": { id: "Dashboard manajemen lengkap untuk laporan, user, dan log aktivitas", en: "Complete management dashboard for reports, users, and activity logs" },
+  "custom.feature.6": { id: "Dukungan maintenance prioritas", en: "Priority maintenance support" },
+  "footer.title": { id: "Bangun sesuatu yang orang ingat.", en: "Let's build something people remember." },
+  "footer.desc": { id: "Studio desain dan pengembangan produk digital modern untuk brand yang ingin tampil premium dan siap bertumbuh.", en: "Modern digital product and web design studio for brands that want to look premium and grow." },
+  "footer.nav": { id: "Navigasi", en: "Navigation" },
+  "footer.connect": { id: "Kontak", en: "Connect" },
+  "footer.top": { id: "Kembali ke atas", en: "Back to top" },
+  "footer.copy": { id: `Copyright ${new Date().getFullYear()} Solivate Studio. Semua hak dilindungi.`, en: `Copyright ${new Date().getFullYear()} Solivate Studio. All rights reserved.` }
+};
+
+const tx = (key: string) => pricingI18n[key]?.id ?? key;
+const pricingI18nJson = JSON.stringify(pricingI18n);
 ---
 
 <!doctype html>
@@ -107,7 +264,7 @@ const customFeatures = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Daftar harga layanan pembuatan website Solivate Studio untuk personal, UMKM, company profile, landing page, dan website custom eksklusif."
+      content={tx("meta.description")}
     />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <title>Daftar Harga Website | Solivate Studio</title>
@@ -120,16 +277,16 @@ const customFeatures = [
         </a>
 
         <nav class="nav" aria-label="Navigasi utama">
-          <a class="nav-link nav-link-primary" href="/#about"><span>Tentang</span></a>
-          <a class="nav-link" href="/#services"><span>Layanan</span></a>
-          <a class="nav-link" href="/#pricing"><span>Harga</span></a>
-          <a class="nav-link" href="/#work"><span>Karya</span></a>
-          <a class="nav-link" href="/#process"><span>Proses</span></a>
-          <a class="nav-link" href="/#contact"><span>Kontak</span></a>
+          <a class="nav-link nav-link-primary" href="/#about"><span data-i18n="nav.about">{tx("nav.about")}</span></a>
+          <a class="nav-link" href="/#services"><span data-i18n="nav.services">{tx("nav.services")}</span></a>
+          <a class="nav-link" href="/#pricing"><span data-i18n="nav.pricing">{tx("nav.pricing")}</span></a>
+          <a class="nav-link" href="/#work"><span data-i18n="nav.work">{tx("nav.work")}</span></a>
+          <a class="nav-link" href="/#process"><span data-i18n="nav.process">{tx("nav.process")}</span></a>
+          <a class="nav-link" href="/#contact"><span data-i18n="nav.contact">{tx("nav.contact")}</span></a>
 
           <a class="nav-cta" href="/#contact">
             <span class="nav-dot"></span>
-            <span>Mulai Proyek</span>
+            <span data-i18n="nav.cta">{tx("nav.cta")}</span>
             <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
           </a>
 
@@ -146,19 +303,16 @@ const customFeatures = [
         <div class="hero-bg"></div>
         <div class="container pricing-hero-grid">
           <div>
-            <p class="eyebrow">Daftar Harga Layanan</p>
-            <h1>Jasa Pembuatan Website untuk personal, UMKM, hingga korporat.</h1>
-            <p class="hero-text">
-              Pilih paket yang paling dekat dengan kebutuhan. Untuk website custom, harga final ditentukan berdasarkan
-              blueprint dan scope of work yang disepakati.
-            </p>
+            <p class="eyebrow" data-i18n="hero.eyebrow">{tx("hero.eyebrow")}</p>
+            <h1 data-i18n="hero.title">{tx("hero.title")}</h1>
+            <p class="hero-text" data-i18n="hero.lead">{tx("hero.lead")}</p>
           </div>
           <div class="pricing-quote-card">
-            <span>Mulai dari</span>
+            <span data-i18n="quote.label">{tx("quote.label")}</span>
             <strong>Rp 49.000</strong>
-            <p>Website sederhana untuk ucapan, event, landing page bisnis, sampai sistem custom skala perusahaan.</p>
+            <p data-i18n="quote.desc">{tx("quote.desc")}</p>
             <a class="btn-primary" href="https://wa.me/6281219118993" target="_blank" rel="noreferrer">
-              Konsultasi Gratis
+              <span data-i18n="quote.cta">{tx("quote.cta")}</span>
               <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
             </a>
           </div>
@@ -168,20 +322,20 @@ const customFeatures = [
       <section class="section light">
         <div class="container section-head split">
           <div>
-            <p class="eyebrow">01 / Personal & Event</p>
-            <h2>Website sederhana untuk momen personal dan undangan digital.</h2>
+            <p class="eyebrow" data-i18n="personal.eyebrow">{tx("personal.eyebrow")}</p>
+            <h2 data-i18n="personal.title">{tx("personal.title")}</h2>
           </div>
-          <p class="lead">Cocok untuk hadiah ulang tahun, kartu ucapan, party, wedding, dan event kecil.</p>
+          <p class="lead" data-i18n="personal.lead">{tx("personal.lead")}</p>
         </div>
         <div class="container pricing-detail-grid compact">
-          {personalPlans.map((plan) => (
+          {personalPlans.map((plan, planIndex) => (
             <article class="pricing-detail-card">
-              <span class="pricing-label">Personal</span>
+              <span class="pricing-label" data-i18n="label.personal">{tx("label.personal")}</span>
               <h3>{plan.name}</h3>
               <strong>{plan.price}</strong>
-              <p>{plan.fit}</p>
+              <p data-i18n={`personal.${planIndex}.fit`}>{tx(`personal.${planIndex}.fit`)}</p>
               <ul>
-                {plan.items.map((item) => <li>{item}</li>)}
+                {plan.items.map((item, itemIndex) => <li data-i18n={`personal.${planIndex}.item.${itemIndex}`}>{item}</li>)}
               </ul>
             </article>
           ))}
@@ -191,20 +345,20 @@ const customFeatures = [
       <section class="section pricing-detail-band">
         <div class="container section-head split">
           <div>
-            <p class="eyebrow">02 / Landing & Multi-Page</p>
-            <h2>Paket website bisnis yang paling sering dipakai UMKM dan organisasi.</h2>
+            <p class="eyebrow" data-i18n="business.eyebrow">{tx("business.eyebrow")}</p>
+            <h2 data-i18n="business.title">{tx("business.title")}</h2>
           </div>
-          <p class="lead">Untuk school profile, company profile, UMKM, event, konser, komunitas, dan landing page promosi.</p>
+          <p class="lead" data-i18n="business.lead">{tx("business.lead")}</p>
         </div>
         <div class="container pricing-detail-grid">
-          {businessPlans.map((plan) => (
+          {businessPlans.map((plan, planIndex) => (
             <article class={`pricing-detail-card business ${plan.featured ? "featured" : ""}`}>
-              <span class="pricing-label">{plan.badge}</span>
+              <span class="pricing-label" data-i18n={`business.${planIndex}.badge`}>{tx(`business.${planIndex}.badge`)}</span>
               <h3>{plan.name}</h3>
               <strong>{plan.price}</strong>
-              <p>{plan.note}</p>
+              <p data-i18n={`business.${planIndex}.note`}>{tx(`business.${planIndex}.note`)}</p>
               <ul>
-                {plan.items.map((item) => <li>{item}</li>)}
+                {plan.items.map((item, itemIndex) => <li data-i18n={`business.${planIndex}.item.${itemIndex}`}>{item}</li>)}
               </ul>
             </article>
           ))}
@@ -213,37 +367,37 @@ const customFeatures = [
 
       <section class="section light comparison-section">
         <div class="container section-head">
-          <p class="eyebrow">Perbandingan Paket</p>
-          <h2>Bandingkan fitur utama sebelum memilih paket.</h2>
+          <p class="eyebrow" data-i18n="comparison.eyebrow">{tx("comparison.eyebrow")}</p>
+          <h2 data-i18n="comparison.title">{tx("comparison.title")}</h2>
         </div>
         <div class="container comparison-shell">
           <table class="comparison-table">
             <thead>
               <tr>
-                <th><span class="comparison-plan-title">Fitur</span></th>
+                <th><span class="comparison-plan-title" data-i18n="compare.feature">{tx("compare.feature")}</span></th>
                 <th>
-                  <span class="comparison-plan-title">Paket 1</span>
-                  <span class="comparison-plan-badge">Basic</span>
+                  <span class="comparison-plan-title" data-i18n="compare.plan1">{tx("compare.plan1")}</span>
+                  <span class="comparison-plan-badge" data-i18n="compare.basic">{tx("compare.basic")}</span>
                 </th>
                 <th>
-                  <span class="comparison-plan-title">Paket 2</span>
-                  <span class="comparison-plan-badge">Standard</span>
+                  <span class="comparison-plan-title" data-i18n="compare.plan2">{tx("compare.plan2")}</span>
+                  <span class="comparison-plan-badge" data-i18n="compare.standard">{tx("compare.standard")}</span>
                 </th>
                 <th>
-                  <span class="comparison-plan-title">Paket 3</span>
-                  <span class="comparison-plan-badge">Premium</span>
+                  <span class="comparison-plan-title" data-i18n="compare.plan3">{tx("compare.plan3")}</span>
+                  <span class="comparison-plan-badge" data-i18n="compare.premium">{tx("compare.premium")}</span>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {comparisonRows.map((row) => (
+              {comparisonRows.map((row, rowIndex) => (
                 <tr>
-                  <th>{row.feature}</th>
-                  {(["basic", "standard", "premium"] as const).map((plan) => (
+                  <th data-i18n={comparisonFeatureKeys[rowIndex]}>{tx(comparisonFeatureKeys[rowIndex])}</th>
+                  {planKeys.map((plan, planIndex) => (
                     <td>
                       <span class={`comparison-cell ${row[plan].type}`}>
                         <span class="comparison-icon" aria-hidden="true"></span>
-                        <span>{row[plan].label}</span>
+                        <span data-i18n={comparisonValueKeys[rowIndex][planIndex] || undefined}>{comparisonValueKeys[rowIndex][planIndex] ? tx(comparisonValueKeys[rowIndex][planIndex]) : row[plan].label}</span>
                       </span>
                     </td>
                   ))}
@@ -257,24 +411,21 @@ const customFeatures = [
       <section class="section dark custom-pricing">
         <div class="container custom-pricing-grid">
           <div>
-            <p class="eyebrow">03 / Custom Eksklusif</p>
-            <h2>Solusi advanced untuk sistem yang butuh fitur khusus.</h2>
-            <p class="lead">
-              Cocok untuk marketplace, payment gateway, event skala besar, toko online kompleks, ERP, CRM, dan sistem
-              informasi manajemen perusahaan.
-            </p>
+            <p class="eyebrow" data-i18n="custom.eyebrow">{tx("custom.eyebrow")}</p>
+            <h2 data-i18n="custom.title">{tx("custom.title")}</h2>
+            <p class="lead" data-i18n="custom.lead">{tx("custom.lead")}</p>
           </div>
           <div class="custom-price-box">
-            <span>Harga mulai dari</span>
+            <span data-i18n="custom.priceLabel">{tx("custom.priceLabel")}</span>
             <strong>Rp 2.999.000</strong>
-            <p>Harga akhir ditentukan berdasarkan blueprint dan scope of work yang disepakati.</p>
+            <p data-i18n="custom.priceNote">{tx("custom.priceNote")}</p>
           </div>
         </div>
         <div class="container custom-feature-grid">
-          {customFeatures.map((feature) => (
+          {customFeatures.map((_, index) => (
             <article>
               <span></span>
-              <p>{feature}</p>
+              <p data-i18n={`custom.feature.${index}`}>{tx(`custom.feature.${index}`)}</p>
             </article>
           ))}
         </div>
@@ -284,9 +435,9 @@ const customFeatures = [
     <footer class="footer">
       <div class="container">
         <div class="footer-top">
-          <h2>Bangun sesuatu yang orang ingat.</h2>
+          <h2 data-i18n="footer.title">{tx("footer.title")}</h2>
           <a class="btn-primary" href="/#contact">
-            Mulai Proyek
+            <span data-i18n="nav.cta">{tx("nav.cta")}</span>
             <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
           </a>
         </div>
@@ -296,19 +447,19 @@ const customFeatures = [
             <span class="brand">
               <img src="/solivate-logo.svg" alt="Solivate Studio" width="9935" height="1285" loading="lazy" />
             </span>
-            <p>Studio desain dan pengembangan produk digital modern untuk brand yang ingin tampil premium dan siap bertumbuh.</p>
+            <p data-i18n="footer.desc">{tx("footer.desc")}</p>
             <p class="footer-location">Bekasi, Indonesia</p>
           </div>
           <div class="footer-col">
-            <h4>Navigasi</h4>
-            <a href="/#about">Tentang</a>
-            <a href="/#services">Layanan</a>
-            <a href="/#pricing">Harga</a>
-            <a href="/#work">Karya</a>
-            <a href="/#process">Proses</a>
+            <h4 data-i18n="footer.nav">{tx("footer.nav")}</h4>
+            <a href="/#about" data-i18n="nav.about">{tx("nav.about")}</a>
+            <a href="/#services" data-i18n="nav.services">{tx("nav.services")}</a>
+            <a href="/#pricing" data-i18n="nav.pricing">{tx("nav.pricing")}</a>
+            <a href="/#work" data-i18n="nav.work">{tx("nav.work")}</a>
+            <a href="/#process" data-i18n="nav.process">{tx("nav.process")}</a>
           </div>
           <div class="footer-col">
-            <h4>Kontak</h4>
+            <h4 data-i18n="footer.connect">{tx("footer.connect")}</h4>
             <a href="mailto:solivatestudio@gmail.com">solivatestudio@gmail.com</a>
             <a href="https://wa.me/6281219118993" target="_blank" rel="noreferrer">WhatsApp</a>
             <a href="https://www.instagram.com/solivatestudio/" target="_blank" rel="noreferrer">Instagram</a>
@@ -316,16 +467,18 @@ const customFeatures = [
         </div>
 
         <div class="footer-bottom">
-          <span>Copyright {new Date().getFullYear()} Solivate Studio. Semua hak dilindungi.</span>
+          <span data-i18n="footer.copy">{tx("footer.copy")}</span>
           <button class="footer-top-btn" type="button" data-top>
-            Kembali ke atas
+            <span data-i18n="footer.top">{tx("footer.top")}</span>
             <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
           </button>
         </div>
       </div>
     </footer>
 
+    <script is:inline type="application/json" id="pricing-i18n-data" set:html={pricingI18nJson}></script>
     <script is:inline>
+      const translations = JSON.parse(document.getElementById("pricing-i18n-data")?.textContent || "{}");
       const header = document.querySelector("[data-header]");
       const updateHeader = () => {
         const y = Math.max(0, window.scrollY);
@@ -335,18 +488,34 @@ const customFeatures = [
       window.addEventListener("scroll", updateHeader, { passive: true });
       updateHeader();
 
-      document.querySelectorAll("[data-lang-switch]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const activeLang = button.getAttribute("data-lang-switch") === "en" ? "en" : "id";
-          document.documentElement.lang = activeLang;
+      const setLanguage = (lang, persist = false) => {
+        const activeLang = lang === "en" ? "en" : "id";
+        document.documentElement.lang = activeLang;
+        if (persist) {
           window.localStorage.setItem("solivate-language", activeLang);
-          document.querySelectorAll("[data-lang-switch]").forEach((current) => {
-            const active = current.getAttribute("data-lang-switch") === activeLang;
-            current.classList.toggle("active", active);
-            current.setAttribute("aria-pressed", String(active));
-          });
+          window.localStorage.setItem("solivate-language-manual", "true");
+        }
+
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          const next = translations[key]?.[activeLang];
+          if (next) node.textContent = next;
         });
+
+        document.querySelectorAll("[data-lang-switch]").forEach((button) => {
+          const active = button.getAttribute("data-lang-switch") === activeLang;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+      };
+
+      document.querySelectorAll("[data-lang-switch]").forEach((button) => {
+        button.addEventListener("click", () => setLanguage(button.getAttribute("data-lang-switch"), true));
       });
+      const savedLanguage = window.localStorage.getItem("solivate-language-manual") === "true"
+        ? window.localStorage.getItem("solivate-language")
+        : "id";
+      setLanguage(savedLanguage || "id");
 
       document.querySelectorAll("[data-top]").forEach((trigger) => {
         trigger.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));

@@ -544,10 +544,13 @@ const i18nJson = JSON.stringify(i18n);
         header?.classList.toggle("is-compact", y > 64);
       };
 
-      const setLanguage = (lang) => {
+      const setLanguage = (lang, persist = false) => {
         const activeLang = lang === "en" ? "en" : "id";
         document.documentElement.lang = activeLang;
-        window.localStorage.setItem("solivate-language", activeLang);
+        if (persist) {
+          window.localStorage.setItem("solivate-language", activeLang);
+          window.localStorage.setItem("solivate-language-manual", "true");
+        }
 
         document.querySelectorAll("[data-i18n]").forEach((node) => {
           const key = node.getAttribute("data-i18n");
@@ -584,9 +587,12 @@ const i18nJson = JSON.stringify(i18n);
       window.setTimeout(updateHeader, 120);
 
       document.querySelectorAll("[data-lang-switch]").forEach((button) => {
-        button.addEventListener("click", () => setLanguage(button.getAttribute("data-lang-switch")));
+        button.addEventListener("click", () => setLanguage(button.getAttribute("data-lang-switch"), true));
       });
-      setLanguage(window.localStorage.getItem("solivate-language") || "id");
+      const savedLanguage = window.localStorage.getItem("solivate-language-manual") === "true"
+        ? window.localStorage.getItem("solivate-language")
+        : "id";
+      setLanguage(savedLanguage || "id");
 
       document.querySelectorAll("[data-scroll]").forEach((trigger) => {
         trigger.addEventListener("click", () => {
