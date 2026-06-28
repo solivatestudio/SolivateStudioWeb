@@ -9,7 +9,7 @@ const navLinks = [
   ["Tentang", "/#about", "nav.about"],
   ["Layanan", "/#services", "nav.services"],
   ["Harga", "/#pricing", "nav.pricing"],
-  ["Karya", "/#work", "nav.work"],
+  ["Karya", "/project", "nav.work"],
   ["Proses", "/#process", "nav.process"]
 ];
 ---
@@ -42,7 +42,7 @@ const navLinks = [
       <div class="footer-col">
         <h4 {...attr("footer.nav")}>Navigasi</h4>
         {navLinks.map(([label, href, key]) => (
-          <a href={home ? href.replace("/#", "#") : href} {...attr(key)}>{label}</a>
+          <a href={home && href.startsWith("/#") ? href.replace("/#", "#") : href} {...attr(key)}>{label}</a>
         ))}
       </div>
       <div class="footer-col">

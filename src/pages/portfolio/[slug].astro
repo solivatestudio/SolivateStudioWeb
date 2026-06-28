@@ -14,7 +14,13 @@ const { page } = Astro.props;
 const pageEn = portfolioPageEnglish[page.slug];
 const canonical = `${siteUrl}/portfolio/${page.slug}`;
 const title = `${page.title} | Studi Kasus Solivate Studio`;
-const relatedServices = servicePages.filter((item) => ["mosque-community-website", "website-development"].includes(item.slug));
+const relatedServiceSlugs: Record<string, string[]> = {
+  "masjid-raya-puri-telukjambe": ["mosque-community-website", "website-development"],
+  "cutbae-barbershop": ["barbershop-website", "website-development"],
+  "makdian-bakery": ["sme-website", "company-profile-website"]
+};
+const relatedServices = servicePages.filter((item) => (relatedServiceSlugs[page.slug] ?? ["website-development"]).includes(item.slug));
+const primaryRelatedService = relatedServices[0]?.slug ?? "website-development";
 const staticI18n = {
   "nav.about": { id: "Tentang", en: "About" },
   "nav.services": { id: "Layanan", en: "Services" },
@@ -28,8 +34,8 @@ const staticI18n = {
   "case.related": { id: "Layanan Terkait", en: "Related Service" },
   "related.eyebrow": { id: "Layanan Terkait", en: "Related Services" },
   "related.title": {
-    id: "Halaman ini terhubung dengan keyword jasa website masjid dan digitalisasi komunitas.",
-    en: "This case connects with mosque website and community digitalization keywords."
+    id: "Project ini terhubung dengan layanan website yang bisa disesuaikan dengan kebutuhan brand Anda.",
+    en: "This project connects with website services that can be adjusted to your brand needs."
   },
   "related.link": { id: "Lihat layanan", en: "View service" },
   "footer.title": { id: "Bangun sesuatu yang orang ingat.", en: "Let's build something people remember." },
@@ -111,7 +117,7 @@ const schema = JSON.stringify({
                 <span data-i18n="case.live">Lihat Website Live</span>
                 <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
               </a>
-              <a class="btn-secondary" href="/layanan/mosque-community-website" data-i18n="case.related">Layanan Terkait</a>
+              <a class="btn-secondary" href={`/layanan/${primaryRelatedService}`} data-i18n="case.related">Layanan Terkait</a>
             </div>
           </div>
           <div class="case-preview-card">

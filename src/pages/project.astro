@@ -1,0 +1,270 @@
+---
+import "../index.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { portfolioPageEnglish, portfolioPages, siteUrl } from "../data/seo-pages";
+
+type LocaleCopy = {
+  id: string;
+  en: string;
+};
+
+const projectI18n: Record<string, LocaleCopy> = {
+  "meta.description": {
+    id: "Showcase project Solivate Studio: website masjid, barbershop, bakery, UMKM, komunitas, event, dan solusi digital custom yang sudah dibangun.",
+    en: "Solivate Studio project showcase: mosque, barbershop, bakery, SME, community, event, and custom digital solution websites we have built."
+  },
+  "nav.about": { id: "Tentang", en: "About" },
+  "nav.services": { id: "Layanan", en: "Services" },
+  "nav.pricing": { id: "Harga", en: "Pricing" },
+  "nav.work": { id: "Karya", en: "Work" },
+  "nav.process": { id: "Proses", en: "Process" },
+  "nav.contact": { id: "Kontak", en: "Contact" },
+  "nav.cta": { id: "Mulai Proyek", en: "Start Project" },
+  "project.eyebrow": { id: "Project Showcase", en: "Project Showcase" },
+  "project.title": {
+    id: "Karya digital yang dibangun untuk kebutuhan nyata.",
+    en: "Digital work built for real needs."
+  },
+  "project.lead": {
+    id: "Lihat bagaimana Solivate Studio membantu komunitas, UMKM, dan brand lokal punya website yang rapi, cepat, dan siap dipakai.",
+    en: "See how Solivate Studio helps communities, SMEs, and local brands own clean, fast, and launch-ready websites."
+  },
+  "project.stat.1.label": { id: "Project aktif", en: "Active projects" },
+  "project.stat.2.label": { id: "Target pasar", en: "Target markets" },
+  "project.stat.3.label": { id: "Fokus utama", en: "Main focus" },
+  "project.stat.3.value": { id: "Website cepat", en: "Fast websites" },
+  "project.list.eyebrow": { id: "Selected Work", en: "Selected Work" },
+  "project.list.title": {
+    id: "Showcase website Solivate Studio.",
+    en: "Solivate Studio website showcase."
+  },
+  "project.case": { id: "Lihat Studi Kasus", en: "View Case Study" },
+  "project.live": { id: "Kunjungi Website", en: "Visit Website" },
+  "project.cta.eyebrow": { id: "Mau project seperti ini?", en: "Want a project like this?" },
+  "project.cta.title": {
+    id: "Konsultasi sekarang, gratis. Kita susun scope yang paling masuk akal untuk brand Anda.",
+    en: "Get a free consultation. We will shape a practical scope for your brand."
+  },
+  "project.cta.button": { id: "Mulai Konsultasi", en: "Start Consultation" },
+  "footer.title": { id: "Bangun sesuatu yang orang ingat.", en: "Let's build something people remember." },
+  "footer.cta": { id: "Mulai Proyek", en: "Start Project" },
+  "footer.desc": {
+    id: "Digital solution provider untuk UMKM, komunitas sosial, event, celebration, dan sistem custom yang ingin naik kelas secara digital.",
+    en: "Digital solution provider for SMEs, social communities, events, celebrations, and custom systems ready to level up digitally."
+  },
+  "footer.nav": { id: "Navigasi", en: "Navigation" },
+  "footer.connect": { id: "Kontak", en: "Connect" },
+  "footer.copy": { id: `Copyright ${new Date().getFullYear()} Solivate Studio. Semua hak dilindungi.`, en: `Copyright ${new Date().getFullYear()} Solivate Studio. All rights reserved.` },
+  "footer.top": { id: "Kembali ke atas", en: "Back to top" },
+  "floating.wa": { id: "Konsultasi sekarang, gratis!", en: "Free consultation now!" }
+};
+
+const portfolioI18n = Object.fromEntries(
+  portfolioPages.flatMap((project, index) => {
+    const en = portfolioPageEnglish[project.slug];
+    return [
+      [`project.${index}.title`, { id: project.title, en: en.title }],
+      [`project.${index}.description`, { id: project.description, en: en.description }],
+      ...project.highlights.map((highlight, highlightIndex) => [
+        `project.${index}.highlight.${highlightIndex}`,
+        { id: highlight, en: en.highlights[highlightIndex] }
+      ])
+    ];
+  })
+);
+
+const i18nJson = JSON.stringify({ ...projectI18n, ...portfolioI18n });
+const pageTitle = "Project Showcase Solivate Studio | Website UMKM, Komunitas & Brand";
+const pageDescription = projectI18n["meta.description"].id;
+const canonical = `${siteUrl}/project`;
+const collectionSchema = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "Project Showcase Solivate Studio",
+  url: canonical,
+  description: pageDescription,
+  mainEntity: {
+    "@type": "ItemList",
+    itemListElement: portfolioPages.map((project, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "CreativeWork",
+        name: project.title,
+        url: `${siteUrl}/portfolio/${project.slug}`,
+        image: `${siteUrl}${project.image}`,
+        description: project.description
+      }
+    }))
+  }
+});
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <meta name="keywords" content="project Solivate Studio, portfolio Solivate Studio, website UMKM, website barbershop, website bakery, website masjid, jasa pembuatan website, digital solution provider Indonesia" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Solivate Studio" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={`${siteUrl}${portfolioPages[0].image}`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+  </head>
+  <body>
+    <Header compact i18n />
+
+    <main class="project-page">
+      <section class="project-hero">
+        <div class="hero-bg"></div>
+        <div class="container project-hero-grid">
+          <div class="project-hero-copy">
+            <p class="eyebrow" data-i18n="project.eyebrow">Project Showcase</p>
+            <h1 data-i18n="project.title">Karya digital yang dibangun untuk kebutuhan nyata.</h1>
+            <p class="hero-text" data-i18n="project.lead">Lihat bagaimana Solivate Studio membantu komunitas, UMKM, dan brand lokal punya website yang rapi, cepat, dan siap dipakai.</p>
+            <div class="hero-actions">
+              <a class="btn-primary" href="/#contact">
+                <span data-i18n="project.cta.button">Mulai Konsultasi</span>
+                <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
+              </a>
+              <a class="btn-secondary" href="#showcase" data-i18n="project.list.eyebrow">Selected Work</a>
+            </div>
+          </div>
+          <div class="project-hero-panel" aria-label="Project summary">
+            <div>
+              <strong>{portfolioPages.length}</strong>
+              <span data-i18n="project.stat.1.label">Project aktif</span>
+            </div>
+            <div>
+              <strong>3+</strong>
+              <span data-i18n="project.stat.2.label">Target pasar</span>
+            </div>
+            <div>
+              <strong data-i18n="project.stat.3.value">Website cepat</strong>
+              <span data-i18n="project.stat.3.label">Fokus utama</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="showcase" class="section project-showcase-section">
+        <div class="container section-head split">
+          <div>
+            <p class="eyebrow" data-i18n="project.list.eyebrow">Selected Work</p>
+            <h2 data-i18n="project.list.title">Showcase website Solivate Studio.</h2>
+          </div>
+          <p class="lead" data-i18n="project.lead">Lihat bagaimana Solivate Studio membantu komunitas, UMKM, dan brand lokal punya website yang rapi, cepat, dan siap dipakai.</p>
+        </div>
+
+        <div class="container project-showcase-grid">
+          {portfolioPages.map((project, index) => (
+            <article class="project-showcase-card">
+              <a class="project-card-media" href={`/portfolio/${project.slug}`} aria-label={`Lihat studi kasus ${project.title}`}>
+                <img src={project.image} alt={project.title} loading={index === 0 ? "eager" : "lazy"} />
+              </a>
+              <div class="project-card-body">
+                <div>
+                  <span class="project-card-index">{String(index + 1).padStart(2, "0")}</span>
+                  <h3 data-i18n={`project.${index}.title`}>{project.title}</h3>
+                  <p data-i18n={`project.${index}.description`}>{project.description}</p>
+                </div>
+                <div class="project-tags">
+                  {project.highlights.slice(0, 4).map((highlight, highlightIndex) => (
+                    <span data-i18n={`project.${index}.highlight.${highlightIndex}`}>{highlight}</span>
+                  ))}
+                </div>
+                <div class="project-card-actions">
+                  <a class="btn-primary" href={`/portfolio/${project.slug}`}>
+                    <span data-i18n="project.case">Lihat Studi Kasus</span>
+                    <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
+                  </a>
+                  <a class="btn-secondary" href={project.url} target="_blank" rel="noreferrer">
+                    <span data-i18n="project.live">Kunjungi Website</span>
+                    <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
+                  </a>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="section project-cta-section">
+        <div class="container project-cta-band">
+          <p class="eyebrow" data-i18n="project.cta.eyebrow">Mau project seperti ini?</p>
+          <h2 data-i18n="project.cta.title">Konsultasi sekarang, gratis. Kita susun scope yang paling masuk akal untuk brand Anda.</h2>
+          <a class="btn-primary" href="/#contact">
+            <span data-i18n="project.cta.button">Mulai Konsultasi</span>
+            <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <Footer i18n />
+    <script is:inline type="application/ld+json" set:html={collectionSchema}></script>
+    <script is:inline type="application/json" id="project-i18n-data" set:html={i18nJson}></script>
+    <script is:inline>
+      const translations = JSON.parse(document.getElementById("project-i18n-data")?.textContent || "{}");
+      const header = document.querySelector("[data-header]");
+      const updateHeader = () => {
+        const y = Math.max(0, window.scrollY);
+        header?.classList.toggle("is-scrolled", y > 24);
+        header?.classList.toggle("is-compact", y > 64);
+      };
+      window.addEventListener("scroll", updateHeader, { passive: true });
+      updateHeader();
+
+      document.querySelectorAll("[data-top]").forEach((trigger) => {
+        trigger.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+      });
+
+      document.querySelectorAll("[data-home-contact]").forEach((trigger) => {
+        trigger.addEventListener("click", () => {
+          window.location.href = "/#contact";
+        });
+      });
+
+      const setLanguage = (lang, persist = false) => {
+        const activeLang = lang === "en" ? "en" : "id";
+        document.documentElement.lang = activeLang;
+        if (persist) {
+          window.localStorage.setItem("solivate-language", activeLang);
+          window.localStorage.setItem("solivate-language-manual", "true");
+        }
+
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          const next = translations[key]?.[activeLang];
+          if (next) node.textContent = next;
+        });
+
+        document.querySelectorAll("[data-lang-switch]").forEach((button) => {
+          const active = button.getAttribute("data-lang-switch") === activeLang;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+      };
+
+      document.querySelectorAll("[data-lang-switch]").forEach((button) => {
+        button.addEventListener("click", () => setLanguage(button.getAttribute("data-lang-switch"), true));
+      });
+
+      const savedLanguage = window.localStorage.getItem("solivate-language-manual") === "true"
+        ? window.localStorage.getItem("solivate-language")
+        : "id";
+      setLanguage(savedLanguage || "id");
+    </script>
+  </body>
+</html>

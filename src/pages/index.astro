@@ -112,15 +112,16 @@ const i18n: Record<string, LocaleCopy> = {
   "pricing.card.3.point.1": { id: "UI/UX premium", en: "Premium UI/UX" },
   "pricing.card.3.point.2": { id: "Payment & ongkir API", en: "Payment & shipping API" },
   "pricing.card.3.point.3": { id: "Dashboard manajemen", en: "Management dashboard" },
-  "work.eyebrow": { id: "Portofolio & Rekam Jejak", en: "Portfolio & Track Record" },
+  "work.eyebrow": { id: "Project Showcase", en: "Project Showcase" },
   "work.title": { id: "Project yang berdampak untuk masyarakat, bisnis, dan momen personal.", en: "Projects with impact for communities, businesses, and personal moments." },
   "work.lead": {
-    id: "Kami mengembangkan website untuk komunitas sosial, ucapan birthday interaktif, dan beberapa sistem bisnis yang sedang disiapkan untuk memperluas digitalisasi.",
-    en: "We develop websites for social communities, interactive birthday greetings, and several business systems prepared to expand digitalization."
+    id: "Beberapa website yang sudah dibangun untuk komunitas, UMKM, dan brand lokal dengan kebutuhan digital yang berbeda.",
+    en: "Selected websites built for communities, SMEs, and local brands with different digital needs."
   },
   "work.1.type": { id: "Completed Project", en: "Completed Project" },
   "work.2.type": { id: "Completed Project", en: "Completed Project" },
-  "work.3.type": { id: "Upcoming Project", en: "Upcoming Project" },
+  "work.3.type": { id: "Completed Project", en: "Completed Project" },
+  "work.all": { id: "Lihat Semua Project", en: "View All Projects" },
   "process.eyebrow": { id: "Proses", en: "Process" },
   "process.title": { id: "Cara kerja yang jelas dari ide sampai website siap digunakan.", en: "A clear workflow from idea to launch-ready website." },
   "process.lead": { id: "Kami menjaga proses tetap praktis: kebutuhan dipetakan, desain disusun, website dibangun, lalu mitra didampingi setelah rilis.", en: "We keep the process practical: map needs, design the experience, build the website, then support partners after release." },
@@ -212,8 +213,18 @@ const works = [
     img: "/images/masjidrayapuritelukjambe.webp",
     url: "/portfolio/masjid-raya-puri-telukjambe"
   },
-  { title: "Birthday Website Interaktif", typeKey: "work.2.type", img: "/images/portfolio_mobile_1781799748021.webp" },
-  { title: "Barbershop, Panti Asuhan, Rental Mobil & Company Parfum", typeKey: "work.3.type", img: "/images/portfolio_cloud_1781799732798.webp" }
+  {
+    title: "Cutbae Barbershop",
+    typeKey: "work.2.type",
+    img: "/images/cutbae-barbershop.webp",
+    url: "/portfolio/cutbae-barbershop"
+  },
+  {
+    title: "Makdian Bakery",
+    typeKey: "work.3.type",
+    img: "/images/makdian-bakery.webp",
+    url: "/portfolio/makdian-bakery"
+  }
 ];
 
 const process = [
@@ -478,7 +489,13 @@ const organizationSchema = JSON.stringify({
             <p class="eyebrow" data-i18n="work.eyebrow">{tx("work.eyebrow")}</p>
             <h2 data-i18n="work.title">{tx("work.title")}</h2>
           </div>
-          <p class="lead" data-i18n="work.lead">{tx("work.lead")}</p>
+          <div class="pricing-intro">
+            <p class="lead" data-i18n="work.lead">{tx("work.lead")}</p>
+            <a class="btn-primary" href="/project">
+              <span data-i18n="work.all">{tx("work.all")}</span>
+              <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
+            </a>
+          </div>
         </div>
         <div class="container work-grid">
           {works.map((item) => (
