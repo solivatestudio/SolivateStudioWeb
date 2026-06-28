@@ -123,6 +123,8 @@ const i18n: Record<string, LocaleCopy> = {
   "form.brief": { id: "Brief proyek", en: "Project brief" },
   "form.brief.placeholder": { id: "Ceritakan tujuan, timeline, range budget, dan referensi yang kamu suka.", en: "Tell us about the goal, timeline, budget range, and references." },
   "form.submit": { id: "Kirim Brief", en: "Send Brief" },
+  "form.sending": { id: "Mengirim...", en: "Sending..." },
+  "form.error": { id: "Brief belum terkirim. Coba lagi atau hubungi kami lewat WhatsApp.", en: "Brief was not sent. Please try again or contact us via WhatsApp." },
   "success.title": { id: "Brief diterima.", en: "Brief received." },
   "success.text": { id: "Terima kasih. Solivate Studio akan review catatan kamu dan membalas dengan langkah berikutnya.", en: "Thanks. Solivate Studio will review your notes and reply with a practical next step." },
   "success.reset": { id: "Kirim lagi", en: "Send another" },
@@ -179,7 +181,12 @@ const pricingPreview = [
 ];
 
 const works = [
-  { title: "Website Masjid", typeKey: "work.1.type", img: "/images/portfolio_saas_1781799718522.webp" },
+  {
+    title: "Masjid Raya Puri Telukjambe",
+    typeKey: "work.1.type",
+    img: "/images/masjidrayapuritelukjambe.webp",
+    url: "https://www.masjidrayapuritelukjambe.com/"
+  },
   { title: "Birthday Website Interaktif", typeKey: "work.2.type", img: "/images/portfolio_mobile_1781799748021.webp" },
   { title: "Barbershop, Panti Asuhan, Rental Mobil & Company Parfum", typeKey: "work.3.type", img: "/images/portfolio_cloud_1781799732798.webp" }
 ];
@@ -455,13 +462,13 @@ const organizationSchema = JSON.stringify({
         </div>
         <div class="container work-grid">
           {works.map((item) => (
-            <article class="work-card">
+            <a class="work-card" href={item.url ?? "#contact"} target={item.url ? "_blank" : undefined} rel={item.url ? "noreferrer" : undefined}>
               <img src={item.img} alt={item.title} loading="eager" />
               <div>
                 <span data-i18n={item.typeKey}>{tx(item.typeKey)}</span>
                 <h3>{item.title}</h3>
               </div>
-            </article>
+            </a>
           ))}
         </div>
       </section>
@@ -508,15 +515,15 @@ const organizationSchema = JSON.stringify({
             <form data-contact-form>
               <label>
                 <span data-i18n="form.name">{tx("form.name")}</span>
-                <input required placeholder={tx("form.name.placeholder")} data-i18n-placeholder="form.name.placeholder" />
+                <input required name="name" autocomplete="name" placeholder={tx("form.name.placeholder")} data-i18n-placeholder="form.name.placeholder" />
               </label>
               <label>
                 <span data-i18n="form.contact">{tx("form.contact")}</span>
-                <input required placeholder={tx("form.contact.placeholder")} data-i18n-placeholder="form.contact.placeholder" />
+                <input required name="contact" autocomplete="email" placeholder={tx("form.contact.placeholder")} data-i18n-placeholder="form.contact.placeholder" />
               </label>
               <label>
                 <span data-i18n="form.type">{tx("form.type")}</span>
-                <select>
+                <select name="projectType">
                   <option data-i18n="form.type.1">{tx("form.type.1")}</option>
                   <option data-i18n="form.type.2">{tx("form.type.2")}</option>
                   <option data-i18n="form.type.3">{tx("form.type.3")}</option>
@@ -525,8 +532,9 @@ const organizationSchema = JSON.stringify({
               </label>
               <label>
                 <span data-i18n="form.brief">{tx("form.brief")}</span>
-                <textarea required placeholder={tx("form.brief.placeholder")} data-i18n-placeholder="form.brief.placeholder"></textarea>
+                <textarea required name="brief" placeholder={tx("form.brief.placeholder")} data-i18n-placeholder="form.brief.placeholder"></textarea>
               </label>
+              <p class="form-error" data-form-error data-i18n="form.error" hidden>{tx("form.error")}</p>
               <button class="btn-primary" type="submit">
                 <span data-i18n="form.submit">{tx("form.submit")}</span>
                 <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
@@ -676,10 +684,41 @@ const organizationSchema = JSON.stringify({
 
       const contactForm = document.querySelector("[data-contact-form]");
       const success = document.querySelector("[data-success]");
-      contactForm?.addEventListener("submit", (event) => {
+      const formError = document.querySelector("[data-form-error]");
+      contactForm?.addEventListener("submit", async (event) => {
         event.preventDefault();
-        contactForm.setAttribute("hidden", "");
-        success?.removeAttribute("hidden");
+        formError?.setAttribute("hidden", "");
+        const submit = contactForm.querySelector('button[type="submit"]');
+        const submitText = submit?.querySelector("[data-i18n]");
+        const activeLang = document.documentElement.lang === "en" ? "en" : "id";
+        const originalText = submitText?.textContent || "";
+
+        submit?.setAttribute("disabled", "");
+        if (submitText) submitText.textContent = translations["form.sending"]?.[activeLang] || "Mengirim...";
+
+        try {
+          const formData = new FormData(contactForm);
+          const response = await fetch("/api/contact", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: formData.get("name"),
+              contact: formData.get("contact"),
+              projectType: formData.get("projectType"),
+              brief: formData.get("brief")
+            })
+          });
+
+          if (!response.ok) throw new Error("Contact request failed");
+          contactForm.setAttribute("hidden", "");
+          success?.removeAttribute("hidden");
+          contactForm.reset();
+        } catch (error) {
+          formError?.removeAttribute("hidden");
+        } finally {
+          submit?.removeAttribute("disabled");
+          if (submitText) submitText.textContent = originalText;
+        }
       });
       document.querySelector("[data-reset-form]")?.addEventListener("click", () => {
         success?.setAttribute("hidden", "");

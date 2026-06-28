@@ -2,6 +2,7 @@ node_modules/
 build/
 dist/
 .astro/
+.vercel/
 coverage/
 .DS_Store
 *.log
