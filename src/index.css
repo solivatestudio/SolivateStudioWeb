@@ -922,7 +922,14 @@ a {
 
 .eyebrow:hover {
   transform: translateX(4px);
-  color: var(--lime);
+  color: var(--navy);
+}
+
+.dark .eyebrow:hover,
+.hero .eyebrow:hover,
+.seo-hero .eyebrow:hover,
+.pricing-hero .eyebrow:hover {
+  color: var(--cyan);
 }
 
 h2 {
@@ -2603,8 +2610,24 @@ h2:hover {
     grid-template-columns: 1fr;
   }
 
-  .service-console {
+  .service-page .seo-hero-grid {
+    gap: 28px;
     min-height: auto;
+    padding-top: 118px;
+    padding-bottom: 28px;
+  }
+
+  .service-page .seo-hero h1 {
+    max-width: 820px;
+  }
+
+  .service-console {
+    width: min(100%, 680px);
+    min-height: auto;
+  }
+
+  .service-orbit {
+    min-height: 250px;
   }
 
   .service-stat-strip,
@@ -2850,27 +2873,82 @@ h2:hover {
     padding-bottom: 64px;
   }
 
+  .service-page .seo-hero-grid {
+    gap: 24px;
+    padding-top: 96px;
+    padding-bottom: 26px;
+  }
+
   .seo-hero h1 {
     font-size: clamp(2.3rem, 11vw, 4rem);
     line-height: 1;
   }
 
+  .service-page .seo-hero h1 {
+    font-size: clamp(2.15rem, 10.5vw, 3.55rem);
+    line-height: 1.03;
+  }
+
+  .service-page .hero-text {
+    max-width: none;
+    font-size: 0.94rem;
+    line-height: 1.72;
+  }
+
+  .service-page .hero-actions {
+    gap: 10px;
+  }
+
   .service-orbit {
-    min-height: 220px;
-    margin: 16px;
+    min-height: 180px;
+    margin: 12px;
+    border-radius: 20px;
+  }
+
+  .orbit-core {
+    width: 68px;
+    height: 68px;
+    border-radius: 22px;
+    font-size: 18px;
+  }
+
+  .service-console-top {
+    align-items: flex-start;
+    padding: 14px;
+  }
+
+  .service-console-top i {
+    max-width: 118px;
+    justify-content: center;
+    text-align: center;
   }
 
   .service-console-list {
-    padding: 2px 20px 22px;
+    gap: 12px;
+    padding: 2px 16px 18px;
+  }
+
+  .service-console-list li {
+    font-size: 0.92rem;
+    line-height: 1.55;
   }
 
   .service-stat-strip article,
   .service-workflow-grid article {
     min-height: auto;
+    padding: 20px;
   }
 
   .service-audience-card {
-    min-height: 280px;
+    min-height: auto;
+  }
+
+  .service-feature-card {
+    min-height: 190px;
+  }
+
+  .service-workflow-grid h3 {
+    margin-top: 44px;
   }
 
   .pricing-quote-card,
