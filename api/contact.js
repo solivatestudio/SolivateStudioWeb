@@ -1,13 +1,9 @@
-import type { APIRoute } from "astro";
-
-export const prerender = false;
-
 const RESEND_API_URL = "https://api.resend.com/emails";
 const FALLBACK_TO_EMAIL = "solivatestudio@gmail.com";
 const FALLBACK_FROM_EMAIL = "Solivate Studio <onboarding@resend.dev>";
 
-const clean = (value: unknown) => String(value ?? "").trim();
-const escapeHtml = (value: string) =>
+const clean = (value) => String(value ?? "").trim();
+const escapeHtml = (value) =>
   value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -15,32 +11,30 @@ const escapeHtml = (value: string) =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 
-export const POST: APIRoute = async ({ request }) => {
+export default async function handler(request, response) {
+  if (request.method !== "POST") {
+    response.setHeader("Allow", "POST");
+    return response.status(405).json({ message: "Method not allowed." });
+  }
+
   const apiKey = process.env.RESEND_API_KEY;
 
   if (!apiKey) {
-    return Response.json({ message: "Resend API key is not configured." }, { status: 500 });
+    return response.status(500).json({ message: "Resend API key is not configured." });
   }
 
-  let payload: Record<string, unknown>;
-
-  try {
-    payload = await request.json();
-  } catch {
-    return Response.json({ message: "Invalid request body." }, { status: 400 });
-  }
-
+  const payload = typeof request.body === "object" && request.body ? request.body : {};
   const name = clean(payload.name);
   const contact = clean(payload.contact);
   const projectType = clean(payload.projectType);
   const brief = clean(payload.brief);
 
   if (!name || !contact || !projectType || !brief) {
-    return Response.json({ message: "Please complete all required fields." }, { status: 400 });
+    return response.status(400).json({ message: "Please complete all required fields." });
   }
 
   if (name.length > 120 || contact.length > 160 || projectType.length > 120 || brief.length > 4000) {
-    return Response.json({ message: "Submitted content is too long." }, { status: 400 });
+    return response.status(400).json({ message: "Submitted content is too long." });
   }
 
   const submittedAt = new Intl.DateTimeFormat("id-ID", {
@@ -70,7 +64,7 @@ export const POST: APIRoute = async ({ request }) => {
     </div>
   `;
 
-  const response = await fetch(RESEND_API_URL, {
+  const resendResponse = await fetch(RESEND_API_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -94,11 +88,11 @@ export const POST: APIRoute = async ({ request }) => {
     })
   });
 
-  if (!response.ok) {
-    const detail = await response.text();
+  if (!resendResponse.ok) {
+    const detail = await resendResponse.text();
     console.error("Resend email failed:", detail);
-    return Response.json({ message: "Email failed to send." }, { status: 502 });
+    return response.status(502).json({ message: "Email failed to send." });
   }
 
-  return Response.json({ ok: true });
-};
+  return response.status(200).json({ ok: true });
+}
