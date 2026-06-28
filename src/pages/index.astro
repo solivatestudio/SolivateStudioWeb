@@ -689,18 +689,42 @@ const organizationSchema = JSON.stringify({
         event.preventDefault();
         formError?.setAttribute("hidden", "");
         const formData = new FormData(contactForm);
-        const subject = encodeURIComponent(`Brief baru Solivate Studio - ${formData.get("projectType") || "Website"}`);
-        const body = encodeURIComponent([
-          `Nama: ${formData.get("name") || ""}`,
-          `Kontak: ${formData.get("contact") || ""}`,
-          `Jenis Proyek: ${formData.get("projectType") || ""}`,
-          "",
-          `${formData.get("brief") || ""}`
-        ].join("\n"));
-        window.location.href = `mailto:solivatestudio@gmail.com?subject=${subject}&body=${body}`;
-        contactForm.setAttribute("hidden", "");
-        success?.removeAttribute("hidden");
-        contactForm.reset();
+        const submit = contactForm.querySelector('button[type="submit"]');
+        const submitText = submit?.querySelector("[data-i18n]");
+        const activeLang = document.documentElement.lang === "en" ? "en" : "id";
+        const originalText = submitText?.textContent || "";
+
+        submit?.setAttribute("disabled", "");
+        if (submitText) submitText.textContent = translations["form.sending"]?.[activeLang] || "Mengirim...";
+
+        fetch("https://formsubmit.co/ajax/solivatestudio@gmail.com", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            _subject: `Brief baru Solivate Studio - ${formData.get("projectType") || "Website"}`,
+            _template: "table",
+            name: formData.get("name"),
+            contact: formData.get("contact"),
+            projectType: formData.get("projectType"),
+            brief: formData.get("brief")
+          })
+        })
+          .then((response) => {
+            if (!response.ok) throw new Error("Form submit failed");
+            contactForm.setAttribute("hidden", "");
+            success?.removeAttribute("hidden");
+            contactForm.reset();
+          })
+          .catch(() => {
+            formError?.removeAttribute("hidden");
+          })
+          .finally(() => {
+            submit?.removeAttribute("disabled");
+            if (submitText) submitText.textContent = originalText;
+          });
       });
       document.querySelector("[data-reset-form]")?.addEventListener("click", () => {
         success?.setAttribute("hidden", "");
