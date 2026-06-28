@@ -2071,44 +2071,58 @@ h2:hover {
   z-index: 120;
   display: inline-flex;
   align-items: center;
-  gap: 0;
-  width: 56px;
+  gap: 8px;
+  width: 58px;
   max-width: min(330px, calc(100vw - 36px));
-  min-height: 56px;
-  border: 1px solid rgba(6, 20, 39, 0.16);
+  min-height: 58px;
+  border: 1px solid rgba(215, 255, 63, 0.54);
   border-radius: 999px;
-  background: var(--lime);
-  color: var(--ink);
-  padding: 8px;
+  background:
+    linear-gradient(135deg, rgba(6, 20, 39, 0.96), rgba(2, 62, 138, 0.92)),
+    var(--ink);
+  color: var(--white);
+  padding: 7px;
   font-size: 13px;
   font-weight: 900;
-  box-shadow: 0 22px 54px -28px rgba(6, 20, 39, 0.85);
+  box-shadow: 0 18px 48px -28px rgba(6, 20, 39, 0.95), 0 0 0 7px rgba(215, 255, 63, 0.08);
   white-space: nowrap;
-  transition: width 300ms var(--ease-out), transform 260ms var(--ease-out), box-shadow 260ms ease, background 220ms ease;
+  isolation: isolate;
+  transition: width 320ms var(--ease-out), transform 260ms var(--ease-out), box-shadow 260ms ease, border-color 220ms ease;
 }
 
 .floating-wa:hover,
 .floating-wa:focus-visible {
-  width: min(294px, calc(100vw - 36px));
-  background: var(--white);
-  box-shadow: 0 28px 70px -32px rgba(6, 20, 39, 0.92);
+  width: min(286px, calc(100vw - 36px));
+  border-color: rgba(215, 255, 63, 0.9);
+  box-shadow: 0 30px 74px -34px rgba(6, 20, 39, 0.96), 0 0 0 8px rgba(215, 255, 63, 0.12);
   transform: translateY(-4px);
+}
+
+.floating-wa-pulse {
+  position: absolute;
+  inset: -7px;
+  z-index: -1;
+  border: 1px solid rgba(215, 255, 63, 0.34);
+  border-radius: inherit;
+  opacity: 0.8;
+  animation: floatingWaPulse 2.6s ease-out infinite;
 }
 
 .floating-wa-icon {
   display: grid;
   flex: 0 0 auto;
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   place-items: center;
   border-radius: 50%;
-  background: var(--ink);
-  color: var(--lime);
+  background: #25D366;
+  color: var(--white);
+  box-shadow: inset 0 -8px 18px rgba(6, 20, 39, 0.18);
 }
 
 .floating-wa-icon svg {
-  width: 23px;
-  height: 23px;
+  width: 24px;
+  height: 24px;
 }
 
 .floating-wa-label {
@@ -2117,14 +2131,31 @@ h2:hover {
   overflow: hidden;
   opacity: 0;
   padding-left: 0;
-  transition: max-width 300ms var(--ease-out), opacity 180ms ease, padding-left 300ms var(--ease-out);
+  color: var(--lime);
+  transform: translateX(-4px);
+  transition: max-width 320ms var(--ease-out), opacity 180ms ease, padding-left 320ms var(--ease-out), transform 320ms var(--ease-out);
 }
 
 .floating-wa:hover .floating-wa-label,
 .floating-wa:focus-visible .floating-wa-label {
-  max-width: 230px;
+  max-width: 222px;
   opacity: 1;
-  padding-left: 10px;
+  padding-left: 2px;
+  padding-right: 10px;
+  transform: translateX(0);
+}
+
+@keyframes floatingWaPulse {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.72;
+  }
+
+  70%,
+  100% {
+    transform: scale(1.18);
+    opacity: 0;
+  }
 }
 
 .seo-page {
@@ -2910,21 +2941,21 @@ h2:hover {
   .floating-wa {
     right: 12px;
     bottom: 12px;
-    width: 48px;
+    width: 52px;
     max-width: calc(100vw - 24px);
-    min-height: 48px;
-    padding: 7px;
+    min-height: 52px;
+    padding: 6px;
     font-size: 12px;
   }
 
   .floating-wa-icon {
-    width: 34px;
-    height: 34px;
+    width: 40px;
+    height: 40px;
   }
 
   .floating-wa:hover,
   .floating-wa:focus-visible {
-    width: min(262px, calc(100vw - 24px));
+    width: min(250px, calc(100vw - 24px));
   }
 
   .floating-wa:hover .floating-wa-label,
@@ -2933,8 +2964,8 @@ h2:hover {
   }
 
   .floating-wa-icon svg {
-    width: 20px;
-    height: 20px;
+    width: 23px;
+    height: 23px;
   }
 
   h2 {
