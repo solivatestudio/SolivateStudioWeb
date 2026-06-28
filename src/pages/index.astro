@@ -82,6 +82,36 @@ const i18n: Record<string, LocaleCopy> = {
     en: "From simple personal websites to exclusive custom systems. Pick the closest package, then consult the final scope with us."
   },
   "pricing.detail": { id: "Lihat Detail Harga", en: "View Pricing Details" },
+  "pricing.card.1.label": { id: "Personal & Event", en: "Personal & Event" },
+  "pricing.card.1.title": { id: "Website Sederhana", en: "Simple Website" },
+  "pricing.card.1.price": { id: "Mulai Rp 49.000", en: "From Rp 49,000" },
+  "pricing.card.1.desc": {
+    id: "Birthday website, kartu ucapan, digital flower, dan undangan party atau wedding.",
+    en: "Birthday websites, greeting cards, digital flowers, and party or wedding invitations."
+  },
+  "pricing.card.1.point.1": { id: "Landing page", en: "Landing page" },
+  "pricing.card.1.point.2": { id: "Maksimal 3 foto", en: "Up to 3 photos" },
+  "pricing.card.1.point.3": { id: "Opsi video & custom name", en: "Video option & custom name" },
+  "pricing.card.2.label": { id: "Best Value", en: "Best Value" },
+  "pricing.card.2.title": { id: "Landing / Multi-Page", en: "Landing / Multi-Page" },
+  "pricing.card.2.price": { id: "Rp 249.000 - Rp 499.000", en: "Rp 249,000 - Rp 499,000" },
+  "pricing.card.2.desc": {
+    id: "Untuk school profile, company profile, UMKM, event, konser, dan komunitas.",
+    en: "For school profiles, company profiles, SMEs, events, concerts, and communities."
+  },
+  "pricing.card.2.point.1": { id: "1 sampai 10 halaman", en: "1 to 10 pages" },
+  "pricing.card.2.point.2": { id: "WhatsApp integration", en: "WhatsApp integration" },
+  "pricing.card.2.point.3": { id: "SEO, speed, revisi, garansi", en: "SEO, speed, revisions, warranty" },
+  "pricing.card.3.label": { id: "Advanced", en: "Advanced" },
+  "pricing.card.3.title": { id: "Custom Eksklusif", en: "Exclusive Custom" },
+  "pricing.card.3.price": { id: "Mulai Rp 2.999.000", en: "From Rp 2,999,000" },
+  "pricing.card.3.desc": {
+    id: "Untuk marketplace, payment gateway, toko online kompleks, ERP, CRM, dan dashboard.",
+    en: "For marketplaces, payment gateways, complex online stores, ERP, CRM, and dashboards."
+  },
+  "pricing.card.3.point.1": { id: "UI/UX premium", en: "Premium UI/UX" },
+  "pricing.card.3.point.2": { id: "Payment & ongkir API", en: "Payment & shipping API" },
+  "pricing.card.3.point.3": { id: "Dashboard manajemen", en: "Management dashboard" },
   "work.eyebrow": { id: "Portofolio & Rekam Jejak", en: "Portfolio & Track Record" },
   "work.title": { id: "Project yang berdampak untuk masyarakat, bisnis, dan momen personal.", en: "Projects with impact for communities, businesses, and personal moments." },
   "work.lead": {
@@ -152,25 +182,25 @@ const services = [
 
 const pricingPreview = [
   {
-    label: "Personal & Event",
-    title: "Website Sederhana",
-    price: "Mulai Rp 49.000",
-    desc: "Birthday website, kartu ucapan, digital flower, dan undangan party atau wedding.",
-    points: ["Landing page", "Maksimal 3 foto", "Opsi video & custom name"]
+    labelKey: "pricing.card.1.label",
+    titleKey: "pricing.card.1.title",
+    priceKey: "pricing.card.1.price",
+    descKey: "pricing.card.1.desc",
+    pointKeys: ["pricing.card.1.point.1", "pricing.card.1.point.2", "pricing.card.1.point.3"]
   },
   {
-    label: "Best Value",
-    title: "Landing / Multi-Page",
-    price: "Rp 249.000 - Rp 499.000",
-    desc: "Untuk school profile, company profile, UMKM, event, konser, dan komunitas.",
-    points: ["1 sampai 10 halaman", "WhatsApp integration", "SEO, speed, revisi, garansi"]
+    labelKey: "pricing.card.2.label",
+    titleKey: "pricing.card.2.title",
+    priceKey: "pricing.card.2.price",
+    descKey: "pricing.card.2.desc",
+    pointKeys: ["pricing.card.2.point.1", "pricing.card.2.point.2", "pricing.card.2.point.3"]
   },
   {
-    label: "Advanced",
-    title: "Custom Eksklusif",
-    price: "Mulai Rp 2.999.000",
-    desc: "Untuk marketplace, payment gateway, toko online kompleks, ERP, CRM, dan dashboard.",
-    points: ["UI/UX premium", "Payment & ongkir API", "Dashboard manajemen"]
+    labelKey: "pricing.card.3.label",
+    titleKey: "pricing.card.3.title",
+    priceKey: "pricing.card.3.price",
+    descKey: "pricing.card.3.desc",
+    pointKeys: ["pricing.card.3.point.1", "pricing.card.3.point.2", "pricing.card.3.point.3"]
   }
 ];
 
@@ -429,12 +459,12 @@ const organizationSchema = JSON.stringify({
         <div class="container pricing-grid">
           {pricingPreview.map((plan, index) => (
             <article class={`pricing-card ${index === 1 ? "featured" : ""}`}>
-              <span class="pricing-label">{plan.label}</span>
-              <h3>{plan.title}</h3>
-              <strong>{plan.price}</strong>
-              <p>{plan.desc}</p>
+              <span class="pricing-label" data-i18n={plan.labelKey}>{tx(plan.labelKey)}</span>
+              <h3 data-i18n={plan.titleKey}>{tx(plan.titleKey)}</h3>
+              <strong data-i18n={plan.priceKey}>{tx(plan.priceKey)}</strong>
+              <p data-i18n={plan.descKey}>{tx(plan.descKey)}</p>
               <ul>
-                {plan.points.map((point) => <li>{point}</li>)}
+                {plan.pointKeys.map((pointKey) => <li data-i18n={pointKey}>{tx(pointKey)}</li>)}
               </ul>
             </article>
           ))}
