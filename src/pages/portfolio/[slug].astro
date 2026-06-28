@@ -1,0 +1,136 @@
+---
+import "../../index.css";
+import { portfolioPages, servicePages, siteUrl } from "../../data/seo-pages";
+
+export const getStaticPaths = () =>
+  portfolioPages.map((page) => ({
+    params: { slug: page.slug },
+    props: { page }
+  }));
+
+const { page } = Astro.props;
+const canonical = `${siteUrl}/portfolio/${page.slug}`;
+const title = `${page.title} | Studi Kasus Solivate Studio`;
+const relatedServices = servicePages.filter((item) => ["website-masjid-komunitas", "jasa-pembuatan-website"].includes(item.slug));
+const schema = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  name: page.title,
+  creator: {
+    "@type": "Organization",
+    name: "Solivate Studio",
+    url: siteUrl
+  },
+  url: canonical,
+  image: `${siteUrl}${page.image}`,
+  description: page.description,
+  keywords: page.keywords
+});
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={page.description} />
+    <meta name="keywords" content={page.keywords.join(", ")} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Solivate Studio" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={page.description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={`${siteUrl}${page.image}`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={page.description} />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+  </head>
+  <body>
+    <header class="header is-scrolled is-compact">
+      <div class="wrap header-inner">
+        <a class="brand header-brand" href="/" aria-label="Solivate Studio home">
+          <img src="/solivate-logo.svg" alt="Solivate Studio" width="9935" height="1285" />
+        </a>
+        <nav class="nav" aria-label="Navigasi utama">
+          <a class="nav-link nav-link-primary" href="/#about"><span>Tentang</span></a>
+          <a class="nav-link" href="/#services"><span>Layanan</span></a>
+          <a class="nav-link" href="/pricing"><span>Harga</span></a>
+          <a class="nav-link" href="/#work"><span>Karya</span></a>
+          <a class="nav-cta" href="/#contact">
+            <span class="nav-dot"></span>
+            <span>Mulai Proyek</span>
+            <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="seo-page">
+      <section class="seo-hero portfolio-case-hero">
+        <div class="hero-bg"></div>
+        <div class="container seo-hero-grid">
+          <div>
+            <p class="eyebrow">Studi Kasus</p>
+            <h1>{page.title}</h1>
+            <p class="hero-text">{page.description}</p>
+            <div class="hero-actions">
+              <a class="btn-primary" href={page.url} target="_blank" rel="noreferrer">
+                <span>Lihat Website Live</span>
+                <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
+              </a>
+              <a class="btn-secondary" href="/layanan/website-masjid-komunitas">Layanan Terkait</a>
+            </div>
+          </div>
+          <div class="case-preview-card">
+            <img src={page.image} alt={page.title} loading="eager" />
+          </div>
+        </div>
+      </section>
+
+      <section class="section light">
+        <div class="container seo-feature-grid">
+          {page.highlights.map((item, index) => (
+            <article class="feature-card">
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <h3>{item}</h3>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="section services">
+        <div class="container case-study-grid">
+          {page.sections.map((section) => (
+            <article>
+              <p class="eyebrow">{section.title}</p>
+              <p>{section.body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="section light">
+        <div class="container section-head">
+          <p class="eyebrow">Layanan Terkait</p>
+          <h2>Halaman ini terhubung dengan keyword jasa website masjid dan digitalisasi komunitas.</h2>
+        </div>
+        <div class="container service-grid">
+          {relatedServices.map((service) => (
+            <article class="service-card">
+              <div class="icon-box">SS</div>
+              <h3>{service.eyebrow}</h3>
+              <p>{service.description}</p>
+              <a href={`/layanan/${service.slug}`}><span>Lihat layanan</span> <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg></a>
+            </article>
+          ))}
+        </div>
+      </section>
+    </main>
+
+    <script is:inline type="application/ld+json" set:html={schema}></script>
+  </body>
+</html>

@@ -1,5 +1,6 @@
 ---
 import "../index.css";
+import { servicePages } from "../data/seo-pages";
 
 type LocaleCopy = {
   id: string;
@@ -150,10 +151,10 @@ const navItems = [
 ];
 
 const services = [
-  { icon: "UI", titleKey: "service.1.title", descKey: "service.1.desc" },
-  { icon: "</>", titleKey: "service.2.title", descKey: "service.2.desc" },
-  { icon: "DB", titleKey: "service.3.title", descKey: "service.3.desc" },
-  { icon: "24", titleKey: "service.4.title", descKey: "service.4.desc" }
+  { icon: "UI", titleKey: "service.1.title", descKey: "service.1.desc", href: "/layanan/website-umkm" },
+  { icon: "</>", titleKey: "service.2.title", descKey: "service.2.desc", href: "/layanan/website-masjid-komunitas" },
+  { icon: "DB", titleKey: "service.3.title", descKey: "service.3.desc", href: "/layanan/website-event-konser" },
+  { icon: "24", titleKey: "service.4.title", descKey: "service.4.desc", href: "/layanan/jasa-pembuatan-website" }
 ];
 
 const pricingPreview = [
@@ -185,7 +186,7 @@ const works = [
     title: "Masjid Raya Puri Telukjambe",
     typeKey: "work.1.type",
     img: "/images/masjidrayapuritelukjambe.webp",
-    url: "https://www.masjidrayapuritelukjambe.com/"
+    url: "/portfolio/masjid-raya-puri-telukjambe"
   },
   { title: "Birthday Website Interaktif", typeKey: "work.2.type", img: "/images/portfolio_mobile_1781799748021.webp" },
   { title: "Barbershop, Panti Asuhan, Rental Mobil & Company Parfum", typeKey: "work.3.type", img: "/images/portfolio_cloud_1781799732798.webp" }
@@ -245,7 +246,20 @@ const organizationSchema = JSON.stringify({
     { "@type": "Offer", name: "Website Event dan Concert" },
     { "@type": "Offer", name: "Wedding Invitation dan Birthday Website" },
     { "@type": "Offer", name: "Website Custom Eksklusif" }
-  ]
+  ],
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Layanan Solivate Studio",
+    itemListElement: servicePages.map((page) => ({
+      "@type": "Offer",
+      itemOffered: {
+        "@type": "Service",
+        name: page.eyebrow,
+        url: `${siteUrl}/layanan/${page.slug}`,
+        description: page.description
+      }
+    }))
+  }
 });
 ---
 
@@ -417,8 +431,13 @@ const organizationSchema = JSON.stringify({
               <div class="icon-box">{service.icon}</div>
               <h3 data-i18n={service.titleKey}>{tx(service.titleKey)}</h3>
               <p data-i18n={service.descKey}>{tx(service.descKey)}</p>
-              <a href="#contact"><span data-i18n="service.link">{tx("service.link")}</span> <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg></a>
+              <a href={service.href}><span data-i18n="service.link">{tx("service.link")}</span> <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg></a>
             </article>
+          ))}
+        </div>
+        <div class="container service-link-cloud" aria-label="Halaman layanan Solivate Studio">
+          {servicePages.map((page) => (
+            <a href={`/layanan/${page.slug}`}>{page.eyebrow}</a>
           ))}
         </div>
       </section>
@@ -462,7 +481,7 @@ const organizationSchema = JSON.stringify({
         </div>
         <div class="container work-grid">
           {works.map((item) => (
-            <a class="work-card" href={item.url ?? "#contact"} target={item.url ? "_blank" : undefined} rel={item.url ? "noreferrer" : undefined}>
+            <a class="work-card" href={item.url ?? "#contact"} target={item.url?.startsWith("http") ? "_blank" : undefined} rel={item.url?.startsWith("http") ? "noreferrer" : undefined}>
               <img src={item.img} alt={item.title} loading="eager" />
               <div>
                 <span data-i18n={item.typeKey}>{tx(item.typeKey)}</span>

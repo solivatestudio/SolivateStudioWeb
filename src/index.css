@@ -1120,6 +1120,34 @@ h2:hover {
   transform: translateX(3px);
 }
 
+.service-link-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.service-link-cloud a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--ink);
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1), border-color 240ms ease, background 240ms ease;
+}
+
+.service-link-cloud a:hover {
+  border-color: var(--cyan);
+  background: var(--white);
+  transform: translateY(-3px);
+}
+
 .pricing {
   background:
     radial-gradient(circle at 12% 10%, rgba(0, 180, 216, 0.14), transparent 26%),
@@ -2020,6 +2048,159 @@ h2:hover {
   transform: translate(2px, -2px) rotate(12deg);
 }
 
+.seo-page {
+  background: var(--paper);
+}
+
+.seo-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--white);
+}
+
+.seo-hero-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.42fr);
+  gap: clamp(36px, 7vw, 96px);
+  align-items: center;
+  min-height: clamp(620px, 78svh, 760px);
+  padding-top: 120px;
+  padding-bottom: 80px;
+}
+
+.seo-hero h1 {
+  max-width: 980px;
+  margin: 0;
+  font-size: clamp(3rem, 6.4vw, 7rem);
+  font-weight: 800;
+  line-height: 0.96;
+}
+
+.seo-hero-panel,
+.case-preview-card {
+  overflow: hidden;
+  border: 1px solid var(--dark-line);
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 34px 110px -54px rgba(0, 0, 0, 0.95);
+}
+
+.seo-hero-panel {
+  padding: 28px;
+}
+
+.seo-hero-panel > span {
+  display: block;
+  margin-bottom: 18px;
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.seo-hero-panel ul,
+.seo-list-panel ul {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.seo-hero-panel li,
+.seo-list-panel li {
+  position: relative;
+  padding-left: 22px;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.6;
+}
+
+.seo-hero-panel li::before,
+.seo-list-panel li::before {
+  position: absolute;
+  top: 0.72em;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--lime);
+  content: "";
+}
+
+.seo-copy-grid,
+.case-study-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.46fr);
+  gap: 28px;
+}
+
+.seo-copy-grid article,
+.seo-list-panel,
+.case-study-grid article {
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: var(--white);
+  padding: 28px;
+}
+
+.seo-copy-grid h2 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 4.6rem);
+  line-height: 1;
+}
+
+.seo-list-panel h3 {
+  margin: 0 0 18px;
+  color: var(--navy);
+  font-size: 20px;
+}
+
+.seo-list-panel li {
+  color: var(--muted);
+}
+
+.seo-feature-grid,
+.seo-faq-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.seo-feature-grid .feature-card {
+  min-height: 220px;
+}
+
+.seo-faq-grid .faq-item {
+  padding: 24px;
+}
+
+.seo-faq-grid .faq-item h3 {
+  margin: 0 0 12px;
+  color: var(--ink);
+}
+
+.seo-faq-grid .faq-item p,
+.case-study-grid article p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.seo-cta {
+  padding-block: 84px;
+}
+
+.case-preview-card img {
+  display: block;
+  width: 100%;
+  height: min(560px, 65vh);
+  object-fit: cover;
+  object-position: top;
+}
+
 @media (max-width: 1080px) {
   .header-inner {
     width: calc(100% - 28px);
@@ -2051,6 +2232,9 @@ h2:hover {
   .about-grid,
   .section-head.split,
   .contact-grid,
+  .seo-hero-grid,
+  .seo-copy-grid,
+  .case-study-grid,
   .footer-grid {
     grid-template-columns: 1fr;
   }
@@ -2068,6 +2252,8 @@ h2:hover {
   .pricing-grid,
   .pricing-detail-grid,
   .work-grid,
+  .seo-feature-grid,
+  .seo-faq-grid,
   .process-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -2241,6 +2427,8 @@ h2:hover {
   .pricing-grid,
   .pricing-detail-grid,
   .custom-feature-grid,
+  .seo-feature-grid,
+  .seo-faq-grid,
   .work-grid,
   .process-grid {
     grid-template-columns: 1fr;
@@ -2274,6 +2462,17 @@ h2:hover {
 
   .pricing-hero h1 {
     font-size: clamp(2.4rem, 12vw, 4.2rem);
+    line-height: 1;
+  }
+
+  .seo-hero-grid {
+    min-height: auto;
+    padding-top: 104px;
+    padding-bottom: 64px;
+  }
+
+  .seo-hero h1 {
+    font-size: clamp(2.3rem, 11vw, 4rem);
     line-height: 1;
   }
 

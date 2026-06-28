@@ -1,0 +1,159 @@
+---
+import "../../index.css";
+import { servicePages, siteUrl } from "../../data/seo-pages";
+
+export const getStaticPaths = () =>
+  servicePages.map((page) => ({
+    params: { slug: page.slug },
+    props: { page }
+  }));
+
+const { page } = Astro.props;
+const canonical = `${siteUrl}/layanan/${page.slug}`;
+const title = `${page.eyebrow} | Solivate Studio`;
+const schema = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Service",
+  name: page.eyebrow,
+  provider: {
+    "@type": "Organization",
+    name: "Solivate Studio",
+    url: siteUrl,
+    logo: `${siteUrl}/solivate-logo.svg`
+  },
+  areaServed: "Indonesia",
+  serviceType: page.eyebrow,
+  description: page.description,
+  keywords: page.keywords
+});
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={page.description} />
+    <meta name="keywords" content={page.keywords.join(", ")} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Solivate Studio" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={page.description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={`${siteUrl}/solivate-logo.svg`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={page.description} />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+  </head>
+  <body>
+    <header class="header is-scrolled is-compact">
+      <div class="wrap header-inner">
+        <a class="brand header-brand" href="/" aria-label="Solivate Studio home">
+          <img src="/solivate-logo.svg" alt="Solivate Studio" width="9935" height="1285" />
+        </a>
+        <nav class="nav" aria-label="Navigasi utama">
+          <a class="nav-link nav-link-primary" href="/#about"><span>Tentang</span></a>
+          <a class="nav-link" href="/#services"><span>Layanan</span></a>
+          <a class="nav-link" href="/pricing"><span>Harga</span></a>
+          <a class="nav-link" href="/#work"><span>Karya</span></a>
+          <a class="nav-link" href="/#contact"><span>Kontak</span></a>
+          <a class="nav-cta" href="/#contact">
+            <span class="nav-dot"></span>
+            <span>Mulai Proyek</span>
+            <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="seo-page">
+      <section class="seo-hero">
+        <div class="hero-bg"></div>
+        <div class="container seo-hero-grid">
+          <div>
+            <p class="eyebrow">{page.eyebrow}</p>
+            <h1>{page.title}</h1>
+            <p class="hero-text">{page.description}</p>
+            <div class="hero-actions">
+              <a class="btn-primary" href="/#contact">
+                <span>Konsultasi Gratis</span>
+                <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
+              </a>
+              <a class="btn-secondary" href="/pricing">Lihat Harga</a>
+            </div>
+          </div>
+          <div class="seo-hero-panel">
+            <span>Fokus layanan</span>
+            <ul>
+              {page.heroPoints.map((point) => <li>{point}</li>)}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section light">
+        <div class="container seo-copy-grid">
+          <article>
+            <p class="eyebrow">Untuk Siapa</p>
+            <h2>{page.audience}</h2>
+          </article>
+          <div class="seo-list-panel">
+            <h3>Hasil yang dituju</h3>
+            <ul>
+              {page.outcomes.map((item) => <li>{item}</li>)}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section services">
+        <div class="container section-head split">
+          <div>
+            <p class="eyebrow">Fitur Utama</p>
+            <h2>Struktur website disusun sesuai kebutuhan pengguna dan target pencarian.</h2>
+          </div>
+          <p class="lead">Kami menjaga halaman tetap cepat, responsif, jelas dibaca, dan siap dikembangkan ketika scope bisnis bertambah.</p>
+        </div>
+        <div class="container seo-feature-grid">
+          {page.features.map((feature, index) => (
+            <article class="feature-card">
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <h3>{feature}</h3>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="section light">
+        <div class="container section-head">
+          <p class="eyebrow">Pertanyaan Umum</p>
+          <h2>Hal yang sering ditanyakan sebelum mulai project.</h2>
+        </div>
+        <div class="container seo-faq-grid">
+          {page.faqs.map((faq) => (
+            <article class="faq-item">
+              <h3>{faq.question}</h3>
+              <p>{faq.answer}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="section dark seo-cta">
+        <div class="container footer-top">
+          <h2>Siap digitalisasi bareng Solivate Studio?</h2>
+          <a class="btn-primary" href="/#contact">
+            <span>Mulai Proyek</span>
+            <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <script is:inline type="application/ld+json" set:html={schema}></script>
+  </body>
+</html>
