@@ -48,7 +48,7 @@ export const servicePages: ServicePage[] = [
       "jasa pembuatan website Solivate Studio",
       "digital solution agency Indonesia",
       "jasa digitalisasi UMKM",
-      "software house Indonesia"
+      "software house Indonesia",
     ],
     heroPoints: [
       "Website responsif dan mobile friendly",
@@ -86,8 +86,7 @@ export const servicePages: ServicePage[] = [
   {
     slug: "sme-website",
     eyebrow: "Website UMKM",
-    title:
-      "Jasa Pembuatan Website UMKM Murah & Digitalisasi Usaha Kecil",
+    title: "Jasa Pembuatan Website UMKM Murah & Digitalisasi Usaha Kecil",
     description:
       "Website UMKM untuk profil bisnis, katalog produk online, landing page promosi, dan digitalisasi usaha kecil agar lebih mudah dipercaya pelanggan.",
     keywords: [
@@ -98,7 +97,7 @@ export const servicePages: ServicePage[] = [
       "digitalisasi usaha kecil",
       "digitalisasi UMKM",
       "website untuk UMKM",
-      "berapa biaya bikin website"
+      "berapa biaya bikin website",
     ],
     heroPoints: [
       "Profil bisnis dan katalog produk",
@@ -145,7 +144,7 @@ export const servicePages: ServicePage[] = [
       "pembuatan website perusahaan murah",
       "pembuatan website company profile parfum",
       "jasa pembuatan landing page produk parfum",
-      "cara membuat company profile online"
+      "cara membuat company profile online",
     ],
     heroPoints: [
       "Struktur profil perusahaan",
@@ -183,8 +182,7 @@ export const servicePages: ServicePage[] = [
   {
     slug: "mosque-community-website",
     eyebrow: "Website Masjid & Komunitas",
-    title:
-      "Jasa Pembuatan Website Masjid & Platform Transparansi Kas",
+    title: "Jasa Pembuatan Website Masjid & Platform Transparansi Kas",
     description:
       "Website masjid, komunitas sosial, dan platform transparansi kas masjid untuk jadwal kajian, kegiatan, infak, donasi, dan informasi jamaah.",
     keywords: [
@@ -194,7 +192,7 @@ export const servicePages: ServicePage[] = [
       "platform transparansi kas masjid",
       "digitalisasi komunitas sosial",
       "jasa website masjid transparansi infak",
-      "website masjid modern"
+      "website masjid modern",
     ],
     heroPoints: [
       "Jadwal kajian dan kegiatan",
@@ -232,8 +230,7 @@ export const servicePages: ServicePage[] = [
   {
     slug: "foundation-orphanage-website",
     eyebrow: "Website Yayasan & Panti Asuhan",
-    title:
-      "Jasa Pembuatan Website Panti Asuhan & Yayasan Donasi Online",
+    title: "Jasa Pembuatan Website Panti Asuhan & Yayasan Donasi Online",
     description:
       "Jasa pembuatan website panti asuhan dan yayasan untuk publikasi kegiatan, profil lembaga, platform donasi online, dan transparansi program sosial.",
     keywords: [
@@ -243,7 +240,7 @@ export const servicePages: ServicePage[] = [
       "platform donasi online panti asuhan",
       "website donasi online",
       "jasa website panti asuhan",
-      "jasa website yayasan"
+      "jasa website yayasan",
     ],
     heroPoints: [
       "Profil lembaga and program",
@@ -281,8 +278,7 @@ export const servicePages: ServicePage[] = [
   {
     slug: "event-concert-website",
     eyebrow: "Website Event & Konser",
-    title:
-      "Website Registrasi Event Online & Platform Manajemen Konser",
+    title: "Website Registrasi Event Online & Platform Manajemen Konser",
     description:
       "Platform registrasi online event, website konser, landing page acara, dan pusat informasi event agar peserta mudah daftar dan memahami detail acara.",
     keywords: [
@@ -292,7 +288,7 @@ export const servicePages: ServicePage[] = [
       "jasa website event",
       "website event",
       "jasa pembuatan website konser",
-      "platform registrasi online event"
+      "platform registrasi online event",
     ],
     heroPoints: [
       "Landing page acara",
@@ -331,8 +327,7 @@ export const servicePages: ServicePage[] = [
   {
     slug: "digital-invitation",
     eyebrow: "Undangan Digital",
-    title:
-      "Jasa Undangan Pernikahan Online & Wedding Invitation Digital",
+    title: "Jasa Undangan Pernikahan Online & Wedding Invitation Digital",
     description:
       "Jasa pembuatan undangan digital pernikahan, birthday website, ucapan ulang tahun website personal, RSVP online, dan invitation website custom.",
     keywords: [
@@ -344,7 +339,7 @@ export const servicePages: ServicePage[] = [
       "jasa buat website undangan nikah custom murah",
       "contoh website ucapan ulang tahun kreatif",
       "ucapan ulang tahun website personal",
-      "undangan ulang tahun online"
+      "undangan ulang tahun online",
     ],
     heroPoints: [
       "Wedding invitation",
@@ -391,7 +386,7 @@ export const servicePages: ServicePage[] = [
       "sistem booking online barbershop",
       "website barbershop",
       "jasa booking online",
-      "booking online untuk barbershop"
+      "booking online untuk barbershop",
     ],
     heroPoints: [
       "Booking online",
@@ -437,7 +432,7 @@ export const servicePages: ServicePage[] = [
       "aplikasi reservasi rental mobil",
       "website rental mobil",
       "sistem reservasi online",
-      "aplikasi sewa mobil"
+      "aplikasi sewa mobil",
     ],
     heroPoints: [
       "Katalog armada",
@@ -1035,13 +1030,14 @@ export const targetCities: CityPage[] = [
   { slug: "surabaya", name: "Surabaya", type: "Kota" },
   { slug: "semarang", name: "Semarang", type: "Kota" },
   { slug: "medan", name: "Medan", type: "Kota" },
-  { slug: "makassar", name: "Makassar", type: "Kota" }
+  { slug: "makassar", name: "Makassar", type: "Kota" },
 ];
 
 export const allSeoUrls = [
   "",
   "pricing",
   "project",
+  "hiring",
   "privacy-policy",
   "terms",
   "revision-policy",

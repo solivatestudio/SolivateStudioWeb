@@ -1,0 +1,309 @@
+---
+import "../../index.css";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import { siteUrl } from "../../data/seo-pages";
+
+const canonical = `${siteUrl}/hiring/apply`;
+const pageTitle = "Formulir Pendaftaran Seleksi | Solivate Studio";
+const pageDescription = "Isi formulir pendaftaran untuk bergabung bersama tim Solivate Studio.";
+
+const roleOptions = [
+  "apply.pos.1",
+  "apply.pos.2",
+  "apply.pos.3",
+  "apply.pos.4",
+  "apply.pos.5",
+  "apply.pos.6",
+  "apply.pos.7",
+  "apply.pos.8"
+];
+
+const staticI18n = {
+  "nav.about": { id: "Tentang", en: "About" },
+  "nav.services": { id: "Layanan", en: "Services" },
+  "nav.pricing": { id: "Harga", en: "Pricing" },
+  "nav.work": { id: "Karya", en: "Work" },
+  "nav.process": { id: "Proses", en: "Process" },
+  "nav.contact": { id: "Kontak", en: "Contact" },
+  "nav.cta": { id: "Mulai Proyek", en: "Start Project" },
+  "apply.eyebrow": { id: "Hiring Form", en: "Hiring Form" },
+  "apply.title": { id: "Ceritakan skill dan arah kontribusi kamu.", en: "Tell us your skills and contribution direction." },
+  "apply.lead": {
+    id: "Isi data inti, link portfolio atau CV, dan alasan kamu ingin bergabung. Kami review secara manual agar kandidat yang cocok bisa dihubungi dengan jelas.",
+    en: "Fill in your key details, portfolio or CV link, and reason to join. We review applications manually so suitable candidates can be contacted clearly."
+  },
+  "apply.panel.1.title": { id: "Review manual", en: "Manual review" },
+  "apply.panel.1.desc": { id: "Setiap pendaftaran dibaca oleh tim Solivate.", en: "Every application is reviewed by the Solivate team." },
+  "apply.panel.2.title": { id: "Kontak langsung", en: "Direct contact" },
+  "apply.panel.2.desc": { id: "Kandidat cocok akan dihubungi via WhatsApp atau email.", en: "Suitable candidates will be contacted via WhatsApp or email." },
+  "apply.panel.3.title": { id: "Portfolio penting", en: "Portfolio matters" },
+  "apply.panel.3.desc": { id: "Masukkan link CV, GitHub, Drive, Behance, Notion, atau karya terbaik.", en: "Add a CV, GitHub, Drive, Behance, Notion, or best-work link." },
+  "apply.form_eyebrow": { id: "Data Pendaftaran", en: "Application Details" },
+  "apply.form_title": { id: "Formulir pendaftaran", en: "Application form" },
+  "apply.name": { id: "Nama Lengkap", en: "Full Name" },
+  "apply.name_placeholder": { id: "Contoh: Hammad Al Fatih", en: "e.g., Hammad Al Fatih" },
+  "apply.email": { id: "Alamat Email", en: "Email Address" },
+  "apply.email_placeholder": { id: "nama@email.com", en: "name@email.com" },
+  "apply.whatsapp": { id: "Nomor WhatsApp", en: "WhatsApp Number" },
+  "apply.whatsapp_placeholder": { id: "0812xxxxxxxx", en: "+62 812 xxxx xxxx" },
+  "apply.position": { id: "Posisi yang Dilamar", en: "Position Applied For" },
+  "apply.position_select": { id: "Pilih posisi", en: "Select a role" },
+  "apply.pos.1": { id: "Web Dev Frontend & Backend", en: "Frontend & Backend Web Dev" },
+  "apply.pos.2": { id: "Data Analyst & Finance Analyst", en: "Data Analyst & Finance Analyst" },
+  "apply.pos.3": { id: "Finance", en: "Finance" },
+  "apply.pos.4": { id: "Marketing & SEO/Ads Optimization", en: "Marketing & SEO/Ads Optimization" },
+  "apply.pos.5": { id: "Content Creator Instagram/TikTok", en: "Instagram/TikTok Content Creator" },
+  "apply.pos.6": { id: "Customer Relations", en: "Customer Relations" },
+  "apply.pos.7": { id: "Database Architecture", en: "Database Architecture" },
+  "apply.pos.8": { id: "Deploy Specialist", en: "Deploy Specialist" },
+  "apply.portfolio": { id: "Link Portfolio / CV", en: "Portfolio / CV Link" },
+  "apply.portfolio_placeholder": { id: "https://drive.google.com/... atau https://github.com/...", en: "https://drive.google.com/... or https://github.com/..." },
+  "apply.reason": { id: "Alasan Ingin Bergabung", en: "Why Do You Want to Join?" },
+  "apply.reason_placeholder": {
+    id: "Ceritakan latar belakang singkat, bidang yang kamu minati, skill yang sudah kamu punya, dan kontribusi yang ingin kamu bawa.",
+    en: "Tell us your short background, interest area, current skills, and the contribution you want to bring."
+  },
+  "apply.message": { id: "Pesan Tambahan", en: "Additional Message" },
+  "apply.message_placeholder": { id: "Opsional. Tambahkan catatan yang menurut kamu penting.", en: "Optional. Add any note you think matters." },
+  "apply.submit": { id: "Kirim Pendaftaran", en: "Submit Application" },
+  "apply.sending": { id: "Mengirim...", en: "Sending..." },
+  "apply.error": { id: "Pendaftaran belum terkirim. Cek data kamu atau coba lagi beberapa saat.", en: "Application was not sent. Check your details or try again shortly." },
+  "apply.success_title": { id: "Pendaftaran terkirim.", en: "Application sent." },
+  "apply.success_text": {
+    id: "Terima kasih. Tim Solivate Studio akan meninjau data kamu dan menghubungi kandidat yang cocok lewat WhatsApp atau email.",
+    en: "Thank you. Solivate Studio will review your details and contact suitable candidates through WhatsApp or email."
+  },
+  "apply.back_to_hiring": { id: "Kembali ke Hiring", en: "Back to Hiring" },
+  "footer.title": { id: "Bangun sesuatu yang orang ingat.", en: "Let's build something people remember." },
+  "footer.cta": { id: "Mulai Proyek", en: "Start Project" },
+  "footer.desc": {
+    id: "Digital solution provider untuk UMKM, komunitas sosial, event, celebration, dan sistem custom yang ingin naik kelas secara digital.",
+    en: "Digital solution provider for SMEs, social communities, events, celebrations, and custom systems ready to level up digitally."
+  },
+  "footer.nav": { id: "Navigasi", en: "Navigation" },
+  "footer.connect": { id: "Kontak", en: "Connect" },
+  "footer.copy": { id: `Copyright ${new Date().getFullYear()} Solivate Studio. Semua hak dilindungi.`, en: `Copyright ${new Date().getFullYear()} Solivate Studio. All rights reserved.` },
+  "footer.top": { id: "Kembali ke atas", en: "Back to top" },
+  "floating.wa": { id: "Konsultasi sekarang, gratis!", en: "Free consultation now!" }
+};
+
+const i18nJson = JSON.stringify(staticI18n);
+const initialText = (key: string) => staticI18n[key as keyof typeof staticI18n]?.id ?? key;
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Solivate Studio" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={`${siteUrl}/solivate-logo.webp`} />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+  </head>
+  <body>
+    <Header compact i18n />
+
+    <main class="apply-page">
+      <section class="apply-hero">
+        <div class="hero-bg"></div>
+        <div class="container apply-hero-grid">
+          <div>
+            <p class="eyebrow" data-i18n="apply.eyebrow">{initialText("apply.eyebrow")}</p>
+            <h1 data-i18n="apply.title">{initialText("apply.title")}</h1>
+            <p class="hero-text" data-i18n="apply.lead">{initialText("apply.lead")}</p>
+          </div>
+          <aside class="apply-info-panel" aria-label="Application process">
+            {[1, 2, 3].map((item) => (
+              <article>
+                <span>{String(item).padStart(2, "0")}</span>
+                <h2 data-i18n={`apply.panel.${item}.title`}>{initialText(`apply.panel.${item}.title`)}</h2>
+                <p data-i18n={`apply.panel.${item}.desc`}>{initialText(`apply.panel.${item}.desc`)}</p>
+              </article>
+            ))}
+          </aside>
+        </div>
+      </section>
+
+      <section class="section apply-form-section">
+        <div class="container apply-shell">
+          <div class="apply-form-heading">
+            <p class="eyebrow" data-i18n="apply.form_eyebrow">{initialText("apply.form_eyebrow")}</p>
+            <h2 data-i18n="apply.form_title">{initialText("apply.form_title")}</h2>
+          </div>
+
+          <form class="apply-form-card" data-apply-form>
+            <div class="apply-field full">
+              <label for="name" data-i18n="apply.name">{initialText("apply.name")}</label>
+              <input required type="text" id="name" name="name" autocomplete="name" maxlength="120" placeholder={initialText("apply.name_placeholder")} data-i18n-placeholder="apply.name_placeholder" />
+            </div>
+
+            <div class="apply-field">
+              <label for="email" data-i18n="apply.email">{initialText("apply.email")}</label>
+              <input required type="email" id="email" name="email" autocomplete="email" maxlength="160" placeholder={initialText("apply.email_placeholder")} data-i18n-placeholder="apply.email_placeholder" />
+            </div>
+
+            <div class="apply-field">
+              <label for="whatsapp" data-i18n="apply.whatsapp">{initialText("apply.whatsapp")}</label>
+              <input required type="tel" id="whatsapp" name="whatsapp" maxlength="40" placeholder={initialText("apply.whatsapp_placeholder")} data-i18n-placeholder="apply.whatsapp_placeholder" />
+            </div>
+
+            <div class="apply-field full">
+              <label for="position" data-i18n="apply.position">{initialText("apply.position")}</label>
+              <select required id="position" name="position">
+                <option value="" disabled selected data-i18n="apply.position_select">{initialText("apply.position_select")}</option>
+                {roleOptions.map((key) => (
+                  <option value={initialText(key)} data-i18n={key}>{initialText(key)}</option>
+                ))}
+              </select>
+            </div>
+
+            <div class="apply-field full">
+              <label for="portfolio" data-i18n="apply.portfolio">{initialText("apply.portfolio")}</label>
+              <input required type="url" id="portfolio" name="portfolio" maxlength="300" placeholder={initialText("apply.portfolio_placeholder")} data-i18n-placeholder="apply.portfolio_placeholder" />
+            </div>
+
+            <div class="apply-field full">
+              <label for="reason" data-i18n="apply.reason">{initialText("apply.reason")}</label>
+              <textarea required id="reason" name="reason" maxlength="4000" placeholder={initialText("apply.reason_placeholder")} data-i18n-placeholder="apply.reason_placeholder"></textarea>
+            </div>
+
+            <div class="apply-field full">
+              <label for="message" data-i18n="apply.message">{initialText("apply.message")}</label>
+              <textarea id="message" name="message" maxlength="2000" placeholder={initialText("apply.message_placeholder")} data-i18n-placeholder="apply.message_placeholder"></textarea>
+            </div>
+
+            <p class="apply-form-error full" data-form-error data-i18n="apply.error" hidden>{initialText("apply.error")}</p>
+
+            <button class="btn-primary apply-submit full" type="submit">
+              <span data-i18n="apply.submit">{initialText("apply.submit")}</span>
+              <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
+            </button>
+          </form>
+
+          <div class="apply-success-card" data-success-screen hidden>
+            <span>OK</span>
+            <h2 data-i18n="apply.success_title">{initialText("apply.success_title")}</h2>
+            <p data-i18n="apply.success_text">{initialText("apply.success_text")}</p>
+            <a href="/hiring" class="btn-secondary" data-i18n="apply.back_to_hiring">{initialText("apply.back_to_hiring")}</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <Footer i18n />
+
+    <script is:inline type="application/json" id="apply-i18n-data" set:html={i18nJson}></script>
+    <script is:inline>
+      const translations = JSON.parse(document.getElementById("apply-i18n-data")?.textContent || "{}");
+      const header = document.querySelector("[data-header]");
+      const updateHeader = () => {
+        const y = Math.max(0, window.scrollY);
+        header?.classList.toggle("is-scrolled", y > 24);
+        header?.classList.toggle("is-compact", y > 64);
+      };
+      window.addEventListener("scroll", updateHeader, { passive: true });
+      updateHeader();
+
+      document.querySelectorAll("[data-top]").forEach((trigger) => {
+        trigger.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+      });
+      document.querySelectorAll("[data-home-contact]").forEach((trigger) => {
+        trigger.addEventListener("click", () => {
+          window.location.href = "/#contact";
+        });
+      });
+
+      const setLanguage = (lang, persist = false) => {
+        const activeLang = lang === "en" ? "en" : "id";
+        document.documentElement.lang = activeLang;
+        if (persist) {
+          window.localStorage.setItem("solivate-language", activeLang);
+          window.localStorage.setItem("solivate-language-manual", "true");
+        }
+
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          const next = translations[key]?.[activeLang];
+          if (next) node.textContent = next;
+        });
+
+        document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => {
+          const key = node.getAttribute("data-i18n-placeholder");
+          const next = translations[key]?.[activeLang];
+          if (next) node.setAttribute("placeholder", next);
+        });
+
+        document.querySelectorAll("[data-lang-switch]").forEach((button) => {
+          const active = button.getAttribute("data-lang-switch") === activeLang;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+      };
+
+      document.querySelectorAll("[data-lang-switch]").forEach((button) => {
+        button.addEventListener("click", () => setLanguage(button.getAttribute("data-lang-switch"), true));
+      });
+      const savedLanguage = window.localStorage.getItem("solivate-language-manual") === "true"
+        ? window.localStorage.getItem("solivate-language")
+        : "id";
+      setLanguage(savedLanguage || "id");
+
+      const applyForm = document.querySelector("[data-apply-form]");
+      const successScreen = document.querySelector("[data-success-screen]");
+      const formError = document.querySelector("[data-form-error]");
+
+      applyForm?.addEventListener("submit", (event) => {
+        event.preventDefault();
+        formError?.setAttribute("hidden", "");
+
+        const formData = new FormData(applyForm);
+        const submitButton = applyForm.querySelector('button[type="submit"]');
+        const submitText = submitButton?.querySelector("[data-i18n]");
+        const activeLang = document.documentElement.lang === "en" ? "en" : "id";
+        const originalText = submitText?.textContent || "";
+
+        submitButton?.setAttribute("disabled", "");
+        if (submitText) submitText.textContent = translations["apply.sending"]?.[activeLang] || "Mengirim...";
+
+        fetch("/api/hiring", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name: formData.get("name"),
+            email: formData.get("email"),
+            whatsapp: formData.get("whatsapp"),
+            position: formData.get("position"),
+            portfolio: formData.get("portfolio"),
+            reason: formData.get("reason"),
+            message: formData.get("message")
+          })
+        })
+          .then((response) => {
+            if (!response.ok) throw new Error("Application submit failed");
+            applyForm.setAttribute("hidden", "");
+            successScreen?.removeAttribute("hidden");
+            applyForm.reset();
+            successScreen?.scrollIntoView({ behavior: "smooth", block: "center" });
+          })
+          .catch(() => {
+            formError?.removeAttribute("hidden");
+          })
+          .finally(() => {
+            submitButton?.removeAttribute("disabled");
+            if (submitText) submitText.textContent = originalText;
+          });
+      });
+    </script>
+  </body>
+</html>

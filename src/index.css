@@ -2124,6 +2124,426 @@ h2:hover {
   line-height: 0.98;
 }
 
+.hiring-page,
+.apply-page {
+  overflow-x: clip;
+  background: var(--paper);
+}
+
+.hiring-hero,
+.apply-hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 84% 16%,
+      rgba(215, 255, 63, 0.16),
+      transparent 26%
+    ),
+    radial-gradient(
+      circle at 14% 14%,
+      rgba(0, 180, 216, 0.24),
+      transparent 28%
+    ),
+    linear-gradient(135deg, #041122 0%, #061427 54%, #012b61 100%);
+  color: var(--white);
+}
+
+.hiring-hero::after,
+.apply-hero::after {
+  position: absolute;
+  inset: auto 0 0;
+  height: 42%;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 74px 74px;
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.75), transparent);
+  content: "";
+  pointer-events: none;
+}
+
+.hiring-hero-grid,
+.apply-hero-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.38fr);
+  gap: clamp(34px, 7vw, 92px);
+  align-items: end;
+  min-height: clamp(620px, 76svh, 760px);
+  padding-top: 128px;
+  padding-bottom: 86px;
+}
+
+.hiring-hero-copy,
+.apply-hero-grid > div:first-child {
+  max-width: 920px;
+}
+
+.hiring-hero h1,
+.apply-hero h1 {
+  max-width: 980px;
+  margin: 0;
+  font-size: clamp(3rem, 6.2vw, 6.8rem);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+}
+
+.hiring-status-panel,
+.apply-info-panel {
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--dark-line);
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 18px;
+  box-shadow: 0 34px 110px -54px rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.hiring-status-panel div,
+.apply-info-panel article {
+  display: grid;
+  gap: 8px;
+  min-height: 116px;
+  align-content: space-between;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 20px;
+  transition:
+    transform 320ms var(--ease-expo),
+    background 260ms ease;
+}
+
+.hiring-status-panel div:hover,
+.apply-info-panel article:hover {
+  background: rgba(255, 255, 255, 0.13);
+  transform: translateY(-4px);
+}
+
+.hiring-status-panel strong,
+.apply-info-panel span {
+  color: var(--lime);
+  font-size: clamp(1.55rem, 3.5vw, 3.1rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.hiring-status-panel span,
+.apply-info-panel h2 {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.25;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.apply-info-panel p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.64);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.hiring-roles-section,
+.apply-form-section {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(247, 248, 250, 1)),
+    radial-gradient(circle at 12% 18%, rgba(0, 180, 216, 0.12), transparent 26%);
+}
+
+.hiring-role-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.hiring-role-card,
+.hiring-benefit-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 270px;
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  background: var(--white);
+  padding: 24px;
+  box-shadow: 0 26px 80px -62px rgba(6, 20, 39, 0.7);
+  transition:
+    transform 360ms var(--ease-expo),
+    border-color 260ms ease,
+    box-shadow 360ms ease,
+    background 260ms ease;
+}
+
+.hiring-role-card::after,
+.hiring-benefit-card::after {
+  position: absolute;
+  right: -38px;
+  bottom: -38px;
+  width: 132px;
+  height: 132px;
+  border-radius: 38px;
+  background: rgba(0, 180, 216, 0.08);
+  content: "";
+  transform: rotate(18deg);
+  transition:
+    transform 360ms var(--ease-expo),
+    background 260ms ease;
+}
+
+.hiring-role-card:hover,
+.hiring-benefit-card:hover {
+  border-color: rgba(0, 180, 216, 0.32);
+  box-shadow: 0 38px 96px -62px rgba(2, 62, 138, 0.58);
+  transform: translateY(-8px);
+}
+
+.hiring-role-card:hover::after,
+.hiring-benefit-card:hover::after {
+  background: rgba(215, 255, 63, 0.2);
+  transform: rotate(8deg) scale(1.08);
+}
+
+.hiring-role-card > span,
+.hiring-benefit-card > span {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 34px;
+  border-radius: 16px;
+  background: var(--ink);
+  color: var(--lime);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.hiring-role-card h3,
+.hiring-benefit-card h3 {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 14px;
+  color: var(--ink);
+  font-size: 21px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.hiring-role-card p,
+.hiring-benefit-card p {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.68;
+}
+
+.hiring-benefit-section {
+  background:
+    radial-gradient(circle at 80% 10%, rgba(255, 90, 95, 0.1), transparent 22%),
+    linear-gradient(180deg, var(--white) 0%, #eef4fb 100%);
+}
+
+.hiring-benefit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.hiring-benefit-card {
+  min-height: 300px;
+}
+
+.hiring-cta-section {
+  padding-top: 0;
+  background: var(--paper);
+}
+
+.hiring-cta-band {
+  position: relative;
+  overflow: hidden;
+  border-radius: 34px;
+  background:
+    radial-gradient(
+      circle at 86% 16%,
+      rgba(215, 255, 63, 0.18),
+      transparent 26%
+    ),
+    linear-gradient(135deg, #061427 0%, #023e8a 100%);
+  color: var(--white);
+  padding: clamp(34px, 6vw, 74px);
+}
+
+.hiring-cta-band h2 {
+  max-width: 900px;
+  margin: 0;
+  color: var(--white);
+  font-size: clamp(2.2rem, 5vw, 5rem);
+  line-height: 0.98;
+}
+
+.hiring-cta-band p {
+  max-width: 720px;
+  margin: 20px 0 30px;
+  color: rgba(255, 255, 255, 0.74);
+  line-height: 1.7;
+}
+
+.apply-shell {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.34fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.apply-form-heading {
+  position: sticky;
+  top: 104px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: var(--white);
+  padding: 28px;
+  box-shadow: 0 26px 80px -62px rgba(6, 20, 39, 0.7);
+}
+
+.apply-form-heading h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  line-height: 1.04;
+  overflow-wrap: anywhere;
+}
+
+.apply-form-card,
+.apply-success-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 30px;
+  background: var(--white);
+  padding: clamp(22px, 4vw, 42px);
+  box-shadow: 0 30px 96px -70px rgba(6, 20, 39, 0.7);
+}
+
+.apply-field {
+  display: grid;
+  min-width: 0;
+  gap: 9px;
+}
+
+.apply-field.full,
+.apply-submit.full,
+.apply-form-error.full {
+  grid-column: 1 / -1;
+}
+
+.apply-field label {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.apply-field input,
+.apply-field select,
+.apply-field textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(6, 20, 39, 0.12);
+  border-radius: 16px;
+  background: #f7f8fa;
+  color: var(--ink);
+  padding: 15px 16px;
+  outline: 0;
+  transition:
+    border-color 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms var(--ease-expo);
+}
+
+.apply-field input:focus,
+.apply-field select:focus,
+.apply-field textarea:focus {
+  border-color: rgba(0, 180, 216, 0.72);
+  background: var(--white);
+  box-shadow: 0 0 0 4px rgba(0, 180, 216, 0.12);
+  transform: translateY(-1px);
+}
+
+.apply-field textarea {
+  min-height: 140px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.apply-form-error {
+  margin: 0;
+  border: 1px solid rgba(255, 90, 95, 0.32);
+  border-radius: 16px;
+  background: rgba(255, 90, 95, 0.08);
+  color: #bc2f35;
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.apply-submit {
+  width: 100%;
+  min-height: 54px;
+}
+
+.apply-success-card {
+  display: block;
+  text-align: center;
+}
+
+.apply-success-card > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  margin-bottom: 24px;
+  border-radius: 24px;
+  background: var(--ink);
+  color: var(--lime);
+  font-weight: 900;
+}
+
+.apply-success-card h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(2rem, 4vw, 4rem);
+  line-height: 1;
+}
+
+.apply-success-card p {
+  max-width: 620px;
+  margin: 18px auto 28px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.apply-success-card .btn-secondary {
+  border-color: rgba(6, 20, 39, 0.14);
+  background: var(--white);
+  color: var(--ink);
+}
+
 .process-grid {
   grid-template-columns: repeat(4, 1fr);
 }
@@ -2769,9 +3189,15 @@ h2:hover {
   display: block;
 }
 
-.browser-header .dot.red { background: #ff5f56; }
-.browser-header .dot.yellow { background: #ffbd2e; }
-.browser-header .dot.green { background: #27c93f; }
+.browser-header .dot.red {
+  background: #ff5f56;
+}
+.browser-header .dot.yellow {
+  background: #ffbd2e;
+}
+.browser-header .dot.green {
+  background: #27c93f;
+}
 
 .browser-header .browser-url {
   margin-left: 12px;
@@ -2818,14 +3244,22 @@ h2:hover {
 .highlight-bento-card {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--white), rgba(247, 248, 250, 0.8)) !important;
+  background: linear-gradient(
+    135deg,
+    var(--white),
+    rgba(247, 248, 250, 0.8)
+  ) !important;
   border: 1px solid rgba(2, 62, 138, 0.08) !important;
 }
 
 .highlight-bento-card .card-glow {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 10% 10%, rgba(0, 180, 216, 0.08), transparent 45%);
+  background: radial-gradient(
+    circle at 10% 10%,
+    rgba(0, 180, 216, 0.08),
+    transparent 45%
+  );
   pointer-events: none;
 }
 
@@ -2979,27 +3413,27 @@ h2:hover {
     padding-bottom: 60px;
     min-height: auto;
   }
-  
+
   .portfolio-case-hero .case-meta-eyebrow {
     justify-content: center;
   }
-  
+
   .portfolio-case-hero .case-metadata-bar {
     justify-content: center;
     gap: 20px 32px;
     margin: 28px 0;
   }
-  
+
   .portfolio-case-hero .hero-actions {
     justify-content: center;
   }
-  
+
   .portfolio-case-hero .browser-mockup {
     transform: none !important;
     max-width: 100%;
     margin: 0 auto;
   }
-  
+
   .portfolio-case-hero .browser-viewport {
     height: 250px;
   }
@@ -3011,27 +3445,27 @@ h2:hover {
     grid-template-columns: 1fr;
     gap: 24px;
   }
-  
+
   .narrative-row.reverse .text-col {
     grid-column: auto;
   }
-  
+
   .narrative-row.reverse .visual-col {
     grid-column: auto;
     grid-row: auto;
   }
-  
+
   .narrative-title {
     font-size: 26px;
   }
-  
+
   .decorative-quote-card,
   .decorative-stat-card,
   .decorative-tech-stack {
     padding: 24px;
     border-radius: 20px;
   }
-  
+
   .decorative-stat-card strong {
     font-size: 48px;
   }
@@ -3719,16 +4153,32 @@ h2:hover {
   .pricing-hero-grid,
   .custom-pricing-grid,
   .project-hero-grid,
-  .project-showcase-card {
+  .project-showcase-card,
+  .hiring-hero-grid,
+  .apply-hero-grid,
+  .apply-shell {
     grid-template-columns: 1fr;
   }
 
-  .project-hero-grid {
+  .project-hero-grid,
+  .hiring-hero-grid,
+  .apply-hero-grid {
     align-items: start;
   }
 
-  .project-hero-panel {
+  .project-hero-panel,
+  .hiring-status-panel,
+  .apply-info-panel {
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  .hiring-role-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .apply-form-heading {
+    position: relative;
+    top: auto;
   }
 
   .project-card-media img {
@@ -3943,15 +4393,24 @@ h2:hover {
   .service-workflow-grid,
   .work-grid,
   .process-grid,
-  .project-hero-panel {
+  .project-hero-panel,
+  .hiring-status-panel,
+  .apply-info-panel,
+  .hiring-role-grid,
+  .hiring-benefit-grid,
+  .apply-form-card {
     grid-template-columns: 1fr;
   }
 
-  .project-hero {
+  .project-hero,
+  .hiring-hero,
+  .apply-hero {
     overflow-x: hidden;
   }
 
-  .project-hero-grid {
+  .project-hero-grid,
+  .hiring-hero-grid,
+  .apply-hero-grid {
     gap: 24px;
     width: calc(100% - 28px);
     max-width: calc(100vw - 28px);
@@ -3960,22 +4419,79 @@ h2:hover {
     padding-bottom: 54px;
   }
 
-  .project-hero h1 {
+  .project-hero h1,
+  .hiring-hero h1,
+  .apply-hero h1 {
     font-size: clamp(2.25rem, 10.6vw, 3.35rem);
     line-height: 1.03;
     letter-spacing: -0.045em;
   }
 
-  .project-hero-panel {
+  .project-hero-panel,
+  .hiring-status-panel,
+  .apply-info-panel {
     width: 100%;
     border-radius: 24px;
     padding: 12px;
   }
 
-  .project-hero-panel div {
+  .project-hero-panel div,
+  .hiring-status-panel div,
+  .apply-info-panel article {
     min-height: 96px;
     border-radius: 18px;
     padding: 16px;
+  }
+
+  .hiring-role-card,
+  .hiring-benefit-card {
+    min-height: auto;
+    border-radius: 22px;
+    padding: 22px;
+  }
+
+  .hiring-role-card > span,
+  .hiring-benefit-card > span {
+    margin-bottom: 22px;
+  }
+
+  .hiring-cta-band,
+  .apply-shell {
+    width: calc(100% - 28px);
+    max-width: calc(100vw - 28px);
+  }
+
+  .hiring-cta-band {
+    border-radius: 24px;
+    padding: 28px 22px;
+  }
+
+  .hiring-cta-band h2 {
+    font-size: clamp(2rem, 10vw, 3rem);
+    line-height: 1.04;
+  }
+
+  .apply-form-heading,
+  .apply-form-card,
+  .apply-success-card {
+    width: 100%;
+    min-width: 0;
+    border-radius: 24px;
+    padding: 22px;
+  }
+
+  .apply-field.full,
+  .apply-submit.full,
+  .apply-form-error.full {
+    grid-column: auto;
+  }
+
+  .apply-field input,
+  .apply-field select,
+  .apply-field textarea {
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 14px;
   }
 
   .project-showcase-section .section-head.split {
