@@ -11,8 +11,8 @@ type LocaleCopy = {
 
 const i18n: Record<string, LocaleCopy> = {
   "meta.description": {
-    id: "Solivate Studio adalah digital solution agency Indonesia di Bekasi yang menyediakan jasa pembuatan website Solivate Studio, digitalisasi UMKM, company profile, komunitas, event, dan sistem custom.",
-    en: "Solivate Studio is a digital solution agency in Indonesia and Bekasi providing website development, SME digitalization, company profiles, communities, events, and custom systems."
+    id: "Solivate Studio — jasa pembuatan website UMKM, company profile, event, & sistem custom di Indonesia.",
+    en: "Solivate Studio — custom website development for SMEs, company profiles, events, & custom systems in Indonesia."
   },
   "nav.about": { id: "Tentang", en: "About" },
   "nav.services": { id: "Layanan", en: "Services" },
@@ -22,10 +22,10 @@ const i18n: Record<string, LocaleCopy> = {
   "nav.contact": { id: "Kontak", en: "Contact" },
   "nav.cta": { id: "Mulai Proyek", en: "Start Project" },
   "hero.trust": { id: "Inovate, Integrate, Elevate", en: "Inovate, Integrate, Elevate" },
-  "hero.title": { id: "Bawa ide Anda naik kelas secara digital.", en: "Elevate your ideas digitally." },
+  "hero.title": { id: "Jasa Pembuatan Website & Digital Agency", en: "Web Development & Digital Agency" },
   "hero.text": {
-    id: "Solivate Studio membantu UMKM, komunitas sosial, event, dan celebration naik kelas melalui website, platform digital, dan sistem interaktif yang personal, fungsional, dan siap digunakan.",
-    en: "Solivate Studio helps SMEs, social communities, events, and celebrations level up through personal, functional, and launch-ready websites, digital platforms, and interactive systems."
+    id: "Bawa ide Anda naik kelas secara digital. Solivate Studio membantu UMKM, komunitas sosial, event, dan celebration melalui website, platform digital, dan sistem kustom yang fungsional.",
+    en: "Elevate your ideas digitally. Solivate Studio helps SMEs, social communities, events, and celebrations level up through functional, launch-ready websites and custom systems."
   },
   "hero.primary": { id: "Mulai Proyek", en: "Start Project" },
   "hero.secondary": { id: "Lihat Portofolio", en: "View Portfolio" },
@@ -43,8 +43,8 @@ const i18n: Record<string, LocaleCopy> = {
   "about.eyebrow": { id: "Tentang Solivate Studio", en: "About Solivate Studio" },
   "about.title": { id: "Solution to Elevate: bukan hanya menyelesaikan masalah, tapi membawa Anda naik kelas.", en: "Solution to Elevate: not only solving problems, but helping you level up." },
   "about.lead": {
-    id: "Solivate Studio adalah agensi layanan digital yang merancang, membangun, dan mengembangkan platform digital untuk UMKM, komunitas, event, konser, pernikahan, ulang tahun, hingga kebutuhan sistem bisnis yang lebih kompleks.",
-    en: "Solivate Studio is a digital service agency that designs, builds, and develops digital platforms for SMEs, communities, events, concerts, weddings, birthdays, and more complex business systems."
+    id: "Solivate Studio adalah digital solution agency Indonesia di Bekasi yang merancang, membangun, dan mengembangkan platform digital untuk UMKM, komunitas, event, konser, pernikahan, ulang tahun, hingga kebutuhan sistem bisnis yang lebih kompleks.",
+    en: "Solivate Studio is a digital solution agency in Indonesia and Bekasi that designs, builds, and develops digital platforms for SMEs, communities, events, concerts, weddings, birthdays, and more complex business systems."
   },
   "feature.1.title": { id: "Visi digitalisasi", en: "Digitalization vision" },
   "feature.1.desc": { id: "Membantu UMKM dan lingkungan masyarakat yang belum terdigitalisasi agar lebih terjangkau, terintegrasi, dan siap bertransformasi secara digital.", en: "Helping SMEs and communities that are not yet digitalized become more accessible, integrated, and ready for digital transformation." },
@@ -257,7 +257,7 @@ const serviceCategoryI18n = Object.fromEntries(
 const i18nJson = JSON.stringify({ ...i18n, ...serviceCategoryI18n });
 const siteUrl = "https://solivate.com";
 const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
-const pageTitle = "Solivate Studio | Jasa Pembuatan Website UMKM & Digital Solution Agency Indonesia";
+const pageTitle = "Jasa Website UMKM & Digital Agency | Solivate Studio";
 const pageDescription = tx("meta.description");
 const organizationSchema = JSON.stringify({
   "@context": "https://schema.org",
@@ -336,6 +336,7 @@ const organizationSchema = JSON.stringify({
     <meta name="twitter:description" content={pageDescription} />
     <meta name="twitter:image" content={`${siteUrl}/solivate-logo.webp`} />
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -454,7 +455,7 @@ const organizationSchema = JSON.stringify({
           {[1, 2, 3].map((num) => (
             <article class="feature-card">
               <span>{String(num).padStart(2, "0")}</span>
-              <h3 data-i18n={`feature.${num}.title`}>{tx(`feature.${num}.title`)}</h3>
+              <div class="card-title" data-i18n={`feature.${num}.title`}>{tx(`feature.${num}.title`)}</div>
               <p data-i18n={`feature.${num}.desc`}>{tx(`feature.${num}.desc`)}</p>
             </article>
           ))}
@@ -470,7 +471,7 @@ const organizationSchema = JSON.stringify({
           {services.map((service) => (
             <article class="service-card">
               <div class="icon-box">{service.icon}</div>
-              <h3 data-i18n={service.titleKey}>{tx(service.titleKey)}</h3>
+              <p class="card-heading" data-i18n={service.titleKey}>{tx(service.titleKey)}</p>
               <p data-i18n={service.descKey}>{tx(service.descKey)}</p>
               <a href={service.href}><span data-i18n="service.link">{tx("service.link")}</span> <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg></a>
             </article>
@@ -501,7 +502,7 @@ const organizationSchema = JSON.stringify({
           {pricingPreview.map((plan, index) => (
             <article class={`pricing-card ${index === 1 ? "featured" : ""}`}>
               <span class="pricing-label" data-i18n={plan.labelKey}>{tx(plan.labelKey)}</span>
-              <h3 data-i18n={plan.titleKey}>{tx(plan.titleKey)}</h3>
+              <div class="card-title" data-i18n={plan.titleKey}>{tx(plan.titleKey)}</div>
               <strong data-i18n={plan.priceKey}>{tx(plan.priceKey)}</strong>
               <p data-i18n={plan.descKey}>{tx(plan.descKey)}</p>
               <ul>
@@ -532,7 +533,7 @@ const organizationSchema = JSON.stringify({
               <img src={item.img} alt={item.title} width={item.width} height={item.height} loading="lazy" decoding="async" />
               <div>
                 <span data-i18n={item.typeKey}>{tx(item.typeKey)}</span>
-                <h3>{item.title}</h3>
+                <p class="card-heading">{item.title}</p>
               </div>
             </a>
           ))}
@@ -551,7 +552,7 @@ const organizationSchema = JSON.stringify({
           {process.map(([num, titleKey, descKey]) => (
             <article>
               <span>{num}</span>
-              <h3 data-i18n={titleKey}>{tx(titleKey)}</h3>
+              <div class="card-title" data-i18n={titleKey}>{tx(titleKey)}</div>
               <p data-i18n={descKey}>{tx(descKey)}</p>
             </article>
           ))}
@@ -608,7 +609,7 @@ const organizationSchema = JSON.stringify({
             </form>
             <div class="success-state" data-success hidden>
               <div class="success-icon">OK</div>
-              <h3 data-i18n="success.title">{tx("success.title")}</h3>
+              <div class="card-title" data-i18n="success.title">{tx("success.title")}</div>
               <p data-i18n="success.text">{tx("success.text")}</p>
               <button class="btn-secondary" type="button" data-reset-form data-i18n="success.reset">{tx("success.reset")}</button>
             </div>
