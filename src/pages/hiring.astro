@@ -1,0 +1,460 @@
+---
+import "../index.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { siteUrl } from "../data/seo-pages";
+
+const canonical = `${siteUrl}/hiring`;
+const pageTitle = "Open Recruitment | Solivate Studio";
+const pageDescription = "Gabung bersama Solivate Studio dan bertumbuh bareng tim solid untuk membangun project digital berkualitas.";
+
+const staticI18n = {
+  "nav.about": { id: "Tentang", en: "About" },
+  "nav.services": { id: "Layanan", en: "Services" },
+  "nav.pricing": { id: "Harga", en: "Pricing" },
+  "nav.work": { id: "Karya", en: "Work" },
+  "nav.process": { id: "Proses", en: "Process" },
+  "nav.contact": { id: "Kontak", en: "Contact" },
+  "nav.cta": { id: "Mulai Proyek", en: "Start Project" },
+  
+  // Hero
+  "hiring.eyebrow": { id: "Open Recruitment", en: "Open Recruitment" },
+  "hiring.title": { id: "Bergabung & Bertumbuh Bersama Solivate", en: "Join & Grow Together with Solivate" },
+  "hiring.lead": { 
+    id: "Solivate Studio lagi cari talenta-talenta baru buat gabung dan bertumbuh bareng! Kalau lo punya skill, passion, dan semangat buat berkarya, ini saatnya gabung tim kami.", 
+    en: "Solivate Studio is looking for new talents to join and grow together! If you have the skills, passion, and spirit to create, it's time to join our team." 
+  },
+
+  // Positions
+  "hiring.positions_title": { id: "Posisi yang Dibuka", en: "Open Positions" },
+  "hiring.positions_subtitle": { id: "Temukan peran yang sesuai dengan minat dan keahlianmu.", en: "Find a role that matches your interests and skills." },
+  
+  "hiring.pos.1.title": { id: "Web Dev (Frontend & Backend)", en: "Web Dev (Frontend & Backend)" },
+  "hiring.pos.1.desc": { id: "Membangun antarmuka web yang responsif atau mengelola logika server dan database.", en: "Building responsive web interfaces or managing server logic and databases." },
+  
+  "hiring.pos.2.title": { id: "Data Analyst & Finance Analyst", en: "Data Analyst & Finance Analyst" },
+  "hiring.pos.2.desc": { id: "Menganalisis data performa bisnis dan membantu perencanaan finansial proyek.", en: "Analyzing business performance data and assisting in project financial planning." },
+  
+  "hiring.pos.3.title": { id: "Finance", en: "Finance" },
+  "hiring.pos.3.desc": { id: "Mengelola administrasi keuangan, arus kas, dan invoicing klien.", en: "Managing financial administration, cash flows, and client invoicing." },
+  
+  "hiring.pos.4.title": { id: "Marketing & SEO/Ads Optimization", en: "Marketing & SEO/Ads Optimization" },
+  "hiring.pos.4.desc": { id: "Merancang strategi pemasaran, optimasi mesin pencari, dan kampanye iklan digital.", en: "Designing marketing strategies, search engine optimization, and digital ad campaigns." },
+  
+  "hiring.pos.5.title": { id: "Content Creator (Instagram/TikTok)", en: "Content Creator (Instagram/TikTok)" },
+  "hiring.pos.5.desc": { id: "Membuat konten visual dan video kreatif untuk meningkatkan engagement di media sosial.", en: "Creating creative visual and video content to increase engagement on social media." },
+  
+  "hiring.pos.6.title": { id: "Customer Relations", en: "Customer Relations" },
+  "hiring.pos.6.desc": { id: "Menjembatani komunikasi dengan klien dan memastikan kebutuhan mereka terpenuhi dengan baik.", en: "Bridging communication with clients and ensuring their needs are well met." },
+  
+  "hiring.pos.7.title": { id: "Database Architecture", en: "Database Architecture" },
+  "hiring.pos.7.desc": { id: "Merancang struktur database yang efisien, aman, dan mudah diskalakan.", en: "Designing database structures that are efficient, secure, and scalable." },
+  
+  "hiring.pos.8.title": { id: "Deploy Specialist", en: "Deploy Specialist" },
+  "hiring.pos.8.desc": { id: "Mengelola deployment aplikasi, konfigurasi server, dan alur CI/CD otomatis.", en: "Managing application deployment, server configurations, and automated CI/CD pipelines." },
+
+  // Why
+  "hiring.why_title": { id: "Kenapa Join Solivate Studio?", en: "Why Join Solivate Studio?" },
+  "hiring.why.1.title": { id: "Belajar & Berkembang", en: "Learn & Grow" },
+  "hiring.why.1.desc": { id: "Bertumbuh bersama tim yang solid dan suportif untuk meningkatkan skill-mu secara langsung.", en: "Grow together with a solid and supportive team to elevate your skills directly." },
+  "hiring.why.2.title": { id: "Project Nyata, Pengalaman Nyata", en: "Real Projects, Real Experience" },
+  "hiring.why.2.desc": { id: "Dapatkan portofolio nyata dengan menangani project aktif dari berbagai industri klien.", en: "Get a real-world portfolio by handling active projects from various client industries." },
+  "hiring.why.3.title": { id: "Lingkungan Kerja Suportif & Fleksibel", en: "Supportive & Flexible Environment" },
+  "hiring.why.3.desc": { id: "Nikmati lingkungan kerja yang adaptif, menghargai kreativitas, dan fleksibel.", en: "Enjoy a work environment that is adaptive, values creativity, and is flexible." },
+
+  // Who & CTA
+  "hiring.who_title": { id: "Siapa Aja Boleh Daftar!", en: "Anyone Can Apply!" },
+  "hiring.who_desc": { 
+    id: "Punya minat di salah satu bidang di atas? Gak perlu expert, yang penting niat belajar dan kontribusi nyata!", 
+    en: "Interested in one of the fields above? No need to be an expert, what matters is your willingness to learn and make a real contribution!" 
+  },
+  "hiring.cta_btn": { id: "Isi Formulir Pendaftaran Sekarang", en: "Fill the Recruitment Form Now" },
+
+  // Footer & Misc
+  "footer.title": { id: "Bangun sesuatu yang orang ingat.", en: "Let's build something people remember." },
+  "footer.cta": { id: "Mulai Proyek", en: "Start Project" },
+  "footer.desc": {
+    id: "Digital solution provider untuk UMKM, komunitas sosial, event, celebration, dan sistem custom yang ingin naik kelas secara digital.",
+    en: "Digital solution provider for SMEs, social communities, events, celebrations, and custom systems ready to level up digitally."
+  },
+  "footer.nav": { id: "Navigasi", en: "Navigation" },
+  "footer.connect": { id: "Kontak", en: "Connect" },
+  "footer.legal": { id: "Kebijakan", en: "Policies" },
+  "footer.privacy": { id: "Kebijakan Privasi", en: "Privacy Policy" },
+  "footer.terms": { id: "Syarat & Ketentuan", en: "Terms & Conditions" },
+  "footer.revision": { id: "Kebijakan Revisi", en: "Revision Policy" },
+  "footer.copy": { id: `Copyright ${new Date().getFullYear()} Solivate Studio. Semua hak dilindungi.`, en: `Copyright ${new Date().getFullYear()} Solivate Studio. All rights reserved.` },
+  "footer.top": { id: "Kembali ke atas", en: "Back to top" },
+  "floating.wa": { id: "Konsultasi sekarang, gratis!", en: "Free consultation now!" }
+};
+
+const i18nJson = JSON.stringify(staticI18n);
+const initialText = (key: string) => staticI18n[key as keyof typeof staticI18n]?.id ?? key;
+const formUrl = "https://s.id/KineticStudio-Hiring";
+
+const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:image" content={`${siteUrl}/solivate-logo.webp`} />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    
+    <style>
+      .hiring-hero {
+        padding-top: clamp(120px, 15vw, 180px);
+        padding-bottom: clamp(60px, 10vw, 100px);
+        text-align: center;
+      }
+      .hiring-hero .eyebrow {
+        background: linear-gradient(90deg, var(--cyan), var(--lime));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        font-size: 14px;
+        margin-bottom: 16px;
+        display: inline-block;
+      }
+      .hiring-hero h1 {
+        font-size: clamp(2.8rem, 6vw, 5.6rem);
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+        margin-bottom: 24px;
+        color: var(--white);
+      }
+      .hiring-hero p {
+        max-width: 680px;
+        margin: 0 auto;
+        font-size: clamp(1.6rem, 2vw, 1.8rem);
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1.6;
+      }
+
+      .positions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+        margin-top: 48px;
+      }
+      .position-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 20px;
+        padding: 28px;
+        transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+      }
+      .position-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at top left, rgba(0, 180, 216, 0.15), transparent 60%);
+        opacity: 0;
+        transition: opacity 300ms ease;
+        pointer-events: none;
+      }
+      .position-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(0, 180, 216, 0.3);
+        background: rgba(255, 255, 255, 0.05);
+        box-shadow: 0 12px 30px -10px rgba(0, 180, 216, 0.2);
+      }
+      .position-card:hover::before {
+        opacity: 1;
+      }
+      .position-icon {
+        font-size: 32px;
+        margin-bottom: 20px;
+        display: inline-block;
+      }
+      .position-card h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--white);
+        margin-bottom: 12px;
+      }
+      .position-card p {
+        font-size: 14px;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.6);
+        margin: 0;
+      }
+
+      .why-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 32px;
+        margin-top: 48px;
+      }
+      .why-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        border-radius: 24px;
+        padding: 36px;
+        text-align: center;
+        transition: all 300ms ease;
+      }
+      .why-card:hover {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(215, 255, 63, 0.25);
+      }
+      .why-badge {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: rgba(215, 255, 63, 0.1);
+        color: var(--lime);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin: 0 auto 24px;
+        font-weight: 700;
+      }
+      .why-card h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--white);
+        margin-bottom: 16px;
+      }
+      .why-card p {
+        font-size: 14px;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.6);
+        margin: 0;
+      }
+
+      .cta-box {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 32px;
+        padding: 60px 40px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        margin-top: 60px;
+      }
+      .cta-box .glow {
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(0, 180, 216, 0.08) 0%, transparent 60%);
+        pointer-events: none;
+      }
+      .cta-box h2 {
+        font-size: clamp(2.4rem, 4vw, 3.6rem);
+        font-weight: 800;
+        color: var(--white);
+        margin-bottom: 16px;
+      }
+      .cta-box p {
+        max-width: 580px;
+        margin: 0 auto 36px;
+        font-size: 16px;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.7);
+      }
+      .cta-box .btn-primary {
+        padding: 16px 36px;
+        font-size: 16px;
+      }
+
+      @media (max-width: 991px) {
+        .why-grid {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+      }
+      @media (max-width: 768px) {
+        .hiring-hero {
+          padding-top: 100px;
+        }
+        .cta-box {
+          padding: 40px 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <Header compact i18n />
+
+    <main class="seo-page">
+      <section class="hiring-hero">
+        <div class="hero-bg"></div>
+        <div class="container">
+          <span class="eyebrow" data-i18n="hiring.eyebrow">{initialText("hiring.eyebrow")}</span>
+          <h1 data-i18n="hiring.title">{initialText("hiring.title")}</h1>
+          <p data-i18n="hiring.lead">{initialText("hiring.lead")}</p>
+        </div>
+      </section>
+
+      <section class="section light">
+        <div class="container">
+          <div class="section-head center">
+            <h2 data-i18n="hiring.positions_title">{initialText("hiring.positions_title")}</h2>
+            <p class="lead" data-i18n="hiring.positions_subtitle">{initialText("hiring.positions_subtitle")}</p>
+          </div>
+          
+          <div class="positions-grid">
+            <article class="position-card">
+              <span class="position-icon" aria-hidden="true">🖥️</span>
+              <h3 data-i18n="hiring.pos.1.title">{initialText("hiring.pos.1.title")}</h3>
+              <p data-i18n="hiring.pos.1.desc">{initialText("hiring.pos.1.desc")}</p>
+            </article>
+
+            <article class="position-card">
+              <span class="position-icon" aria-hidden="true">📊</span>
+              <h3 data-i18n="hiring.pos.2.title">{initialText("hiring.pos.2.title")}</h3>
+              <p data-i18n="hiring.pos.2.desc">{initialText("hiring.pos.2.desc")}</p>
+            </article>
+
+            <article class="position-card">
+              <span class="position-icon" aria-hidden="true">💰</span>
+              <h3 data-i18n="hiring.pos.3.title">{initialText("hiring.pos.3.title")}</h3>
+              <p data-i18n="hiring.pos.3.desc">{initialText("hiring.pos.3.desc")}</p>
+            </article>
+
+            <article class="position-card">
+              <span class="position-icon" aria-hidden="true">🎯</span>
+              <h3 data-i18n="hiring.pos.4.title">{initialText("hiring.pos.4.title")}</h3>
+              <p data-i18n="hiring.pos.4.desc">{initialText("hiring.pos.4.desc")}</p>
+            </article>
+
+            <article class="position-card">
+              <span class="position-icon" aria-hidden="true">🎬</span>
+              <h3 data-i18n="hiring.pos.5.title">{initialText("hiring.pos.5.title")}</h3>
+              <p data-i18n="hiring.pos.5.desc">{initialText("hiring.pos.5.desc")}</p>
+            </article>
+
+            <article class="position-card">
+              <span class="position-icon" aria-hidden="true">🤝</span>
+              <h3 data-i18n="hiring.pos.6.title">{initialText("hiring.pos.6.title")}</h3>
+              <p data-i18n="hiring.pos.6.desc">{initialText("hiring.pos.6.desc")}</p>
+            </article>
+
+            <article class="position-card">
+              <span class="position-icon" aria-hidden="true">🗄️</span>
+              <h3 data-i18n="hiring.pos.7.title">{initialText("hiring.pos.7.title")}</h3>
+              <p data-i18n="hiring.pos.7.desc">{initialText("hiring.pos.7.desc")}</p>
+            </article>
+
+            <article class="position-card">
+              <span class="position-icon" aria-hidden="true">🚀</span>
+              <h3 data-i18n="hiring.pos.8.title">{initialText("hiring.pos.8.title")}</h3>
+              <p data-i18n="hiring.pos.8.desc">{initialText("hiring.pos.8.desc")}</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-head center">
+            <h2 data-i18n="hiring.why_title">{initialText("hiring.why_title")}</h2>
+          </div>
+
+          <div class="why-grid">
+            <div class="why-card">
+              <div class="why-badge">✓</div>
+              <h3 data-i18n="hiring.why.1.title">{initialText("hiring.why.1.title")}</h3>
+              <p data-i18n="hiring.why.1.desc">{initialText("hiring.why.1.desc")}</p>
+            </div>
+
+            <div class="why-card">
+              <div class="why-badge">✓</div>
+              <h3 data-i18n="hiring.why.2.title">{initialText("hiring.why.2.title")}</h3>
+              <p data-i18n="hiring.why.2.desc">{initialText("hiring.why.2.desc")}</p>
+            </div>
+
+            <div class="why-card">
+              <div class="why-badge">✓</div>
+              <h3 data-i18n="hiring.why.3.title">{initialText("hiring.why.3.title")}</h3>
+              <p data-i18n="hiring.why.3.desc">{initialText("hiring.why.3.desc")}</p>
+            </div>
+          </div>
+
+          <div class="cta-box">
+            <div class="glow"></div>
+            <h2 data-i18n="hiring.who_title">{initialText("hiring.who_title")}</h2>
+            <p data-i18n="hiring.who_desc">{initialText("hiring.who_desc")}</p>
+            <a href={formUrl} target="_blank" rel="noreferrer" class="btn-primary">
+              <span data-i18n="hiring.cta_btn">{initialText("hiring.cta_btn")}</span>
+              <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <Footer i18n />
+
+    <script is:inline type="application/json" id="hiring-i18n-data" set:html={i18nJson}></script>
+    <script is:inline>
+      const translations = JSON.parse(document.getElementById("hiring-i18n-data")?.textContent || "{}");
+      const header = document.querySelector("[data-header]");
+      const updateHeader = () => {
+        const y = Math.max(0, window.scrollY);
+        header?.classList.toggle("is-scrolled", y > 24);
+        header?.classList.toggle("is-compact", y > 64);
+      };
+      window.addEventListener("scroll", updateHeader, { passive: true });
+      updateHeader();
+
+      const setLanguage = (lang, persist = false) => {
+        const activeLang = lang === "en" ? "en" : "id";
+        document.documentElement.lang = activeLang;
+        if (persist) {
+          window.localStorage.setItem("solivate-language", activeLang);
+          window.localStorage.setItem("solivate-language-manual", "true");
+        }
+
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          const next = translations[key]?.[activeLang];
+          if (next) node.textContent = next;
+        });
+
+        document.querySelectorAll("[data-lang-switch]").forEach((button) => {
+          const active = button.getAttribute("data-lang-switch") === activeLang;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+      };
+
+      document.querySelectorAll("[data-lang-switch]").forEach((button) => {
+        button.addEventListener("click", () => setLanguage(button.getAttribute("data-lang-switch"), true));
+      });
+      const savedLanguage = window.localStorage.getItem("solivate-language-manual") === "true"
+        ? window.localStorage.getItem("solivate-language")
+        : "id";
+      setLanguage(savedLanguage || "id");
+
+      document.querySelectorAll("[data-top]").forEach((trigger) => {
+        trigger.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+      });
+    </script>
+  </body>
+</html>
