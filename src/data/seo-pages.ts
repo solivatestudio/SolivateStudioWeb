@@ -28,7 +28,7 @@ export type PortfolioPageTranslation = Omit<
   "slug" | "image" | "url" | "keywords"
 >;
 
-export const siteUrl = "https://solivatestudio.com";
+export const siteUrl = "https://solivate.com";
 
 export const servicePages: ServicePage[] = [
   {

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://solivatestudio.com/sitemap.xml
+Sitemap: https://solivate.com/sitemap.xml
