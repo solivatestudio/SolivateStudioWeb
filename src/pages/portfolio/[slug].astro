@@ -126,7 +126,7 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
     <Header compact i18n />
 
     <main class="seo-page">
-      <section class="seo-hero portfolio-case-hero">
+      <section class="seo-hero portfolio-case-hero" style={`background-image: linear-gradient(180deg, rgba(6, 20, 39, 0.78) 0%, rgba(6, 20, 39, 0.96) 100%), url(${page.image});`}>
         <div class="hero-bg"></div>
         <div class="container seo-hero-grid">
           <div>
@@ -140,9 +140,6 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
               </a>
               <a class="btn-secondary" href={`/layanan/${primaryRelatedService}`} data-i18n="case.related">Layanan Terkait</a>
             </div>
-          </div>
-          <div class="case-preview-card">
-            <img src={page.image} alt={page.title} width={page.width} height={page.height} loading="eager" />
           </div>
         </div>
       </section>

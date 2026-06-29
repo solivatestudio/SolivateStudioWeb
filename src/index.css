@@ -2660,6 +2660,21 @@ h2:hover {
   color: var(--white);
 }
 
+.portfolio-case-hero {
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+}
+
+.portfolio-case-hero .hero-bg {
+  opacity: 0.35;
+}
+
+.portfolio-case-hero .seo-hero-grid {
+  grid-template-columns: 1fr;
+  max-width: 900px;
+}
+
 .seo-hero-grid {
   position: relative;
   z-index: 1;
