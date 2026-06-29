@@ -19,6 +19,16 @@ const relatedServiceSlugs: Record<string, string[]> = {
   "cutbae-barbershop": ["barbershop-website", "website-development"],
   "makdian-bakery": ["sme-website", "company-profile-website"]
 };
+const clientNames: Record<string, string> = {
+  "masjid-raya-puri-telukjambe": "Masjid Raya Puri Telukjambe",
+  "cutbae-barbershop": "Cutbae Barbershop",
+  "makdian-bakery": "Makdian Bakery"
+};
+const serviceNames: Record<string, string> = {
+  "masjid-raya-puri-telukjambe": "Website Masjid & Komunitas",
+  "cutbae-barbershop": "Website Barbershop",
+  "makdian-bakery": "Website UMKM"
+};
 const relatedServices = servicePages.filter((item) => (relatedServiceSlugs[page.slug] ?? ["website-development"]).includes(item.slug));
 const primaryRelatedService = relatedServices[0]?.slug ?? "website-development";
 const staticI18n = {
@@ -126,13 +136,33 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
     <Header compact i18n />
 
     <main class="seo-page">
-      <section class="seo-hero portfolio-case-hero" style={`background-image: linear-gradient(180deg, rgba(6, 20, 39, 0.78) 0%, rgba(6, 20, 39, 0.96) 100%), url(${page.image});`}>
+      <section class="seo-hero portfolio-case-hero">
         <div class="hero-bg"></div>
         <div class="container seo-hero-grid">
-          <div>
-            <p class="eyebrow" data-i18n="case.eyebrow">Studi Kasus</p>
-            <h1 data-i18n="page.title">{page.title}</h1>
+          <div class="hero-content-left">
+            <div class="case-meta-eyebrow">
+              <span class="eyebrow" data-i18n="case.eyebrow">Studi Kasus</span>
+              <span class="meta-dot"></span>
+              <span class="meta-service">{serviceNames[page.slug] ?? "Web Development"}</span>
+            </div>
+            <h1 class="case-title" data-i18n="page.title">{page.title}</h1>
             <p class="hero-text" data-i18n="page.description">{page.description}</p>
+            
+            <div class="case-metadata-bar">
+              <div class="meta-item">
+                <small>Klien</small>
+                <strong>{clientNames[page.slug] ?? "Partner"}</strong>
+              </div>
+              <div class="meta-item">
+                <small>Tahun</small>
+                <strong>2026</strong>
+              </div>
+              <div class="meta-item">
+                <small>Kategori</small>
+                <strong>Tailored System</strong>
+              </div>
+            </div>
+
             <div class="hero-actions">
               <a class="btn-primary" href={page.url} target="_blank" rel="noreferrer">
                 <span data-i18n="case.live">Lihat Website Live</span>
@@ -141,27 +171,74 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
               <a class="btn-secondary" href={`/layanan/${primaryRelatedService}`} data-i18n="case.related">Layanan Terkait</a>
             </div>
           </div>
+          
+          <div class="case-mockup-wrapper">
+            <div class="browser-mockup">
+              <div class="browser-header">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+                <div class="browser-url">https://solivate.com/{page.slug}</div>
+              </div>
+              <div class="browser-viewport">
+                <img src={page.image} alt={page.title} width={page.width} height={page.height} loading="eager" />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       <section class="section light">
-        <div class="container seo-feature-grid">
-          {page.highlights.map((item, index) => (
-            <article class="feature-card">
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <h3 data-i18n={`highlight.${index}`}>{item}</h3>
-            </article>
-          ))}
+        <div class="container">
+          <div class="section-head center">
+            <p class="eyebrow" data-i18n="case.eyebrow">Sorotan Utama</p>
+            <h2>Fitur & Solusi Kunci Proyek</h2>
+          </div>
+          <div class="seo-feature-grid">
+            {page.highlights.map((item, index) => (
+              <article class="feature-card highlight-bento-card">
+                <div class="card-glow"></div>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <h3 data-i18n={`highlight.${index}`}>{item}</h3>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section class="section services">
-        <div class="container case-study-grid">
+      <section class="section narrative-story-section">
+        <div class="container narrative-container">
           {page.sections.map((section, index) => (
-            <article>
-              <p class="eyebrow" data-i18n={`section.${index}.title`}>{section.title}</p>
-              <p data-i18n={`section.${index}.body`}>{section.body}</p>
-            </article>
+            <div class={`narrative-row ${index % 2 === 1 ? "reverse" : ""}`}>
+              <div class="narrative-col text-col">
+                <span class="narrative-num">0{index + 1} / {section.title}</span>
+                <h2 class="narrative-title">{section.title === "Tantangan" ? "Apa Masalahnya?" : section.title === "Solusi" ? "Bagaimana Kami Membantu?" : "Apa Hasil Akhirnya?"}</h2>
+                <p class="narrative-body" data-i18n={`section.${index}.body`}>{section.body}</p>
+              </div>
+              <div class="narrative-col visual-col">
+                {index === 0 && (
+                  <div class="decorative-quote-card">
+                    <span class="quote-icon">“</span>
+                    <p>Membantu mitra bertransformasi secara digital dengan alur informasi yang rapi, transparan, dan terpercaya.</p>
+                  </div>
+                )}
+                {index === 1 && (
+                  <div class="decorative-tech-stack">
+                    <div class="tech-tag">Astro SSG</div>
+                    <div class="tech-tag">TypeScript</div>
+                    <div class="tech-tag">Custom CSS</div>
+                    <div class="tech-tag">SEO Schema</div>
+                    <div class="tech-tag">Responsive UI</div>
+                  </div>
+                )}
+                {index === 2 && (
+                  <div class="decorative-stat-card">
+                    <strong>100%</strong>
+                    <p>Kredibilitas Digital Terjamin & Siap Rilis</p>
+                  </div>
+                )}
+              </div>
+            </div>
           ))}
         </div>
       </section>
@@ -169,13 +246,13 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
       <section class="section light">
         <div class="container section-head">
           <p class="eyebrow" data-i18n="related.eyebrow">Layanan Terkait</p>
-          <h2 data-i18n="related.title">Halaman ini terhubung dengan keyword jasa website masjid dan digitalisasi komunitas.</h2>
+          <h2 data-i18n="related.title">Halaman ini terhubung dengan layanan website yang bisa disesuaikan dengan kebutuhan brand Anda.</h2>
         </div>
         <div class="container service-grid">
           {relatedServices.map((service, index) => (
             <article class="service-card">
               <div class="icon-box">SS</div>
-              <h3 data-i18n={`service.${index}.title`}>{service.eyebrow}</h3>
+              <p class="card-heading" data-i18n={`service.${index}.title`}>{service.eyebrow}</p>
               <p data-i18n={`service.${index}.desc`}>{service.description}</p>
               <a href={`/layanan/${service.slug}`}><span data-i18n="related.link">Lihat layanan</span> <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg></a>
             </article>
