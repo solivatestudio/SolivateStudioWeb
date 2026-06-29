@@ -99,6 +99,7 @@ const collectionSchema = JSON.stringify({
     }))
   }
 });
+const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
 ---
 
 <!doctype html>
@@ -121,6 +122,22 @@ const collectionSchema = JSON.stringify({
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={pageDescription} />
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <style>
+      @media (max-width: 768px) {
+        .seo-responsive-signal { display: block; }
+      }
+    </style>
+    {gaId && (
+      <>
+        <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+        <script is:inline define:vars={{ gaId }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', gaId);
+        </script>
+      </>
+    )}
   </head>
   <body>
     <Header compact i18n />
@@ -171,7 +188,7 @@ const collectionSchema = JSON.stringify({
           {portfolioPages.map((project, index) => (
             <article class="project-showcase-card">
               <a class="project-card-media" href={`/portfolio/${project.slug}`} aria-label={`Lihat studi kasus ${project.title}`}>
-                <img src={project.image} alt={project.title} loading={index === 0 ? "eager" : "lazy"} />
+                <img src={project.image} alt={project.title} width={project.width} height={project.height} loading={index === 0 ? "eager" : "lazy"} />
               </a>
               <div class="project-card-body">
                 <div>

@@ -1,5 +1,18 @@
 {
   "framework": "astro",
   "buildCommand": "npm run build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.solivate.com"
+        }
+      ],
+      "destination": "https://solivate.com/:path*",
+      "statusCode": 301
+    }
+  ]
 }

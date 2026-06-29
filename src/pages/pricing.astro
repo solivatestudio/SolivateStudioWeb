@@ -260,6 +260,7 @@ const pricingI18n: Record<string, LocaleCopy> = {
 const tx = (key: string) => pricingI18n[key]?.id ?? key;
 const pricingI18nJson = JSON.stringify(pricingI18n);
 const siteUrl = "https://solivate.com";
+const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
 const pricingUrl = `${siteUrl}/pricing`;
 const pageTitle = "Daftar Harga Jasa Pembuatan Website Solivate Studio Murah | Mulai Rp 49.000";
 const pageDescription = tx("meta.description");
@@ -319,6 +320,22 @@ const pricingSchema = JSON.stringify({
     <meta name="twitter:description" content={pageDescription} />
     <meta name="twitter:image" content={`${siteUrl}/solivate-logo.webp`} />
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <style>
+      @media (max-width: 768px) {
+        .seo-responsive-signal { display: block; }
+      }
+    </style>
+    {gaId && (
+      <>
+        <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+        <script is:inline define:vars={{ gaId }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', gaId);
+        </script>
+      </>
+    )}
   </head>
   <body>
     <Header i18n />

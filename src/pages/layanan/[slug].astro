@@ -118,6 +118,7 @@ const schema = JSON.stringify({
   description: page.description,
   keywords: page.keywords
 });
+const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
 ---
 
 <!doctype html>
@@ -140,6 +141,22 @@ const schema = JSON.stringify({
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={page.description} />
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <style>
+      @media (max-width: 768px) {
+        .seo-responsive-signal { display: block; }
+      }
+    </style>
+    {gaId && (
+      <>
+        <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+        <script is:inline define:vars={{ gaId }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', gaId);
+        </script>
+      </>
+    )}
   </head>
   <body>
     <Header compact i18n />

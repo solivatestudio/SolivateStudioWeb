@@ -16,6 +16,8 @@ export type PortfolioPage = {
   title: string;
   description: string;
   image: string;
+  width?: number;
+  height?: number;
   url: string;
   keywords: string[];
   highlights: string[];
@@ -479,6 +481,8 @@ export const portfolioPages: PortfolioPage[] = [
     description:
       "Studi kasus website Masjid Raya Puri Telukjambe: digitalisasi informasi masjid, jadwal kajian, transparansi kas, donasi QRIS, dan booking aula.",
     image: "/images/masjidrayapuritelukjambe.webp",
+    width: 1440,
+    height: 825,
     url: "https://www.masjidrayapuritelukjambe.com/",
     keywords: [
       "website Masjid Raya Puri Telukjambe",
@@ -514,6 +518,8 @@ export const portfolioPages: PortfolioPage[] = [
     description:
       "Showcase website Cutbae Barbershop: landing page modern untuk layanan grooming, paket haircut, lokasi, dan jalur booking pelanggan.",
     image: "/images/cutbae-barbershop.webp",
+    width: 1440,
+    height: 1000,
     url: "https://cutbaebarbershop.vercel.app/",
     keywords: [
       "website Cutbae Barbershop",
@@ -549,6 +555,8 @@ export const portfolioPages: PortfolioPage[] = [
     description:
       "Showcase website Makdian Bakery: profil brand bakery, katalog produk, informasi pemesanan, dan tampilan visual yang ramah untuk pelanggan UMKM.",
     image: "/images/makdian-bakery.webp",
+    width: 1440,
+    height: 1000,
     url: "https://makdianbakery.vercel.app/",
     keywords: [
       "website Makdian Bakery",
@@ -1034,6 +1042,9 @@ export const allSeoUrls = [
   "",
   "pricing",
   "project",
+  "privacy-policy",
+  "terms",
+  "revision-policy",
   ...servicePages.map((page) => `layanan/${page.slug}`),
   ...portfolioPages.map((page) => `portfolio/${page.slug}`),
   ...targetCities.map((city) => `jasa-pembuatan-website-${city.slug}`),

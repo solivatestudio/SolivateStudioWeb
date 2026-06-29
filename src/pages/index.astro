@@ -211,18 +211,24 @@ const works = [
     title: "Masjid Raya Puri Telukjambe",
     typeKey: "work.1.type",
     img: "/images/masjidrayapuritelukjambe.webp",
+    width: 1440,
+    height: 825,
     url: "/portfolio/masjid-raya-puri-telukjambe"
   },
   {
     title: "Cutbae Barbershop",
     typeKey: "work.2.type",
     img: "/images/cutbae-barbershop.webp",
+    width: 1440,
+    height: 1000,
     url: "/portfolio/cutbae-barbershop"
   },
   {
     title: "Makdian Bakery",
     typeKey: "work.3.type",
     img: "/images/makdian-bakery.webp",
+    width: 1440,
+    height: 1000,
     url: "/portfolio/makdian-bakery"
   }
 ];
@@ -250,6 +256,7 @@ const serviceCategoryI18n = Object.fromEntries(
 );
 const i18nJson = JSON.stringify({ ...i18n, ...serviceCategoryI18n });
 const siteUrl = "https://solivate.com";
+const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
 const pageTitle = "Solivate Studio | Jasa Pembuatan Website UMKM & Digital Solution Agency Indonesia";
 const pageDescription = tx("meta.description");
 const organizationSchema = JSON.stringify({
@@ -329,6 +336,22 @@ const organizationSchema = JSON.stringify({
     <meta name="twitter:description" content={pageDescription} />
     <meta name="twitter:image" content={`${siteUrl}/solivate-logo.webp`} />
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <style>
+      @media (max-width: 768px) {
+        .seo-responsive-signal { display: block; }
+      }
+    </style>
+    {gaId && (
+      <>
+        <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+        <script is:inline define:vars={{ gaId }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', gaId);
+        </script>
+      </>
+    )}
   </head>
   <body>
     <Header home i18n />
@@ -392,7 +415,7 @@ const organizationSchema = JSON.stringify({
                   <div><i></i><i></i><i></i><i></i></div>
                 </div>
                 <div class="image-card">
-                  <img src="/images/portfolio_cloud_1781799732798.webp" alt="" loading="eager" />
+                  <img src="/images/portfolio_cloud_1781799732798.webp" alt="Solivate Studio Cloud Digital Solution Platform Showcase" width="1200" height="896" loading="eager" />
                   <span data-i18n="preview.badge">{tx("preview.badge")}</span>
                 </div>
               </div>
@@ -503,7 +526,7 @@ const organizationSchema = JSON.stringify({
         <div class="container work-grid">
           {works.map((item) => (
             <a class="work-card" href={item.url ?? "#contact"} target={item.url?.startsWith("http") ? "_blank" : undefined} rel={item.url?.startsWith("http") ? "noreferrer" : undefined}>
-              <img src={item.img} alt={item.title} loading="eager" />
+              <img src={item.img} alt={item.title} width={item.width} height={item.height} loading="eager" />
               <div>
                 <span data-i18n={item.typeKey}>{tx(item.typeKey)}</span>
                 <h3>{item.title}</h3>

@@ -36,7 +36,7 @@ const navLinks = [
     <div class="footer-grid">
       <div class="footer-col footer-brand-col">
         <span class="brand">
-          <img src="/solivate-logo.webp" alt="Solivate Studio" width="9935" height="1200" loading="lazy" />
+          <img src="/solivate-logo.webp" alt="Solivate Studio" width="166" height="20" loading="lazy" />
         </span>
         <p {...attr("footer.desc")}>Digital solution provider untuk UMKM, komunitas sosial, event, celebration, dan sistem custom yang ingin naik kelas secara digital.</p>
         <p class="footer-location">Bekasi, Indonesia</p>
@@ -48,8 +48,14 @@ const navLinks = [
         ))}
       </div>
       <div class="footer-col">
+        <h4 data-i18n="footer.legal">Kebijakan</h4>
+        <a href="/privacy-policy" data-i18n="footer.privacy">Kebijakan Privasi</a>
+        <a href="/terms" data-i18n="footer.terms">Syarat & Ketentuan</a>
+        <a href="/revision-policy" data-i18n="footer.revision">Kebijakan Revisi</a>
+      </div>
+      <div class="footer-col">
         <h4 {...attr("footer.connect")}>Kontak</h4>
-        <a href="mailto:solivatestudio@gmail.com">solivatestudio@gmail.com</a>
+        <a href="#" data-email-obfuscated class="footer-email-link">solivatestudio [at] gmail.com</a>
         <a href="https://wa.me/6281219118993" target="_blank" rel="noreferrer">WhatsApp</a>
         <a href="https://www.instagram.com/solivatestudio/" target="_blank" rel="noreferrer">Instagram</a>
       </div>
@@ -89,3 +95,19 @@ const navLinks = [
   </span>
   <span class="floating-wa-label" {...attr("floating.wa")}>Konsultasi sekarang, gratis!</span>
 </a>
+
+<script is:inline>
+  document.querySelectorAll("[data-email-obfuscated]").forEach((el) => {
+    const user = "solivatestudio";
+    const domain = "gmail.com";
+    const email = `${user}@${domain}`;
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.href = `mailto:${email}`;
+    });
+    el.addEventListener("mouseover", () => {
+      el.setAttribute("href", `mailto:${email}`);
+      el.textContent = email;
+    });
+  });
+</script>

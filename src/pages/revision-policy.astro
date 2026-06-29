@@ -1,0 +1,146 @@
+---
+import "../index.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { siteUrl } from "../data/seo-pages";
+
+const canonical = `${siteUrl}/revision-policy`;
+const pageTitle = "Kebijakan Revisi | Solivate Studio";
+const pageDescription = "Kebijakan Revisi Solivate Studio: aturan pengerjaan perubahan, perbaikan, dan pemeliharaan website.";
+
+const staticI18n = {
+  "nav.about": { id: "Tentang", en: "About" },
+  "nav.services": { id: "Layanan", en: "Services" },
+  "nav.pricing": { id: "Harga", en: "Pricing" },
+  "nav.work": { id: "Karya", en: "Work" },
+  "nav.process": { id: "Proses", en: "Process" },
+  "nav.contact": { id: "Kontak", en: "Contact" },
+  "nav.cta": { id: "Mulai Proyek", en: "Start Project" },
+  "revision.title": { id: "Kebijakan Revisi", en: "Revision Policy" },
+  "revision.lead": { id: "Aturan perbaikan dan perubahan desain website.", en: "Rules of website design feedback and changes." },
+  "footer.title": { id: "Bangun sesuatu yang orang ingat.", en: "Let's build something people remember." },
+  "footer.cta": { id: "Mulai Proyek", en: "Start Project" },
+  "footer.desc": {
+    id: "Digital solution provider untuk UMKM, komunitas sosial, event, celebration, dan sistem custom yang ingin naik kelas secara digital.",
+    en: "Digital solution provider for SMEs, social communities, events, celebrations, and custom systems ready to level up digitally."
+  },
+  "footer.nav": { id: "Navigasi", en: "Navigation" },
+  "footer.connect": { id: "Kontak", en: "Connect" },
+  "footer.copy": { id: `Copyright ${new Date().getFullYear()} Solivate Studio. Semua hak dilindungi.`, en: `Copyright ${new Date().getFullYear()} Solivate Studio. All rights reserved.` },
+  "footer.top": { id: "Kembali ke atas", en: "Back to top" },
+  "floating.wa": { id: "Konsultasi sekarang, gratis!", en: "Free consultation now!" }
+};
+
+const i18nJson = JSON.stringify(staticI18n);
+const initialText = (key: string) => staticI18n[key as keyof typeof staticI18n]?.id ?? key;
+
+const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:image" content={`${siteUrl}/solivate-logo.webp`} />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <style>
+      @media (max-width: 768px) {
+        .seo-responsive-signal { display: block; }
+      }
+    </style>
+    {gaId && (
+      <>
+        <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+        <script is:inline define:vars={{ gaId }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', gaId);
+        </script>
+      </>
+    )}
+  </head>
+  <body>
+    <Header compact i18n />
+
+    <main class="seo-page policy-page">
+      <section class="seo-hero">
+        <div class="hero-bg"></div>
+        <div class="container policy-container">
+          <h1 data-i18n="revision.title">{initialText("revision.title")}</h1>
+          <p class="hero-text lead" data-i18n="revision.lead">{initialText("revision.lead")}</p>
+          
+          <div class="policy-content card-glass">
+            <h2>1. Sesi Revisi Selama Pengerjaan</h2>
+            <p>Setiap paket pembuatan website mencakup slot revisi gratis sesuai rincian paket (biasanya 2 hingga 5 kali revisi minor). Revisi diajukan setelah draf awal desain website selesai ditunjukkan kepada klien.</p>
+
+            <h2>2. Batasan Revisi Minor</h2>
+            <p>Revisi minor mencakup perubahan teks, penyesuaian tata letak kecil, penggantian gambar, penyesuaian warna, dan perbaikan bug. Perubahan total konsep desain atau penambahan fitur di luar brief awal akan dikenakan biaya tambahan.</p>
+
+            <h2>3. Garansi Pasca Rilis (Bug-Fixing)</h2>
+            <p>Solivate Studio memberikan garansi perbaikan gratis selama 30 hari setelah peluncuran website untuk mengatasi segala kesalahan teknis (*bug*), link rusak, atau layout berantakan yang terjadi.</p>
+
+            <h2>4. Pemeliharaan (*Maintenance*)</h2>
+            <p>Setelah masa garansi berakhir, Klien dapat memilih paket *maintenance bulanan* kami untuk pembaruan konten rutin, backup database, dan optimalisasi berkala agar website tetap cepat.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <Footer i18n />
+
+    <script is:inline type="application/json" id="revision-i18n-data" set:html={i18nJson}></script>
+    <script is:inline>
+      const translations = JSON.parse(document.getElementById("revision-i18n-data")?.textContent || "{}");
+      const header = document.querySelector("[data-header]");
+      const updateHeader = () => {
+        const y = Math.max(0, window.scrollY);
+        header?.classList.toggle("is-scrolled", y > 24);
+        header?.classList.toggle("is-compact", y > 64);
+      };
+      window.addEventListener("scroll", updateHeader, { passive: true });
+      updateHeader();
+
+      const setLanguage = (lang, persist = false) => {
+        const activeLang = lang === "en" ? "en" : "id";
+        document.documentElement.lang = activeLang;
+        if (persist) {
+          window.localStorage.setItem("solivate-language", activeLang);
+          window.localStorage.setItem("solivate-language-manual", "true");
+        }
+
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          const next = translations[key]?.[activeLang];
+          if (next) node.textContent = next;
+        });
+
+        document.querySelectorAll("[data-lang-switch]").forEach((button) => {
+          const active = button.getAttribute("data-lang-switch") === activeLang;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+      };
+
+      document.querySelectorAll("[data-lang-switch]").forEach((button) => {
+        button.addEventListener("click", () => setLanguage(button.getAttribute("data-lang-switch"), true));
+      });
+      const savedLanguage = window.localStorage.getItem("solivate-language-manual") === "true"
+        ? window.localStorage.getItem("solivate-language")
+        : "id";
+      setLanguage(savedLanguage || "id");
+
+      document.querySelectorAll("[data-top]").forEach((trigger) => {
+        trigger.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+      });
+    </script>
+  </body>
+</html>

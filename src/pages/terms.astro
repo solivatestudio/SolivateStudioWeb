@@ -1,0 +1,146 @@
+---
+import "../index.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { siteUrl } from "../data/seo-pages";
+
+const canonical = `${siteUrl}/terms`;
+const pageTitle = "Syarat & Ketentuan | Solivate Studio";
+const pageDescription = "Syarat & Ketentuan penggunaan layanan pembuatan website dan produk digital Solivate Studio.";
+
+const staticI18n = {
+  "nav.about": { id: "Tentang", en: "About" },
+  "nav.services": { id: "Layanan", en: "Services" },
+  "nav.pricing": { id: "Harga", en: "Pricing" },
+  "nav.work": { id: "Karya", en: "Work" },
+  "nav.process": { id: "Proses", en: "Process" },
+  "nav.contact": { id: "Kontak", en: "Contact" },
+  "nav.cta": { id: "Mulai Proyek", en: "Start Project" },
+  "terms.title": { id: "Syarat & Ketentuan", en: "Terms & Conditions" },
+  "terms.lead": { id: "Aturan dan ketentuan pengerjaan proyek digital.", en: "Rules and terms of digital project execution." },
+  "footer.title": { id: "Bangun sesuatu yang orang ingat.", en: "Let's build something people remember." },
+  "footer.cta": { id: "Mulai Proyek", en: "Start Project" },
+  "footer.desc": {
+    id: "Digital solution provider untuk UMKM, komunitas sosial, event, celebration, dan sistem custom yang ingin naik kelas secara digital.",
+    en: "Digital solution provider for SMEs, social communities, events, celebrations, and custom systems ready to level up digitally."
+  },
+  "footer.nav": { id: "Navigasi", en: "Navigation" },
+  "footer.connect": { id: "Kontak", en: "Connect" },
+  "footer.copy": { id: `Copyright ${new Date().getFullYear()} Solivate Studio. Semua hak dilindungi.`, en: `Copyright ${new Date().getFullYear()} Solivate Studio. All rights reserved.` },
+  "footer.top": { id: "Kembali ke atas", en: "Back to top" },
+  "floating.wa": { id: "Konsultasi sekarang, gratis!", en: "Free consultation now!" }
+};
+
+const i18nJson = JSON.stringify(staticI18n);
+const initialText = (key: string) => staticI18n[key as keyof typeof staticI18n]?.id ?? key;
+
+const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:image" content={`${siteUrl}/solivate-logo.webp`} />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <style>
+      @media (max-width: 768px) {
+        .seo-responsive-signal { display: block; }
+      }
+    </style>
+    {gaId && (
+      <>
+        <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+        <script is:inline define:vars={{ gaId }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', gaId);
+        </script>
+      </>
+    )}
+  </head>
+  <body>
+    <Header compact i18n />
+
+    <main class="seo-page policy-page">
+      <section class="seo-hero">
+        <div class="hero-bg"></div>
+        <div class="container policy-container">
+          <h1 data-i18n="terms.title">{initialText("terms.title")}</h1>
+          <p class="hero-text lead" data-i18n="terms.lead">{initialText("terms.lead")}</p>
+          
+          <div class="policy-content card-glass">
+            <h2>1. Ruang Lingkup Layanan</h2>
+            <p>Solivate Studio menyediakan jasa pembuatan website, perancangan sistem informasi, platform digital, dan solusi teknologi lainnya sesuai dengan kesepakatan tertulis di Lembar Kesepakatan Proyek.</p>
+
+            <h2>2. Pembayaran & Uang Muka</h2>
+            <p>Setiap dimulainya pengerjaan proyek membutuhkan pembayaran uang muka (DP) sesuai dengan nominal paket yang dipilih. Sisa pembayaran wajib diselesaikan setelah website selesai dibangun dan siap untuk diluncurkan online.</p>
+
+            <h2>3. Penggunaan Aset & Hak Cipta</h2>
+            <p>Klien wajib menyediakan aset teks, gambar, dan logo resmi untuk diletakkan di website. Setelah pelunasan, hak akses dan kode sumber situs web sepenuhnya menjadi hak milik klien.</p>
+
+            <h2>4. Batasan Tanggung Jawab</h2>
+            <p>Kami tidak bertanggung jawab atas kerugian bisnis, kesalahan konten yang diberikan oleh klien, atau gangguan pihak ketiga seperti hosting eksternal di luar pengawasan kami.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <Footer i18n />
+
+    <script is:inline type="application/json" id="terms-i18n-data" set:html={i18nJson}></script>
+    <script is:inline>
+      const translations = JSON.parse(document.getElementById("terms-i18n-data")?.textContent || "{}");
+      const header = document.querySelector("[data-header]");
+      const updateHeader = () => {
+        const y = Math.max(0, window.scrollY);
+        header?.classList.toggle("is-scrolled", y > 24);
+        header?.classList.toggle("is-compact", y > 64);
+      };
+      window.addEventListener("scroll", updateHeader, { passive: true });
+      updateHeader();
+
+      const setLanguage = (lang, persist = false) => {
+        const activeLang = lang === "en" ? "en" : "id";
+        document.documentElement.lang = activeLang;
+        if (persist) {
+          window.localStorage.setItem("solivate-language", activeLang);
+          window.localStorage.setItem("solivate-language-manual", "true");
+        }
+
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          const next = translations[key]?.[activeLang];
+          if (next) node.textContent = next;
+        });
+
+        document.querySelectorAll("[data-lang-switch]").forEach((button) => {
+          const active = button.getAttribute("data-lang-switch") === activeLang;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+      };
+
+      document.querySelectorAll("[data-lang-switch]").forEach((button) => {
+        button.addEventListener("click", () => setLanguage(button.getAttribute("data-lang-switch"), true));
+      });
+      const savedLanguage = window.localStorage.getItem("solivate-language-manual") === "true"
+        ? window.localStorage.getItem("solivate-language")
+        : "id";
+      setLanguage(savedLanguage || "id");
+
+      document.querySelectorAll("[data-top]").forEach((trigger) => {
+        trigger.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+      });
+    </script>
+  </body>
+</html>
