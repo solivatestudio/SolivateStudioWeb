@@ -19,7 +19,7 @@ const navLinks = [
 <footer class="footer">
   <div class="container">
     <div class="footer-top">
-      <p class="footer-headline" {...attr("footer.title")}>Bangun sesuatu yang orang ingat.</p>
+      <h2 {...attr("footer.title")}>Bangun sesuatu yang orang ingat.</h2>
       {home ? (
         <button class="btn-primary" type="button" data-scroll="contact">
           <span {...attr("footer.cta")}>Mulai Proyek</span>
@@ -62,7 +62,7 @@ const navLinks = [
     </div>
 
     <div class="footer-local-cloud">
-      <p class="footer-col-title">Wilayah Layanan</p>
+      <h4>Wilayah Layanan</h4>
       <div class="local-links">
         {targetCities.map((city) => (
           <a href={`/jasa-pembuatan-website-${city.slug}`}>Jasa Website {city.name}</a>

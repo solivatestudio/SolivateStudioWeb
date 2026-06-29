@@ -2511,18 +2511,36 @@ h2:hover {
 .footer-local-cloud .local-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 24px;
+  gap: 8px 10px;
 }
 
 .footer-local-cloud .local-links a {
+  display: inline-flex;
+  align-items: center;
   color: rgba(255, 255, 255, 0.6);
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 500;
   text-decoration: none;
-  transition: color 0.2s ease;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 6px 14px;
+  border-radius: 100px;
+  transition:
+    color 200ms ease,
+    background 200ms ease,
+    border-color 200ms ease,
+    transform 200ms ease;
+}
+
+.footer-local-cloud .local-links a::after {
+  content: none !important;
 }
 
 .footer-local-cloud .local-links a:hover {
-  color: var(--cyan);
+  color: var(--white);
+  background: rgba(0, 180, 216, 0.12);
+  border-color: var(--cyan);
+  transform: translateY(-2px);
 }
 
 .floating-wa {
