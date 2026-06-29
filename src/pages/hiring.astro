@@ -115,11 +115,40 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     
     <style>
+      .hiring-page {
+        background: var(--ink) !important;
+        color: var(--white) !important;
+        min-height: 100vh;
+      }
+      
+      .hiring-page h2 {
+        color: var(--white) !important;
+      }
+
+      .hiring-page .lead {
+        color: rgba(255, 255, 255, 0.7) !important;
+      }
+
       .hiring-hero {
         padding-top: clamp(120px, 15vw, 180px);
         padding-bottom: clamp(60px, 10vw, 100px);
         text-align: center;
+        position: relative;
       }
+
+      .hiring-hero .hero-bg {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 50% 20%, rgba(0, 180, 216, 0.15), transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .hiring-hero .container {
+        position: relative;
+        z-index: 1;
+      }
+
       .hiring-hero .eyebrow {
         background: linear-gradient(90deg, var(--cyan), var(--lime));
         -webkit-background-clip: text;
@@ -301,7 +330,7 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
   <body>
     <Header compact i18n />
 
-    <main class="seo-page">
+    <main class="seo-page hiring-page">
       <section class="hiring-hero">
         <div class="hero-bg"></div>
         <div class="container">
@@ -311,7 +340,7 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
         </div>
       </section>
 
-      <section class="section light">
+      <section class="section">
         <div class="container">
           <div class="section-head center">
             <h2 data-i18n="hiring.positions_title">{initialText("hiring.positions_title")}</h2>
