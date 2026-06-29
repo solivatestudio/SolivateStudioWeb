@@ -1,0 +1,134 @@
+---
+import "../index.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { siteUrl } from "../data/seo-pages";
+
+const canonical = `${siteUrl}/404`;
+const pageTitle = "404: Halaman Tidak Ditemukan | Solivate Studio";
+const pageDescription = "Maaf, halaman yang Anda cari tidak dapat ditemukan. Kembali ke beranda Solivate Studio.";
+
+const staticI18n = {
+  "nav.about": { id: "Tentang", en: "About" },
+  "nav.services": { id: "Layanan", en: "Services" },
+  "nav.pricing": { id: "Harga", en: "Pricing" },
+  "nav.work": { id: "Karya", en: "Work" },
+  "nav.process": { id: "Proses", en: "Process" },
+  "nav.contact": { id: "Kontak", en: "Contact" },
+  "nav.cta": { id: "Mulai Proyek", en: "Start Project" },
+  "error.title": { id: "Halaman Tidak Ditemukan", en: "Page Not Found" },
+  "error.text": {
+    id: "Maaf, halaman yang Anda cari tidak ada atau telah dipindahkan. Silakan kembali ke beranda.",
+    en: "Sorry, the page you are looking for does not exist or has been moved. Please return to the homepage."
+  },
+  "error.cta": { id: "Kembali ke Beranda", en: "Back to Home" },
+  "footer.title": { id: "Bangun sesuatu yang orang ingat.", en: "Let's build something people remember." },
+  "footer.cta": { id: "Mulai Proyek", en: "Start Project" },
+  "footer.desc": {
+    id: "Digital solution provider untuk UMKM, komunitas sosial, event, celebration, dan sistem custom yang ingin naik kelas secara digital.",
+    en: "Digital solution provider for SMEs, social communities, events, celebrations, and custom systems ready to level up digitally."
+  },
+  "footer.nav": { id: "Navigasi", en: "Navigation" },
+  "footer.connect": { id: "Kontak", en: "Connect" },
+  "footer.copy": { id: `Copyright ${new Date().getFullYear()} Solivate Studio. Semua hak dilindungi.`, en: `Copyright ${new Date().getFullYear()} Solivate Studio. All rights reserved.` },
+  "footer.top": { id: "Kembali ke atas", en: "Back to top" },
+  "floating.wa": { id: "Konsultasi sekarang, gratis!", en: "Free consultation now!" }
+};
+
+const i18nJson = JSON.stringify(staticI18n);
+const initialText = (key: string) => staticI18n[key as keyof typeof staticI18n]?.id ?? key;
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <meta name="robots" content="noindex, follow" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:image" content={`${siteUrl}/solivate-logo.webp`} />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+  </head>
+  <body>
+    <Header compact i18n />
+
+    <main class="seo-page error-page">
+      <section class="seo-hero">
+        <div class="hero-bg"></div>
+        <div class="container error-container">
+          <div class="error-visual">
+            <h1 class="error-code">404</h1>
+            <div class="error-orbits" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+          <div class="error-content">
+            <h2 data-i18n="error.title">{initialText("error.title")}</h2>
+            <p class="hero-text" data-i18n="error.text">{initialText("error.text")}</p>
+            <div class="hero-actions">
+              <a class="btn-primary" href="/">
+                <span data-i18n="error.cta">{initialText("error.cta")}</span>
+                <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <Footer i18n />
+
+    <script is:inline type="application/json" id="error-i18n-data" set:html={i18nJson}></script>
+    <script is:inline>
+      const translations = JSON.parse(document.getElementById("error-i18n-data")?.textContent || "{}");
+      const header = document.querySelector("[data-header]");
+      const updateHeader = () => {
+        const y = Math.max(0, window.scrollY);
+        header?.classList.toggle("is-scrolled", y > 24);
+        header?.classList.toggle("is-compact", y > 64);
+      };
+      window.addEventListener("scroll", updateHeader, { passive: true });
+      updateHeader();
+
+      const setLanguage = (lang, persist = false) => {
+        const activeLang = lang === "en" ? "en" : "id";
+        document.documentElement.lang = activeLang;
+        if (persist) {
+          window.localStorage.setItem("solivate-language", activeLang);
+          window.localStorage.setItem("solivate-language-manual", "true");
+        }
+
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          const next = translations[key]?.[activeLang];
+          if (next) node.textContent = next;
+        });
+
+        document.querySelectorAll("[data-lang-switch]").forEach((button) => {
+          const active = button.getAttribute("data-lang-switch") === activeLang;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+      };
+
+      document.querySelectorAll("[data-lang-switch]").forEach((button) => {
+        button.addEventListener("click", () => setLanguage(button.getAttribute("data-lang-switch"), true));
+      });
+      const savedLanguage = window.localStorage.getItem("solivate-language-manual") === "true"
+        ? window.localStorage.getItem("solivate-language")
+        : "id";
+      setLanguage(savedLanguage || "id");
+
+      document.querySelectorAll("[data-top]").forEach((trigger) => {
+        trigger.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+      });
+    </script>
+  </body>
+</html>

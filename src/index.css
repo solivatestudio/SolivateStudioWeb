@@ -4058,3 +4058,110 @@ h2:hover {
     animation-duration: 18s !important;
   }
 }
+
+/* 404 Page Styling */
+.error-page .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: calc(100vh - 240px);
+  padding: 160px 24px 80px;
+}
+
+.error-visual {
+  position: relative;
+  margin-bottom: 24px;
+  width: 280px;
+  height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-code {
+  font-size: clamp(80px, 12vw, 130px);
+  font-weight: 900;
+  margin: 0;
+  background: linear-gradient(135deg, var(--lime), var(--cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 40px rgba(6, 201, 223, 0.2);
+  z-index: 10;
+}
+
+.error-orbits {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.error-orbits span {
+  position: absolute;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.error-orbits span:nth-child(1) {
+  width: 220px;
+  height: 220px;
+  animation: orbit-rotate 30s linear infinite;
+}
+
+.error-orbits span:nth-child(2) {
+  width: 280px;
+  height: 280px;
+  animation: orbit-rotate-reverse 45s linear infinite;
+}
+
+.error-orbits span:nth-child(3) {
+  width: 160px;
+  height: 160px;
+  border-style: solid;
+  border-color: rgba(6, 201, 223, 0.15) transparent transparent transparent;
+  animation: orbit-rotate 15s linear infinite;
+}
+
+.error-content {
+  max-width: 580px;
+  z-index: 10;
+}
+
+.error-content h2 {
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 800;
+  margin: 0 0 16px;
+  color: #fff;
+}
+
+.error-content p {
+  font-size: clamp(14px, 2vw, 16px);
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+  margin: 0 0 32px;
+}
+
+@keyframes orbit-rotate {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes orbit-rotate-reverse {
+  from {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+}
