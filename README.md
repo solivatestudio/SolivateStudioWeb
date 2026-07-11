@@ -1,103 +1,165 @@
-# <img src="./public/favicon.png" width="32" height="32" valign="middle" /> Solivate Studio Web
+# Solivate Studio Web
 
-[![Astro](https://img.shields.io/badge/Astro-v4.x-FF5D01?style=flat-square&logo=astro&logoColor=white)](https://astro.build/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=flat-square&logo=vercel&logoColor=white)](https://vercel.com/)
-[![Aesthetics](https://img.shields.io/badge/Aesthetics-Premium_Dark-00b4d8?style=flat-square)](#-design-aesthetics)
+Official website and lightweight internal dashboard for Solivate Studio, a digital solution provider for SMEs, communities, events, and meaningful personal moments.
 
-Official website for **Solivate Studio** – a premium Digital Solution Agency based in Indonesia. Built using Astro with a modern, high-performance static architecture, fully optimized for search engines (SEO) and user experience.
+The public site is built with Astro for a fast static frontend, while operational features run through Vercel serverless functions backed by Neon Postgres.
 
----
+## Features
 
-## 💎 Design Aesthetics
+- Public marketing website for Solivate Studio services, pricing, projects, hiring, policies, and local SEO landing pages.
+- Bilingual public content support for Indonesian and English sections.
+- SEO-focused service pages for website development, SME websites, company profiles, mosque/community websites, foundations, events, digital invitations, barbershops, and car rentals.
+- Portfolio/case-study pages for completed client projects.
+- Contact and hiring form APIs with Resend email delivery.
+- Internal admin dashboard for CMS content, project management, finance entries, performance metrics, and live traffic summaries.
+- Lightweight traffic tracking using pageview and heartbeat events, with active visitor calculation from recent events.
 
-- **Premium UI:** Crafted with custom HSL color systems, sleek dark-mode glassmorphism, responsive layouts, and hardware-accelerated transitions.
-- **Micro-Animations:** Fluid, interactive elements including cursor-guided hover states on cards and buttons.
-- **Optimized Assets:** High-fidelity images utilizing next-gen WebP formatting and responsive sizing.
+## Tech Stack
 
----
+- Astro 7
+- TypeScript
+- Vanilla CSS with custom design tokens
+- Vercel serverless functions
+- Neon Postgres
+- Resend
 
-## 🚀 Advanced SEO Architecture
-
-- **Semantic HTML:** Fully structured layout designed for optimal accessibility (WCAG 2.2) and search crawler parsing.
-- **Programmatic Local SEO:** Automated regional landing pages targeting 10 major Indonesian cities (Bekasi, Jakarta, Tangerang, Depok, Bogor, Bandung, Surabaya, Semarang, Medan, Makassar) to capture high-intent local business searches.
-- **Structured Data:** High-fidelity JSON-LD schema markup (`Organization`, `LocalBusiness`, `ProfessionalService`, `CreativeWork`, and `CollectionPage`) for rich search engine snippets.
-- **Dynamic Sitemap:** Automatically generated XML sitemap mapping all active service categories, portfolios, and regional paths.
-
----
-
-## ⚙️ Technology Stack
-
-| Core | Tooling / Hosting |
-| --- | --- |
-| **Framework:** Astro (Static Site Generation) | **Hosting Platform:** Vercel |
-| **Styling:** Vanilla CSS (CSS Variables) | **Sitemap:** Dynamic XML Generator |
-| **Language:** TypeScript | **Analytics:** Google Analytics 4 |
-
----
-
-## 📂 Project Structure
+## Repository Layout
 
 ```text
-├── public/                  # Static assets (logos, favicon, robots.txt)
-└── src/
-    ├── components/          # Reusable Astro components (Header, Footer, WA CTA)
-    ├── data/                # SEO and localized data configurations (seo-pages.ts)
-    ├── pages/               # Main pages & routing
-    │   ├── layanan/         # Dynamic service pages [slug].astro
-    │   ├── portfolio/       # Dynamic case study pages [slug].astro
-    │   ├── api/             # API endpoints (contact submissions)
-    │   ├── index.astro      # Main landing page
-    │   ├── pricing.astro    # Transparent pricing plans
-    │   ├── project.astro    # Portfolios collection showcase
-    │   ├── sitemap.xml.ts   # Dynamic sitemap generator
-    │   └── jasa-pembuatan-website-[city].astro # Localized city landing pages
-    └── index.css            # Base stylesheet & premium utility styles
+api/
+  _lib/              Shared serverless helpers for auth, database, and HTTP responses
+  admin/             Admin dashboard API routes
+  public/            Public CMS API routes
+  contact.js         Contact form email endpoint
+  hiring.js          Hiring form email endpoint
+  track.js           Public traffic tracking endpoint
+
+public/
+  images/            Portfolio and website assets
+  favicon.png        Favicon
+  solivate-logo.*    Brand logo assets
+
+scripts/
+  hash-admin-password.mjs
+
+src/
+  components/        Shared public UI components
+  data/              SEO service, portfolio, and city page data
+  layouts/           Dashboard layout
+  pages/             Astro pages and routes
+  dashboard.css      Dashboard styling
+  index.css          Public website styling
 ```
 
----
+## Prerequisites
 
-## 🛠️ Getting Started
+- Node.js 18 or newer
+- npm
+- A Neon Postgres database for dashboard, CMS, and analytics data
+- A Resend API key for form email delivery
+- Vercel CLI when testing serverless API routes locally
 
-### Prerequisites
-
-- Node.js (v18.x or later)
-- npm or pnpm / yarn
-
-### Installation
+## Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/solivatestudio/SolivateStudioWeb.git
-
-# Navigate to the project directory
-cd SolivateStudioWeb
-
-# Install dependencies
 npm install
 ```
 
-### Development Commands
+## Configuration
 
-```bash
-# Start the local development server
-npm run dev
+Create `.env.local` for local development. Keep real values out of git.
 
-# Build the production bundle
-npm run build
+```env
+RESEND_API_KEY="re_xxxxxxxxx"
+RESEND_TO_EMAIL="solivatestudio@gmail.com"
+RESEND_FROM_EMAIL="Solivate Studio <onboarding@resend.dev>"
 
-# Preview the locally built production site
-npm run preview
+DATABASE_URL="postgresql://user:password@host/database?sslmode=require"
+
+ADMIN_USERNAME="admin"
+ADMIN_PASSWORD_HASH="scrypt:replace_with_generated_hash"
+SESSION_SECRET="replace_with_a_long_random_string"
+TRACKING_SALT="replace_with_another_long_random_string"
 ```
 
----
+Generate the admin password hash with:
 
-## 🌐 Deployment
+```bash
+npm run admin:hash -- "your-admin-password"
+```
 
-The project is configured for continuous deployment on **Vercel**.
-- **Build Command:** `npm run build`
-- **Output Directory:** `dist`
-- **Configuration:** `vercel.json` (includes security headers and www-to-non-www 301 redirects).
+For production, add the same environment variables in the correct Vercel project or team settings.
 
----
-Developed with ❤️ by **[Solivate Studio](https://solivate.com)**.
+## Running Locally
+
+Run the Astro frontend only:
+
+```bash
+npm run dev
+```
+
+Run the site with Vercel serverless functions:
+
+```bash
+npx vercel dev
+```
+
+Use `npx vercel dev` when testing `/api/*`, dashboard login, contact forms, hiring forms, CMS hydration, or traffic tracking.
+
+## Dashboard
+
+The dashboard is available at:
+
+```text
+/dashboard/login
+```
+
+Dashboard modules:
+
+- Overview: project, finance, and traffic summary
+- Website CMS: editable homepage/company profile content
+- Projects: internal project tracking
+- Finance: income and expense records
+- Performance: internal KPI tracking
+- Live Traffic: pageview, route, referrer, and active visitor summaries
+
+The dashboard pages use `noindex,nofollow` and require the signed admin session cookie.
+
+## Scripts
+
+```bash
+npm run dev          # Start Astro dev server
+npm run build        # Build production output
+npm run preview      # Preview the production build locally
+npm run lint         # Run Astro/TypeScript checks
+npm run admin:hash   # Generate an admin password hash
+```
+
+## Deployment
+
+The project is designed for Vercel.
+
+- Build command: `npm run build`
+- Output directory: `dist`
+- Serverless functions: `api/*`
+- Required production env vars: `RESEND_API_KEY`, `RESEND_TO_EMAIL`, `RESEND_FROM_EMAIL`, `DATABASE_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, `SESSION_SECRET`, `TRACKING_SALT`
+
+After deployment, verify:
+
+- Public pages load correctly.
+- Contact and hiring forms send email through Resend.
+- `/dashboard/login` accepts the configured admin account.
+- Dashboard traffic receives pageview/heartbeat data.
+
+## SEO
+
+SEO data is centralized in `src/data/seo-pages.ts`.
+
+It drives:
+
+- Service pages under `/layanan/[slug]`
+- Portfolio pages under `/portfolio/[slug]`
+- Local SEO pages under `/jasa-pembuatan-website-[city]`
+- Dynamic sitemap entries in `src/pages/sitemap.xml.ts`
+
+When adding a new service, portfolio, or target city, update the data file first so pages and sitemap remain consistent.

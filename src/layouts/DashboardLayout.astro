@@ -1,0 +1,102 @@
+---
+import "../dashboard.css";
+
+const { title, eyebrow = "Operations", active = "overview" } = Astro.props;
+const navigation = [
+  ["overview", "Overview", "/dashboard"],
+  ["cms", "Website CMS", "/dashboard/cms"],
+  ["projects", "Projects", "/dashboard/projects"],
+  ["finance", "Finance", "/dashboard/finance"],
+  ["performance", "Performance", "/dashboard/performance"],
+  ["traffic", "Live Traffic", "/dashboard/traffic"]
+];
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>{title} | Solivate Studio</title>
+    <script is:inline>
+      window.adminApi = async (url, options = {}) => {
+        const response = await fetch(url, {
+          credentials: "same-origin",
+          ...options,
+          headers: { "Content-Type": "application/json", ...(options.headers || {}) }
+        });
+        const data = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          window.location.replace("/dashboard/login");
+          throw new Error("Unauthorized");
+        }
+        if (!response.ok) throw new Error(data.message || "Permintaan gagal.");
+        return data;
+      };
+      window.formatRupiah = (value) => new Intl.NumberFormat("id-ID", {
+        style: "currency", currency: "IDR", maximumFractionDigits: 0
+      }).format(Number(value || 0));
+      window.formatDate = (value) => value ? new Intl.DateTimeFormat("id-ID", {
+        day: "2-digit", month: "short", year: "numeric"
+      }).format(new Date(value)) : "-";
+    </script>
+  </head>
+  <body class="admin-body">
+    <div class="admin-app">
+      <aside class="admin-sidebar" data-sidebar>
+        <div class="admin-brand">
+          <img src="/solivate-logo.webp" alt="Solivate Studio" width="170" height="48" />
+          <span>Internal workspace</span>
+        </div>
+        <nav class="admin-nav" aria-label="Dashboard navigation">
+          {navigation.map(([key, label, href], index) => (
+            <a class:list={["admin-nav-link", { active: active === key }]} href={href}>
+              <span class="admin-nav-index">0{index + 1}</span>
+              <span>{label}</span>
+            </a>
+          ))}
+        </nav>
+        <div class="admin-sidebar-bottom">
+          <a href="/" target="_blank" rel="noreferrer">Buka website <span aria-hidden="true">↗</span></a>
+          <button type="button" data-logout>Keluar</button>
+        </div>
+      </aside>
+
+      <button class="admin-backdrop" type="button" data-sidebar-close aria-label="Tutup menu"></button>
+
+      <main class="admin-main">
+        <header class="admin-topbar">
+          <button class="admin-menu" type="button" data-sidebar-open aria-label="Buka menu">
+            <span></span><span></span>
+          </button>
+          <div>
+            <p>{eyebrow}</p>
+            <h1>{title}</h1>
+          </div>
+          <div class="admin-status"><span></span> System online</div>
+        </header>
+        <div class="admin-content"><slot /></div>
+      </main>
+    </div>
+
+    <div class="admin-toast" data-toast role="status" aria-live="polite"></div>
+    <script is:inline>
+      const setSidebar = (open) => document.body.classList.toggle("sidebar-open", open);
+      document.querySelector("[data-sidebar-open]")?.addEventListener("click", () => setSidebar(true));
+      document.querySelector("[data-sidebar-close]")?.addEventListener("click", () => setSidebar(false));
+      document.querySelector("[data-logout]")?.addEventListener("click", async () => {
+        await fetch("/api/admin/logout", { method: "POST" });
+        window.location.replace("/dashboard/login");
+      });
+      window.showAdminToast = (message, type = "success") => {
+        const toast = document.querySelector("[data-toast]");
+        toast.textContent = message;
+        toast.dataset.type = type;
+        toast.classList.add("show");
+        window.setTimeout(() => toast.classList.remove("show"), 3000);
+      };
+      window.adminApi("/api/admin/me").catch(() => {});
+    </script>
+  </body>
+</html>

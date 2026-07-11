@@ -1,0 +1,30 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+---
+<DashboardLayout title="Studio Overview" active="overview">
+  <section class="admin-intro">
+    <div><h2>Semua yang penting, dalam satu pandangan.</h2><p>Ringkasan operasional Solivate Studio. Angka diperbarui dari modul project, finance, dan traffic.</p></div>
+    <a class="admin-button accent" href="/dashboard/projects">Tambah project</a>
+  </section>
+  <section class="admin-grid stats" data-overview>
+    <article class="admin-stat"><p class="admin-stat-label">Active visitors</p><div class="admin-stat-value admin-skeleton"></div><span class="admin-stat-note">5 menit terakhir</span></article>
+    <article class="admin-stat blue"><p class="admin-stat-label">Visits today</p><div class="admin-stat-value admin-skeleton"></div><span class="admin-stat-note">Pageviews hari ini</span></article>
+    <article class="admin-stat coral"><p class="admin-stat-label">Active projects</p><div class="admin-stat-value admin-skeleton"></div><span class="admin-stat-note">Sedang berjalan</span></article>
+    <article class="admin-stat"><p class="admin-stat-label">Net this month</p><div class="admin-stat-value admin-skeleton"></div><span class="admin-stat-note">Pemasukan dikurangi biaya</span></article>
+  </section>
+  <section class="admin-grid two" style="margin-top:16px">
+    <article class="admin-panel"><div class="admin-panel-head"><div><h2>Progress portfolio</h2><p>Rata-rata progress seluruh project</p></div></div><div class="admin-progress"><span data-progress style="width:0%"></span></div><p data-progress-label style="margin:14px 0 0;font-size:12px;color:var(--admin-muted)">Memuat...</p></article>
+    <article class="admin-panel"><div class="admin-panel-head"><div><h2>Quick access</h2><p>Aksi yang paling sering dipakai</p></div></div><div class="admin-actions"><a class="admin-button ghost" href="/dashboard/cms">Edit website</a><a class="admin-button ghost" href="/dashboard/finance">Catat transaksi</a><a class="admin-button ghost" href="/dashboard/traffic">Lihat traffic</a></div></article>
+  </section>
+  <script is:inline>
+    window.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const data = await window.adminApi("/api/admin/data?resource=overview");
+        const values = [data.traffic.active, data.traffic.today, data.projects.active, window.formatRupiah(Number(data.finance.income) - Number(data.finance.expense))];
+        document.querySelectorAll("[data-overview] .admin-stat-value").forEach((node, index) => { node.classList.remove("admin-skeleton"); node.textContent = values[index]; });
+        document.querySelector("[data-progress]").style.width = `${data.projects.progress}%`;
+        document.querySelector("[data-progress-label]").textContent = `${data.projects.progress}% rata-rata dari ${data.projects.total} project`;
+      } catch (error) { window.showAdminToast(error.message, "error"); }
+    });
+  </script>
+</DashboardLayout>

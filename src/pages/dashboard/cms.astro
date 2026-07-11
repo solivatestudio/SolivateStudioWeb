@@ -1,0 +1,64 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+---
+<DashboardLayout title="Website CMS" active="cms" eyebrow="Content control">
+  <section class="admin-intro"><div><h2>Ubah pesan utama tanpa bongkar source.</h2><p>Konten yang kosong tetap memakai copy bawaan website. Simpan hanya bagian yang memang ingin dioverride.</p></div><button class="admin-button accent" type="button" data-save-cms>Simpan perubahan</button></section>
+  <p class="admin-error" data-cms-error hidden></p>
+  <section class="admin-grid two">
+    <article class="admin-panel">
+      <div class="admin-panel-head"><div><h2>Landing page</h2><p>Headline dan pembuka utama</p></div></div>
+      <div class="admin-form">
+        <label class="admin-field full"><span>Hero title - Indonesia</span><input data-cms-key="hero_title_id" /></label>
+        <label class="admin-field full"><span>Hero title - English</span><input data-cms-key="hero_title_en" /></label>
+        <label class="admin-field full"><span>Hero text - Indonesia</span><textarea data-cms-key="hero_text_id"></textarea></label>
+        <label class="admin-field full"><span>Hero text - English</span><textarea data-cms-key="hero_text_en"></textarea></label>
+      </div>
+    </article>
+    <article class="admin-panel">
+      <div class="admin-panel-head"><div><h2>Company profile</h2><p>Pesan tentang brand</p></div></div>
+      <div class="admin-form">
+        <label class="admin-field full"><span>About title - Indonesia</span><textarea data-cms-key="about_title_id"></textarea></label>
+        <label class="admin-field full"><span>About title - English</span><textarea data-cms-key="about_title_en"></textarea></label>
+        <label class="admin-field full"><span>Visi</span><textarea data-cms-key="vision"></textarea></label>
+        <label class="admin-field full"><span>Misi ringkas</span><textarea data-cms-key="mission"></textarea></label>
+      </div>
+    </article>
+    <article class="admin-panel">
+      <div class="admin-panel-head"><div><h2>Project highlight</h2><p>Project unggulan untuk kebutuhan internal</p></div></div>
+      <div class="admin-form">
+        <label class="admin-field full"><span>Nama project</span><input data-cms-key="highlight_name" /></label>
+        <label class="admin-field full"><span>Deskripsi</span><textarea data-cms-key="highlight_description"></textarea></label>
+        <label class="admin-field full"><span>Project URL</span><input type="url" data-cms-key="highlight_url" /></label>
+      </div>
+    </article>
+    <article class="admin-panel">
+      <div class="admin-panel-head"><div><h2>Kontak & social</h2><p>Sumber kontak utama brand</p></div></div>
+      <div class="admin-form">
+        <label class="admin-field full"><span>Email</span><input type="email" data-cms-key="contact_email" placeholder="solivatestudio@gmail.com" /></label>
+        <label class="admin-field full"><span>WhatsApp</span><input data-cms-key="contact_whatsapp" placeholder="6281219118993" /></label>
+        <label class="admin-field full"><span>Instagram URL</span><input type="url" data-cms-key="contact_instagram" /></label>
+      </div>
+    </article>
+  </section>
+  <script is:inline>
+    window.addEventListener("DOMContentLoaded", async () => {
+      const fields = [...document.querySelectorAll("[data-cms-key]")];
+      const errorNode = document.querySelector("[data-cms-error]");
+      try {
+        const { entries } = await window.adminApi("/api/admin/data?resource=cms");
+        fields.forEach((field) => { field.value = entries[field.dataset.cmsKey] ?? ""; });
+      } catch (error) { errorNode.textContent = error.message; errorNode.hidden = false; }
+      document.querySelector("[data-save-cms]")?.addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        button.textContent = "Menyimpan...";
+        try {
+          const entries = Object.fromEntries(fields.map((field) => [field.dataset.cmsKey, field.value.trim()]));
+          await window.adminApi("/api/admin/data?resource=cms", { method: "PUT", body: JSON.stringify({ entries }) });
+          window.showAdminToast("Konten website berhasil disimpan.");
+        } catch (error) { window.showAdminToast(error.message, "error"); }
+        finally { button.disabled = false; button.textContent = "Simpan perubahan"; }
+      });
+    });
+  </script>
+</DashboardLayout>

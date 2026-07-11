@@ -1,0 +1,48 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+---
+<DashboardLayout title="Project Management" active="projects" eyebrow="Delivery desk">
+  <section class="admin-intro"><div><h2>Jaga scope, deadline, dan progres tetap terlihat.</h2><p>Project aktif, tahap review, dan pekerjaan yang tertahan tersusun dalam satu daftar operasional.</p></div></section>
+  <section class="admin-panel" style="margin-bottom:16px">
+    <div class="admin-panel-head"><div><h2 data-project-form-title>Tambah project</h2><p>Isi detail inti yang dibutuhkan tim.</p></div><button class="admin-button ghost" type="button" data-project-reset>Reset</button></div>
+    <form class="admin-form" data-project-form>
+      <input type="hidden" name="id" />
+      <label class="admin-field"><span>Nama project</span><input name="name" required /></label>
+      <label class="admin-field"><span>Client</span><input name="client" /></label>
+      <label class="admin-field"><span>Status</span><select name="status"><option value="planning">Planning</option><option value="active">Active</option><option value="review">Review</option><option value="on-hold">On hold</option><option value="completed">Completed</option></select></label>
+      <label class="admin-field"><span>Progress (%)</span><input name="progress" type="number" min="0" max="100" value="0" /></label>
+      <label class="admin-field"><span>Deadline</span><input name="deadline" type="date" /></label>
+      <label class="admin-field"><span>Budget</span><input name="budget" type="number" min="0" step="1000" /></label>
+      <label class="admin-field full"><span>Catatan</span><textarea name="notes"></textarea></label>
+      <div class="admin-actions full"><button class="admin-button accent" type="submit">Simpan project</button></div>
+    </form>
+  </section>
+  <section class="admin-panel">
+    <div class="admin-panel-head"><div><h2>Project list</h2><p data-project-count>Memuat data...</p></div></div>
+    <div data-project-list><div class="admin-empty">Memuat project...</div></div>
+  </section>
+  <script is:inline>
+    window.addEventListener("DOMContentLoaded", () => {
+      const form = document.querySelector("[data-project-form]");
+      const list = document.querySelector("[data-project-list]");
+      let items = [];
+      const reset = () => { form.reset(); form.elements.id.value = ""; form.elements.progress.value = 0; document.querySelector("[data-project-form-title]").textContent = "Tambah project"; };
+      const load = async () => { const data = await window.adminApi("/api/admin/data?resource=projects"); items = data.items; render(); };
+      const render = () => {
+        document.querySelector("[data-project-count]").textContent = `${items.length} project tercatat`;
+        if (!items.length) { list.innerHTML = '<div class="admin-empty">Belum ada project. Tambahkan project pertama di atas.</div>'; return; }
+        list.innerHTML = `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Project</th><th>Status</th><th>Progress</th><th>Deadline</th><th>Budget</th><th>Aksi</th></tr></thead><tbody>${items.map((item) => `<tr><td><strong>${escapeText(item.name)}</strong><br><span style="color:var(--admin-muted)">${escapeText(item.client || "Internal")}</span></td><td><span class="admin-badge ${item.status}">${escapeText(item.status)}</span></td><td><div class="admin-progress"><span style="width:${item.progress}%"></span></div><small>${item.progress}%</small></td><td>${window.formatDate(item.deadline)}</td><td>${window.formatRupiah(item.budget)}</td><td><div class="admin-actions"><button class="admin-button ghost" data-edit="${item.id}">Edit</button><button class="admin-button danger" data-delete="${item.id}">Hapus</button></div></td></tr>`).join("")}</tbody></table></div>`;
+      };
+      const escapeText = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char]));
+      form.addEventListener("submit", async (event) => { event.preventDefault(); const data = Object.fromEntries(new FormData(form)); try { await window.adminApi("/api/admin/data?resource=projects", { method: data.id ? "PUT" : "POST", body: JSON.stringify(data) }); reset(); await load(); window.showAdminToast("Project berhasil disimpan."); } catch (error) { window.showAdminToast(error.message, "error"); } });
+      document.querySelector("[data-project-reset]").addEventListener("click", reset);
+      list.addEventListener("click", async (event) => {
+        const editId = event.target.closest("[data-edit]")?.dataset.edit;
+        const deleteId = event.target.closest("[data-delete]")?.dataset.delete;
+        if (editId) { const item = items.find((entry) => entry.id === editId); Object.entries(item).forEach(([key, value]) => { if (form.elements[key]) form.elements[key].value = key === "deadline" && value ? String(value).slice(0,10) : value ?? ""; }); document.querySelector("[data-project-form-title]").textContent = "Edit project"; form.scrollIntoView({ behavior: "smooth" }); }
+        if (deleteId && confirm("Hapus project ini?")) { try { await window.adminApi("/api/admin/data?resource=projects", { method: "DELETE", body: JSON.stringify({ id: deleteId }) }); await load(); window.showAdminToast("Project dihapus."); } catch (error) { window.showAdminToast(error.message, "error"); } }
+      });
+      load().catch((error) => { list.innerHTML = `<p class="admin-error">${escapeText(error.message)}</p>`; });
+    });
+  </script>
+</DashboardLayout>

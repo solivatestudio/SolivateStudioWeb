@@ -1,0 +1,60 @@
+---
+import "../../dashboard.css";
+---
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Admin Login | Solivate Studio</title>
+  </head>
+  <body>
+    <main class="admin-login">
+      <section class="admin-login-brand">
+        <img src="/solivate-logo.webp" alt="Solivate Studio" />
+        <div>
+          <h1>One desk.<br />Clear decisions.</h1>
+          <p>Kelola konten, project, keuangan, kinerja tim, dan denyut website dari satu workspace ringan.</p>
+        </div>
+      </section>
+      <section class="admin-login-form-wrap">
+        <div class="admin-login-form">
+          <p>Restricted area</p>
+          <h2>Masuk dashboard</h2>
+          <p>Gunakan akun internal Solivate Studio. Sesi akan tersimpan aman selama tujuh hari.</p>
+          <p class="admin-error" data-error hidden></p>
+          <form data-login-form>
+            <label class="admin-field"><span>Username</span><input name="username" autocomplete="username" required /></label>
+            <label class="admin-field"><span>Password</span><input type="password" name="password" autocomplete="current-password" required /></label>
+            <button class="admin-button accent" type="submit">Masuk ke workspace</button>
+          </form>
+        </div>
+      </section>
+    </main>
+    <script is:inline>
+      fetch("/api/admin/me").then((response) => { if (response.ok) window.location.replace("/dashboard"); });
+      const form = document.querySelector("[data-login-form]");
+      const error = document.querySelector("[data-error]");
+      form?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        error.hidden = true;
+        const button = form.querySelector("button");
+        button.disabled = true;
+        button.textContent = "Memverifikasi...";
+        try {
+          const values = Object.fromEntries(new FormData(form));
+          const response = await fetch("/api/admin/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(values) });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.message || "Login gagal.");
+          window.location.replace("/dashboard");
+        } catch (reason) {
+          error.textContent = reason.message;
+          error.hidden = false;
+          button.disabled = false;
+          button.textContent = "Masuk ke workspace";
+        }
+      });
+    </script>
+  </body>
+</html>
