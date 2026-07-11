@@ -2,150 +2,163 @@
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 ---
 
-<DashboardLayout title="Website CMS" active="cms" mode="cms" eyebrow="Live content studio">
-  <section class="cms-toolbar">
+<DashboardLayout title="Website CMS" active="cms" mode="cms" eyebrow="Content management">
+  <section class="cms-compact-head">
     <div>
-      <span class="cms-kicker">Homepage content</span>
-      <h2>Edit semua copy dari satu workspace.</h2>
-      <p>Perubahan tersimpan otomatis ke database dan digunakan website saat halaman berikutnya dibuka.</p>
+      <p class="cms-kicker">Homepage editor</p>
+      <h2>Kelola konten yang memang sering berubah.</h2>
+      <p>Pricing, project, FAQ, dan informasi kontak langsung tersimpan ke website.</p>
     </div>
     <div class="cms-toolbar-actions">
-      <span class="cms-save-state" data-save-state><i></i> Menyiapkan konten...</span>
-      <a class="admin-button ghost" href="/" target="_blank" rel="noreferrer">Buka website ↗</a>
-      <button class="admin-button accent" type="button" data-save-all>Simpan semua</button>
+      <span class="cms-save-state" data-save-state><i></i> Memuat...</span>
+      <button class="admin-button accent" type="button" data-save-all>Simpan perubahan</button>
     </div>
   </section>
-
   <p class="admin-error" data-cms-error hidden></p>
 
-  <section class="cms-workbench">
-    <aside class="cms-sections">
-      <label class="cms-search">
-        <span>Cari konten</span>
-        <input type="search" placeholder="Hero, layanan, footer..." data-cms-search />
-      </label>
-      <nav data-cms-groups aria-label="Kelompok konten"></nav>
-      <div class="cms-language-note"><strong>ID + EN</strong><span>Kedua bahasa dikelola berdampingan.</span></div>
+  <section class="cms-simple-shell">
+    <aside class="cms-simple-nav">
+      <div class="cms-nav-label">Bagian website</div>
+      <nav data-cms-groups aria-label="Bagian konten"></nav>
+      <a href="/" target="_blank" rel="noreferrer">Lihat website <span>↗</span></a>
     </aside>
-
-    <div class="cms-editor">
-      <div class="cms-editor-head">
-        <div><span data-group-eyebrow>Section</span><h3 data-group-title>Memuat konten...</h3></div>
-        <span data-field-count>0 field</span>
-      </div>
-      <div class="cms-fields" data-cms-fields></div>
-      <div class="admin-empty" data-cms-empty hidden>Konten tidak ditemukan.</div>
-    </div>
-
-    <aside class="cms-preview">
-      <div class="cms-preview-head">
-        <div><i></i><span>Live preview</span></div>
-        <button type="button" data-refresh-preview aria-label="Muat ulang preview">↻</button>
-      </div>
-      <div class="cms-preview-frame"><iframe src="/?cms-preview=1" title="Homepage preview" data-preview></iframe></div>
-      <p>Preview diperbarui setelah perubahan tersimpan.</p>
-    </aside>
+    <main class="cms-simple-editor">
+      <header>
+        <div><span data-group-eyebrow>Homepage</span><h3 data-group-title>Memuat...</h3></div>
+        <span data-field-count></span>
+      </header>
+      <div class="cms-business-fields" data-cms-fields></div>
+    </main>
   </section>
 
   <script is:inline>
     window.addEventListener("DOMContentLoaded", async () => {
-      const groupLabels = {
-        meta: "SEO & metadata", nav: "Navigation", hero: "Hero", preview: "Hero visual",
-        marquee: "Marquee", about: "About", feature: "Brand pillars", services: "Services intro",
-        service: "Service cards", pricing: "Pricing", work: "Projects", process: "Process",
-        contact: "Contact & FAQ", faq: "FAQ", form: "Contact form", success: "Form success",
-        footer: "Footer", floating: "Floating CTA"
+      const groups = [
+        {
+          id: "main", label: "Konten utama", description: "Hero, tentang, dan pembuka layanan",
+          keys: ["hero.title", "hero.text", "about.title", "about.lead", "services.title"]
+        },
+        {
+          id: "pricing", label: "Pricing", description: "Judul, harga, deskripsi, dan benefit paket",
+          keys: ["pricing.title", "pricing.lead", ...[1,2,3].flatMap((n) => [`pricing.card.${n}.label`, `pricing.card.${n}.title`, `pricing.card.${n}.price`, `pricing.card.${n}.desc`, `pricing.card.${n}.point.1`, `pricing.card.${n}.point.2`, `pricing.card.${n}.point.3`])]
+        },
+        {
+          id: "projects", label: "Project showcase", description: "Project yang tampil di homepage",
+          custom: [1,2,3].flatMap((n) => [
+            { key: `project:${n}:title`, label: `Project ${n} - Nama`, type: "text" },
+            { key: `project:${n}:url`, label: `Project ${n} - Link`, type: "url" },
+            { key: `project:${n}:image`, label: `Project ${n} - URL gambar`, type: "url" }
+          ])
+        },
+        {
+          id: "faq", label: "FAQ", description: "Pertanyaan dan jawaban calon klien",
+          keys: [1,2,3].flatMap((n) => [`faq.${n}.q`, `faq.${n}.a`])
+        },
+        {
+          id: "contact", label: "Kontak & medsos", description: "CTA, email, WhatsApp, dan Instagram",
+          keys: ["contact.title", "contact.lead"],
+          custom: [
+            { key: "contact_email", label: "Email bisnis", type: "email" },
+            { key: "contact_whatsapp", label: "Nomor WhatsApp", type: "tel" },
+            { key: "contact_instagram", label: "Instagram URL", type: "url" }
+          ]
+        }
+      ];
+      const customDefaults = {
+        "project:1:title": "Masjid Raya Puri Telukjambe", "project:1:url": "/portfolio/masjid-raya-puri-telukjambe", "project:1:image": "/images/masjidrayapuritelukjambe.webp",
+        "project:2:title": "Cutbae Barbershop", "project:2:url": "/portfolio/cutbae-barbershop", "project:2:image": "/images/cutbae-barbershop.webp",
+        "project:3:title": "Makdian Bakery", "project:3:url": "/portfolio/makdian-bakery", "project:3:image": "/images/makdian-bakery.webp",
+        contact_email: "solivatestudio@gmail.com", contact_whatsapp: "6281219118993", contact_instagram: "https://www.instagram.com/solivatestudio/"
       };
-      const preferredOrder = Object.keys(groupLabels);
       const fieldsRoot = document.querySelector("[data-cms-fields]");
       const groupsRoot = document.querySelector("[data-cms-groups]");
-      const errorNode = document.querySelector("[data-cms-error]");
       const saveState = document.querySelector("[data-save-state]");
-      const preview = document.querySelector("[data-preview]");
-      let source = {};
+      const errorNode = document.querySelector("[data-cms-error]");
+      let translations = {};
       let values = {};
-      let activeGroup = "hero";
-      let saveTimer;
+      let active = groups[0];
+      let timer;
       let saving = false;
+      let pending = {};
 
       const dbKey = (key, locale) => `copy:${key}:${locale}`;
-      const readable = (key) => key.split(".").slice(1).map((part) => /^\d+$/.test(part) ? `#${part}` : part).join(" · ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-      const setState = (text, status = "ready") => { saveState.lastChild.textContent = ` ${text}`; saveState.dataset.status = status; };
-      const reloadPreview = () => { preview.src = `/?cms-preview=1&t=${Date.now()}`; };
+      const fieldLabel = (key) => {
+        const labels = { title: "Judul", text: "Deskripsi", lead: "Teks pembuka", label: "Label", price: "Harga", desc: "Deskripsi", q: "Pertanyaan", a: "Jawaban" };
+        const parts = key.split(".");
+        const card = parts.includes("card") ? `Paket ${parts[2]} - ` : "";
+        const faq = key.startsWith("faq.") ? `FAQ ${parts[1]} - ` : "";
+        const point = parts.includes("point") ? `Benefit ${parts.at(-1)}` : labels[parts.at(-1)] || parts.at(-1);
+        return `${card}${faq}${point}`;
+      };
+      const setState = (text, status = "saved") => { saveState.lastChild.textContent = ` ${text}`; saveState.dataset.status = status; };
 
-      const save = async (keys = Object.keys(source)) => {
+      const collectVisible = () => {
+        const entries = {};
+        fieldsRoot.querySelectorAll("[data-cms-key]").forEach((field) => { entries[field.dataset.cmsKey] = field.value.trim(); });
+        return entries;
+      };
+      const save = async () => {
         if (saving) return;
         saving = true;
         setState("Menyimpan...", "saving");
-        const entries = {};
-        keys.forEach((key) => ["id", "en"].forEach((locale) => { entries[dbKey(key, locale)] = values[dbKey(key, locale)] ?? ""; }));
         try {
+          const entries = Object.keys(pending).length ? { ...pending } : collectVisible();
+          Object.assign(values, entries);
           await window.adminApi("/api/admin/data?resource=cms", { method: "PUT", body: JSON.stringify({ entries }) });
-          setState("Semua perubahan tersimpan", "saved");
-          reloadPreview();
+          Object.keys(entries).forEach((key) => delete pending[key]);
+          setState("Tersimpan", "saved");
         } catch (error) {
           setState("Gagal menyimpan", "error");
           window.showAdminToast(error.message, "error");
         } finally { saving = false; }
       };
+      const scheduleSave = () => { window.clearTimeout(timer); setState("Belum tersimpan", "dirty"); timer = window.setTimeout(save, 900); };
 
-      const scheduleSave = (key) => {
-        window.clearTimeout(saveTimer);
-        setState("Ada perubahan", "dirty");
-        saveTimer = window.setTimeout(() => save([key]), 850);
-      };
+      const translationField = (key) => `
+        <article class="cms-business-card">
+          <div class="cms-business-label"><strong>${fieldLabel(key)}</strong><span>Bahasa Indonesia & Inggris</span></div>
+          <div class="cms-locale-grid">
+            <label><span>ID</span><textarea data-cms-key="${dbKey(key, "id")}">${values[dbKey(key, "id")] ?? translations[key]?.id ?? ""}</textarea></label>
+            <label><span>EN</span><textarea data-cms-key="${dbKey(key, "en")}">${values[dbKey(key, "en")] ?? translations[key]?.en ?? ""}</textarea></label>
+          </div>
+        </article>`;
+      const customField = (field) => `
+        <article class="cms-business-card compact">
+          <div class="cms-business-label"><strong>${field.label}</strong><span>Digunakan langsung di website</span></div>
+          <label class="cms-single-field"><input type="${field.type}" data-cms-key="${field.key}" value="${values[field.key] ?? customDefaults[field.key] ?? ""}" /></label>
+        </article>`;
 
-      const renderFields = (query = "") => {
-        const keys = Object.keys(source).filter((key) => key.split(".")[0] === activeGroup && (!query || `${key} ${source[key].id} ${source[key].en}`.toLowerCase().includes(query)));
-        document.querySelector("[data-group-title]").textContent = groupLabels[activeGroup] || activeGroup;
-        document.querySelector("[data-group-eyebrow]").textContent = `Homepage / ${activeGroup}`;
-        document.querySelector("[data-field-count]").textContent = `${keys.length} field`;
-        document.querySelector("[data-cms-empty]").hidden = keys.length > 0;
-        fieldsRoot.innerHTML = keys.map((key) => `
-          <article class="cms-field-row" data-copy-key="${key}">
-            <div class="cms-field-label"><strong>${readable(key)}</strong><code>${key}</code></div>
-            <label><span>Indonesia</span><textarea data-locale="id">${values[dbKey(key, "id")] ?? source[key].id}</textarea></label>
-            <label><span>English</span><textarea data-locale="en">${values[dbKey(key, "en")] ?? source[key].en}</textarea></label>
-          </article>`).join("");
-        fieldsRoot.querySelectorAll("textarea").forEach((field) => field.addEventListener("input", () => {
-          const key = field.closest("[data-copy-key]").dataset.copyKey;
-          values[dbKey(key, field.dataset.locale)] = field.value;
-          scheduleSave(key);
+      const render = () => {
+        document.querySelector("[data-group-title]").textContent = active.label;
+        document.querySelector("[data-group-eyebrow]").textContent = active.description;
+        const count = (active.keys?.length || 0) + (active.custom?.length || 0);
+        document.querySelector("[data-field-count]").textContent = `${count} item`;
+        fieldsRoot.innerHTML = `${(active.keys || []).map(translationField).join("")}${(active.custom || []).map(customField).join("")}`;
+        fieldsRoot.querySelectorAll("input, textarea").forEach((field) => field.addEventListener("input", () => {
+          pending[field.dataset.cmsKey] = field.value.trim();
+          values[field.dataset.cmsKey] = field.value;
+          scheduleSave();
         }));
       };
-
-      const renderGroups = () => {
-        const groups = [...new Set(Object.keys(source).map((key) => key.split(".")[0]))].sort((a, b) => preferredOrder.indexOf(a) - preferredOrder.indexOf(b));
-        groupsRoot.innerHTML = groups.map((group) => `<button class="${group === activeGroup ? "active" : ""}" type="button" data-group="${group}"><span>${groupLabels[group] || group}</span><b>${Object.keys(source).filter((key) => key.startsWith(`${group}.`)).length}</b></button>`).join("");
+      const renderNav = () => {
+        groupsRoot.innerHTML = groups.map((group, index) => `<button class="${group.id === active.id ? "active" : ""}" type="button" data-group="${group.id}"><small>0${index + 1}</small><span><strong>${group.label}</strong><em>${group.description}</em></span></button>`).join("");
         groupsRoot.querySelectorAll("button").forEach((button) => button.addEventListener("click", () => {
-          activeGroup = button.dataset.group;
+          active = groups.find((group) => group.id === button.dataset.group);
           groupsRoot.querySelectorAll("button").forEach((item) => item.classList.toggle("active", item === button));
-          renderFields(document.querySelector("[data-cms-search]").value.trim().toLowerCase());
+          render();
         }));
       };
 
       try {
-        const homepage = await fetch("/").then((response) => response.text());
+        const [homepage, cms] = await Promise.all([fetch("/").then((response) => response.text()), window.adminApi("/api/admin/data?resource=cms")]);
         const parsed = new DOMParser().parseFromString(homepage, "text/html");
-        source = JSON.parse(parsed.querySelector("#i18n-data")?.textContent || "{}");
-        const { entries } = await window.adminApi("/api/admin/data?resource=cms");
-        values = entries || {};
-        const defaults = {};
-        Object.entries(source).forEach(([key, copy]) => ["id", "en"].forEach((locale) => { defaults[dbKey(key, locale)] = copy[locale] || ""; }));
-        await window.adminApi("/api/admin/data?resource=cms", { method: "PUT", body: JSON.stringify({ entries: defaults, initialize: true }) });
-        Object.entries(defaults).forEach(([key, value]) => { if (!(key in values)) values[key] = value; });
-        renderGroups();
-        renderFields();
-        setState("Semua perubahan tersimpan", "saved");
+        translations = JSON.parse(parsed.querySelector("#i18n-data")?.textContent || "{}");
+        values = cms.entries || {};
+        renderNav(); render(); setState("Tersimpan", "saved");
       } catch (error) {
-        errorNode.textContent = error.message;
-        errorNode.hidden = false;
-        setState("CMS tidak tersedia", "error");
+        errorNode.textContent = error.message; errorNode.hidden = false; setState("CMS tidak tersedia", "error");
       }
-
-      document.querySelector("[data-cms-search]").addEventListener("input", (event) => renderFields(event.target.value.trim().toLowerCase()));
-      document.querySelector("[data-save-all]").addEventListener("click", () => save());
-      document.querySelector("[data-refresh-preview]").addEventListener("click", reloadPreview);
+      document.querySelector("[data-save-all]").addEventListener("click", save);
     });
   </script>
 </DashboardLayout>

@@ -7,7 +7,7 @@ const clean = (value, max = 500) => String(value ?? "").trim().slice(0, max);
 const number = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
 
 async function getOverview(sql) {
-  const [projects, finance, traffic] = await Promise.all([
+  const [projects, finance, traffic, trafficTrend, financeTrend] = await Promise.all([
     sql`SELECT COUNT(*)::int AS total,
       COUNT(*) FILTER (WHERE status IN ('planning', 'active', 'review'))::int AS active,
       COALESCE(ROUND(AVG(progress)), 0)::int AS progress
@@ -19,9 +19,20 @@ async function getOverview(sql) {
     sql`SELECT
       COUNT(DISTINCT session_hash) FILTER (WHERE created_at >= NOW() - INTERVAL '5 minutes')::int AS active,
       COUNT(*) FILTER (WHERE event_type = 'pageview' AND created_at >= CURRENT_DATE)::int AS today
-      FROM traffic_events`
+      FROM traffic_events`,
+    sql`SELECT day::date, COALESCE(COUNT(event.id), 0)::int AS visits
+      FROM generate_series(CURRENT_DATE - INTERVAL '6 days', CURRENT_DATE, INTERVAL '1 day') day
+      LEFT JOIN traffic_events event ON event.event_type = 'pageview'
+        AND event.created_at >= day AND event.created_at < day + INTERVAL '1 day'
+      GROUP BY day ORDER BY day`,
+    sql`SELECT month::date,
+      COALESCE(SUM(entry.amount) FILTER (WHERE entry.type = 'income'), 0) AS income,
+      COALESCE(SUM(entry.amount) FILTER (WHERE entry.type = 'expense'), 0) AS expense
+      FROM generate_series(date_trunc('month', CURRENT_DATE) - INTERVAL '5 months', date_trunc('month', CURRENT_DATE), INTERVAL '1 month') month
+      LEFT JOIN finance_entries entry ON entry.entry_date >= month AND entry.entry_date < month + INTERVAL '1 month'
+      GROUP BY month ORDER BY month`
   ]);
-  return { projects: projects[0], finance: finance[0], traffic: traffic[0] };
+  return { projects: projects[0], finance: finance[0], traffic: traffic[0], trafficTrend, financeTrend };
 }
 
 export default async function handler(request, response) {

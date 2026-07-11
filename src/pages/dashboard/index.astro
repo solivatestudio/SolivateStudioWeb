@@ -13,10 +13,14 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
     <article class="admin-stat"><p class="admin-stat-label">Net this month</p><div class="admin-stat-value admin-skeleton"></div><span class="admin-stat-note">Pemasukan dikurangi biaya</span></article>
   </section>
   <section class="admin-grid two" style="margin-top:16px">
+    <article class="admin-panel admin-chart-panel"><div class="admin-panel-head"><div><h2>Traffic pulse</h2><p>Pageviews selama 7 hari terakhir</p></div><span class="chart-legend"><i></i> Pageviews</span></div><div class="admin-chart-wrap compact"><canvas data-overview-traffic></canvas></div></article>
+    <article class="admin-panel admin-chart-panel"><div class="admin-panel-head"><div><h2>Financial movement</h2><p>Pemasukan dan pengeluaran 6 bulan</p></div><div class="chart-legends"><span class="chart-legend"><i></i> Income</span><span class="chart-legend expense"><i></i> Expense</span></div></div><div class="admin-chart-wrap compact"><canvas data-overview-finance></canvas></div></article>
     <article class="admin-panel"><div class="admin-panel-head"><div><h2>Progress portfolio</h2><p>Rata-rata progress seluruh project</p></div></div><div class="admin-progress"><span data-progress style="width:0%"></span></div><p data-progress-label style="margin:14px 0 0;font-size:12px;color:var(--admin-muted)">Memuat...</p></article>
     <article class="admin-panel"><div class="admin-panel-head"><div><h2>Quick access</h2><p>Aksi yang paling sering dipakai</p></div></div><div class="admin-actions"><a class="admin-button ghost" href="/dashboard/cms">Edit website</a><a class="admin-button ghost" href="/dashboard/finance">Catat transaksi</a><a class="admin-button ghost" href="/dashboard/traffic">Lihat traffic</a></div></article>
   </section>
-  <script is:inline>
+  <script>
+    // @ts-nocheck -- browser dashboard data is validated by the authenticated API.
+    import Chart from "chart.js/auto";
     window.addEventListener("DOMContentLoaded", async () => {
       try {
         const data = await window.adminApi("/api/admin/data?resource=overview");
@@ -24,6 +28,12 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         document.querySelectorAll("[data-overview] .admin-stat-value").forEach((node, index) => { node.classList.remove("admin-skeleton"); node.textContent = values[index]; });
         document.querySelector("[data-progress]").style.width = `${data.projects.progress}%`;
         document.querySelector("[data-progress-label]").textContent = `${data.projects.progress}% rata-rata dari ${data.projects.total} project`;
+        const baseOptions = { responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: "index" }, plugins: { legend: { display: false }, tooltip: { backgroundColor: "#071526", padding: 11, titleFont: { family: "Plus Jakarta Sans", size: 9 }, bodyFont: { family: "Plus Jakarta Sans", size: 10, weight: "bold" } } }, scales: { x: { grid: { display: false }, border: { display: false }, ticks: { color: "#6d7785", font: { family: "Plus Jakarta Sans", size: 8, weight: 600 } } }, y: { beginAtZero: true, border: { display: false }, grid: { color: "rgba(7,21,38,.07)" }, ticks: { precision: 0, color: "#6d7785", font: { family: "Plus Jakarta Sans", size: 8 } } } } };
+        const trafficContext = document.querySelector("[data-overview-traffic]").getContext("2d");
+        const trafficGradient = trafficContext.createLinearGradient(0, 0, 0, 220); trafficGradient.addColorStop(0, "rgba(2,62,138,.22)"); trafficGradient.addColorStop(1, "rgba(2,62,138,0)");
+        new Chart(trafficContext, { type: "line", data: { labels: data.trafficTrend.map((item) => new Intl.DateTimeFormat("id-ID", { weekday: "short" }).format(new Date(item.day))), datasets: [{ data: data.trafficTrend.map((item) => Number(item.visits)), borderColor: "#023e8a", backgroundColor: trafficGradient, borderWidth: 3, pointRadius: 2, pointHoverRadius: 5, pointBackgroundColor: "#d7ff3f", pointBorderColor: "#023e8a", fill: true, tension: .4 }] }, options: baseOptions });
+        const money = (value) => Number(value) / 1000;
+        new Chart(document.querySelector("[data-overview-finance]"), { type: "line", data: { labels: data.financeTrend.map((item) => new Intl.DateTimeFormat("id-ID", { month: "short" }).format(new Date(item.month))), datasets: [{ data: data.financeTrend.map((item) => money(item.income)), borderColor: "#023e8a", backgroundColor: "transparent", borderWidth: 3, pointRadius: 2, tension: .38 }, { data: data.financeTrend.map((item) => money(item.expense)), borderColor: "#ff5a5f", backgroundColor: "transparent", borderWidth: 2, borderDash: [5,5], pointRadius: 2, tension: .38 }] }, options: { ...baseOptions, scales: { ...baseOptions.scales, y: { ...baseOptions.scales.y, ticks: { ...baseOptions.scales.y.ticks, callback: (value) => `Rp${value}k` } } } } });
       } catch (error) { window.showAdminToast(error.message, "error"); }
     });
   </script>

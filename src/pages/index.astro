@@ -532,12 +532,12 @@ const organizationSchema = JSON.stringify({
           </div>
         </div>
         <div class="container work-grid">
-          {works.map((item) => (
-            <a class="work-card" href={item.url ?? "#contact"} target={item.url?.startsWith("http") ? "_blank" : undefined} rel={item.url?.startsWith("http") ? "noreferrer" : undefined}>
-              <img src={item.img} alt={item.title} width={item.width} height={item.height} loading="lazy" decoding="async" />
+          {works.map((item, index) => (
+            <a class="work-card" data-project-card={index + 1} href={item.url ?? "#contact"} target={item.url?.startsWith("http") ? "_blank" : undefined} rel={item.url?.startsWith("http") ? "noreferrer" : undefined}>
+              <img data-project-image src={item.img} alt={item.title} width={item.width} height={item.height} loading="lazy" decoding="async" />
               <div>
                 <span data-i18n={item.typeKey}>{tx(item.typeKey)}</span>
-                <p class="card-heading">{item.title}</p>
+                <p class="card-heading" data-project-title>{item.title}</p>
               </div>
             </a>
           ))}
@@ -701,6 +701,17 @@ const organizationSchema = JSON.stringify({
             const value = entries[`${cmsKey}_${locale}`];
             if (typeof value === "string" && value.trim() && !entries[`copy:${translationKey}:${locale}`]) translations[translationKey][locale] = value;
           }));
+          document.querySelectorAll("[data-project-card]").forEach((card) => {
+            const index = card.dataset.projectCard;
+            const title = String(entries[`project:${index}:title`] || "").trim();
+            const url = String(entries[`project:${index}:url`] || "").trim();
+            const image = String(entries[`project:${index}:image`] || "").trim();
+            const titleNode = card.querySelector("[data-project-title]");
+            const imageNode = card.querySelector("[data-project-image]");
+            if (title && titleNode) { titleNode.textContent = title; imageNode.alt = title; }
+            if (url) { card.href = url; card.target = url.startsWith("http") ? "_blank" : ""; card.rel = url.startsWith("http") ? "noreferrer" : ""; }
+            if (image && imageNode) imageNode.src = image;
+          });
           setLanguage(document.documentElement.lang);
         })
         .catch(() => {});
