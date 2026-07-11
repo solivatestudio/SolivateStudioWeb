@@ -690,17 +690,17 @@ const organizationSchema = JSON.stringify({
         .then((response) => response.ok ? response.json() : null)
         .then((data) => {
           const entries = data?.entries || {};
-          const cmsMap = {
-            "hero.title": "hero_title",
-            "hero.text": "hero_text",
-            "about.title": "about_title"
-          };
-          Object.entries(cmsMap).forEach(([translationKey, cmsKey]) => {
-            const id = String(entries[`${cmsKey}_id`] || "").trim();
-            const en = String(entries[`${cmsKey}_en`] || "").trim();
-            if (id) translations[translationKey].id = id;
-            if (en) translations[translationKey].en = en;
+          Object.keys(translations).forEach((translationKey) => {
+            ["id", "en"].forEach((locale) => {
+              const value = entries[`copy:${translationKey}:${locale}`];
+              if (typeof value === "string" && value.trim()) translations[translationKey][locale] = value;
+            });
           });
+          const legacyMap = { "hero.title": "hero_title", "hero.text": "hero_text", "about.title": "about_title" };
+          Object.entries(legacyMap).forEach(([translationKey, cmsKey]) => ["id", "en"].forEach((locale) => {
+            const value = entries[`${cmsKey}_${locale}`];
+            if (typeof value === "string" && value.trim() && !entries[`copy:${translationKey}:${locale}`]) translations[translationKey][locale] = value;
+          }));
           setLanguage(document.documentElement.lang);
         })
         .catch(() => {});

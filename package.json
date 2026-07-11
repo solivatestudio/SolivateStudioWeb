@@ -8,7 +8,8 @@
     "build": "astro build",
     "preview": "astro preview --host 0.0.0.0",
     "lint": "astro check",
-    "admin:hash": "node scripts/hash-admin-password.mjs"
+    "admin:hash": "node scripts/hash-admin-password.mjs",
+    "cms:seed": "node scripts/seed-homepage-cms.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

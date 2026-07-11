@@ -1,64 +1,151 @@
 ---
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 ---
-<DashboardLayout title="Website CMS" active="cms" eyebrow="Content control">
-  <section class="admin-intro"><div><h2>Ubah pesan utama tanpa bongkar source.</h2><p>Konten yang kosong tetap memakai copy bawaan website. Simpan hanya bagian yang memang ingin dioverride.</p></div><button class="admin-button accent" type="button" data-save-cms>Simpan perubahan</button></section>
-  <p class="admin-error" data-cms-error hidden></p>
-  <section class="admin-grid two">
-    <article class="admin-panel">
-      <div class="admin-panel-head"><div><h2>Landing page</h2><p>Headline dan pembuka utama</p></div></div>
-      <div class="admin-form">
-        <label class="admin-field full"><span>Hero title - Indonesia</span><input data-cms-key="hero_title_id" /></label>
-        <label class="admin-field full"><span>Hero title - English</span><input data-cms-key="hero_title_en" /></label>
-        <label class="admin-field full"><span>Hero text - Indonesia</span><textarea data-cms-key="hero_text_id"></textarea></label>
-        <label class="admin-field full"><span>Hero text - English</span><textarea data-cms-key="hero_text_en"></textarea></label>
-      </div>
-    </article>
-    <article class="admin-panel">
-      <div class="admin-panel-head"><div><h2>Company profile</h2><p>Pesan tentang brand</p></div></div>
-      <div class="admin-form">
-        <label class="admin-field full"><span>About title - Indonesia</span><textarea data-cms-key="about_title_id"></textarea></label>
-        <label class="admin-field full"><span>About title - English</span><textarea data-cms-key="about_title_en"></textarea></label>
-        <label class="admin-field full"><span>Visi</span><textarea data-cms-key="vision"></textarea></label>
-        <label class="admin-field full"><span>Misi ringkas</span><textarea data-cms-key="mission"></textarea></label>
-      </div>
-    </article>
-    <article class="admin-panel">
-      <div class="admin-panel-head"><div><h2>Project highlight</h2><p>Project unggulan untuk kebutuhan internal</p></div></div>
-      <div class="admin-form">
-        <label class="admin-field full"><span>Nama project</span><input data-cms-key="highlight_name" /></label>
-        <label class="admin-field full"><span>Deskripsi</span><textarea data-cms-key="highlight_description"></textarea></label>
-        <label class="admin-field full"><span>Project URL</span><input type="url" data-cms-key="highlight_url" /></label>
-      </div>
-    </article>
-    <article class="admin-panel">
-      <div class="admin-panel-head"><div><h2>Kontak & social</h2><p>Sumber kontak utama brand</p></div></div>
-      <div class="admin-form">
-        <label class="admin-field full"><span>Email</span><input type="email" data-cms-key="contact_email" placeholder="solivatestudio@gmail.com" /></label>
-        <label class="admin-field full"><span>WhatsApp</span><input data-cms-key="contact_whatsapp" placeholder="6281219118993" /></label>
-        <label class="admin-field full"><span>Instagram URL</span><input type="url" data-cms-key="contact_instagram" /></label>
-      </div>
-    </article>
+
+<DashboardLayout title="Website CMS" active="cms" mode="cms" eyebrow="Live content studio">
+  <section class="cms-toolbar">
+    <div>
+      <span class="cms-kicker">Homepage content</span>
+      <h2>Edit semua copy dari satu workspace.</h2>
+      <p>Perubahan tersimpan otomatis ke database dan digunakan website saat halaman berikutnya dibuka.</p>
+    </div>
+    <div class="cms-toolbar-actions">
+      <span class="cms-save-state" data-save-state><i></i> Menyiapkan konten...</span>
+      <a class="admin-button ghost" href="/" target="_blank" rel="noreferrer">Buka website ↗</a>
+      <button class="admin-button accent" type="button" data-save-all>Simpan semua</button>
+    </div>
   </section>
+
+  <p class="admin-error" data-cms-error hidden></p>
+
+  <section class="cms-workbench">
+    <aside class="cms-sections">
+      <label class="cms-search">
+        <span>Cari konten</span>
+        <input type="search" placeholder="Hero, layanan, footer..." data-cms-search />
+      </label>
+      <nav data-cms-groups aria-label="Kelompok konten"></nav>
+      <div class="cms-language-note"><strong>ID + EN</strong><span>Kedua bahasa dikelola berdampingan.</span></div>
+    </aside>
+
+    <div class="cms-editor">
+      <div class="cms-editor-head">
+        <div><span data-group-eyebrow>Section</span><h3 data-group-title>Memuat konten...</h3></div>
+        <span data-field-count>0 field</span>
+      </div>
+      <div class="cms-fields" data-cms-fields></div>
+      <div class="admin-empty" data-cms-empty hidden>Konten tidak ditemukan.</div>
+    </div>
+
+    <aside class="cms-preview">
+      <div class="cms-preview-head">
+        <div><i></i><span>Live preview</span></div>
+        <button type="button" data-refresh-preview aria-label="Muat ulang preview">↻</button>
+      </div>
+      <div class="cms-preview-frame"><iframe src="/?cms-preview=1" title="Homepage preview" data-preview></iframe></div>
+      <p>Preview diperbarui setelah perubahan tersimpan.</p>
+    </aside>
+  </section>
+
   <script is:inline>
     window.addEventListener("DOMContentLoaded", async () => {
-      const fields = [...document.querySelectorAll("[data-cms-key]")];
+      const groupLabels = {
+        meta: "SEO & metadata", nav: "Navigation", hero: "Hero", preview: "Hero visual",
+        marquee: "Marquee", about: "About", feature: "Brand pillars", services: "Services intro",
+        service: "Service cards", pricing: "Pricing", work: "Projects", process: "Process",
+        contact: "Contact & FAQ", faq: "FAQ", form: "Contact form", success: "Form success",
+        footer: "Footer", floating: "Floating CTA"
+      };
+      const preferredOrder = Object.keys(groupLabels);
+      const fieldsRoot = document.querySelector("[data-cms-fields]");
+      const groupsRoot = document.querySelector("[data-cms-groups]");
       const errorNode = document.querySelector("[data-cms-error]");
-      try {
-        const { entries } = await window.adminApi("/api/admin/data?resource=cms");
-        fields.forEach((field) => { field.value = entries[field.dataset.cmsKey] ?? ""; });
-      } catch (error) { errorNode.textContent = error.message; errorNode.hidden = false; }
-      document.querySelector("[data-save-cms]")?.addEventListener("click", async (event) => {
-        const button = event.currentTarget;
-        button.disabled = true;
-        button.textContent = "Menyimpan...";
+      const saveState = document.querySelector("[data-save-state]");
+      const preview = document.querySelector("[data-preview]");
+      let source = {};
+      let values = {};
+      let activeGroup = "hero";
+      let saveTimer;
+      let saving = false;
+
+      const dbKey = (key, locale) => `copy:${key}:${locale}`;
+      const readable = (key) => key.split(".").slice(1).map((part) => /^\d+$/.test(part) ? `#${part}` : part).join(" · ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+      const setState = (text, status = "ready") => { saveState.lastChild.textContent = ` ${text}`; saveState.dataset.status = status; };
+      const reloadPreview = () => { preview.src = `/?cms-preview=1&t=${Date.now()}`; };
+
+      const save = async (keys = Object.keys(source)) => {
+        if (saving) return;
+        saving = true;
+        setState("Menyimpan...", "saving");
+        const entries = {};
+        keys.forEach((key) => ["id", "en"].forEach((locale) => { entries[dbKey(key, locale)] = values[dbKey(key, locale)] ?? ""; }));
         try {
-          const entries = Object.fromEntries(fields.map((field) => [field.dataset.cmsKey, field.value.trim()]));
           await window.adminApi("/api/admin/data?resource=cms", { method: "PUT", body: JSON.stringify({ entries }) });
-          window.showAdminToast("Konten website berhasil disimpan.");
-        } catch (error) { window.showAdminToast(error.message, "error"); }
-        finally { button.disabled = false; button.textContent = "Simpan perubahan"; }
-      });
+          setState("Semua perubahan tersimpan", "saved");
+          reloadPreview();
+        } catch (error) {
+          setState("Gagal menyimpan", "error");
+          window.showAdminToast(error.message, "error");
+        } finally { saving = false; }
+      };
+
+      const scheduleSave = (key) => {
+        window.clearTimeout(saveTimer);
+        setState("Ada perubahan", "dirty");
+        saveTimer = window.setTimeout(() => save([key]), 850);
+      };
+
+      const renderFields = (query = "") => {
+        const keys = Object.keys(source).filter((key) => key.split(".")[0] === activeGroup && (!query || `${key} ${source[key].id} ${source[key].en}`.toLowerCase().includes(query)));
+        document.querySelector("[data-group-title]").textContent = groupLabels[activeGroup] || activeGroup;
+        document.querySelector("[data-group-eyebrow]").textContent = `Homepage / ${activeGroup}`;
+        document.querySelector("[data-field-count]").textContent = `${keys.length} field`;
+        document.querySelector("[data-cms-empty]").hidden = keys.length > 0;
+        fieldsRoot.innerHTML = keys.map((key) => `
+          <article class="cms-field-row" data-copy-key="${key}">
+            <div class="cms-field-label"><strong>${readable(key)}</strong><code>${key}</code></div>
+            <label><span>Indonesia</span><textarea data-locale="id">${values[dbKey(key, "id")] ?? source[key].id}</textarea></label>
+            <label><span>English</span><textarea data-locale="en">${values[dbKey(key, "en")] ?? source[key].en}</textarea></label>
+          </article>`).join("");
+        fieldsRoot.querySelectorAll("textarea").forEach((field) => field.addEventListener("input", () => {
+          const key = field.closest("[data-copy-key]").dataset.copyKey;
+          values[dbKey(key, field.dataset.locale)] = field.value;
+          scheduleSave(key);
+        }));
+      };
+
+      const renderGroups = () => {
+        const groups = [...new Set(Object.keys(source).map((key) => key.split(".")[0]))].sort((a, b) => preferredOrder.indexOf(a) - preferredOrder.indexOf(b));
+        groupsRoot.innerHTML = groups.map((group) => `<button class="${group === activeGroup ? "active" : ""}" type="button" data-group="${group}"><span>${groupLabels[group] || group}</span><b>${Object.keys(source).filter((key) => key.startsWith(`${group}.`)).length}</b></button>`).join("");
+        groupsRoot.querySelectorAll("button").forEach((button) => button.addEventListener("click", () => {
+          activeGroup = button.dataset.group;
+          groupsRoot.querySelectorAll("button").forEach((item) => item.classList.toggle("active", item === button));
+          renderFields(document.querySelector("[data-cms-search]").value.trim().toLowerCase());
+        }));
+      };
+
+      try {
+        const homepage = await fetch("/").then((response) => response.text());
+        const parsed = new DOMParser().parseFromString(homepage, "text/html");
+        source = JSON.parse(parsed.querySelector("#i18n-data")?.textContent || "{}");
+        const { entries } = await window.adminApi("/api/admin/data?resource=cms");
+        values = entries || {};
+        const defaults = {};
+        Object.entries(source).forEach(([key, copy]) => ["id", "en"].forEach((locale) => { defaults[dbKey(key, locale)] = copy[locale] || ""; }));
+        await window.adminApi("/api/admin/data?resource=cms", { method: "PUT", body: JSON.stringify({ entries: defaults, initialize: true }) });
+        Object.entries(defaults).forEach(([key, value]) => { if (!(key in values)) values[key] = value; });
+        renderGroups();
+        renderFields();
+        setState("Semua perubahan tersimpan", "saved");
+      } catch (error) {
+        errorNode.textContent = error.message;
+        errorNode.hidden = false;
+        setState("CMS tidak tersedia", "error");
+      }
+
+      document.querySelector("[data-cms-search]").addEventListener("input", (event) => renderFields(event.target.value.trim().toLowerCase()));
+      document.querySelector("[data-save-all]").addEventListener("click", () => save());
+      document.querySelector("[data-refresh-preview]").addEventListener("click", reloadPreview);
     });
   </script>
 </DashboardLayout>

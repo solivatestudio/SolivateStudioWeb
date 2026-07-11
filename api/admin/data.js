@@ -66,14 +66,21 @@ export default async function handler(request, response) {
 
     if (resource === "cms" && request.method === "PUT") {
       const entries = body.entries && typeof body.entries === "object" ? body.entries : {};
+      const initialize = body.initialize === true;
       for (const [key, value] of Object.entries(entries)) {
         const safeKey = clean(key, 80);
         if (!safeKey) continue;
-        await sql`INSERT INTO cms_entries (key, value, status, updated_at)
-          VALUES (${safeKey}, ${JSON.stringify(value)}, 'published', NOW())
-          ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, status = 'published', updated_at = NOW()`;
+        if (initialize) {
+          await sql`INSERT INTO cms_entries (key, value, status, updated_at)
+            VALUES (${safeKey}, ${JSON.stringify(value)}, 'published', NOW())
+            ON CONFLICT (key) DO NOTHING`;
+        } else {
+          await sql`INSERT INTO cms_entries (key, value, status, updated_at)
+            VALUES (${safeKey}, ${JSON.stringify(value)}, 'published', NOW())
+            ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, status = 'published', updated_at = NOW()`;
+        }
       }
-      await audit(session.username, "update", "cms", "homepage");
+      await audit(session.username, initialize ? "initialize" : "update", "cms", "homepage");
       return response.status(200).json({ ok: true });
     }
 
