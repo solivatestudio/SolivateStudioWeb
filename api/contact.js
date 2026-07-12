@@ -5,7 +5,16 @@ import { turnstileToken, verifyTurnstile } from "./_lib/turnstile.js";
 const RESEND_API_URL = "https://api.resend.com/emails";
 const FALLBACK_TO_EMAIL = "solivatestudio@gmail.com";
 const FALLBACK_FROM_EMAIL = "Solivate Studio <onboarding@resend.dev>";
-const PROJECT_TYPES = new Set(["Redesign website", "Website baru", "Event / undangan digital", "Sistem custom"]);
+const PROJECT_TYPE_LABELS = new Map([
+  ["Redesign website", "Redesign website"],
+  ["Website redesign", "Redesign website"],
+  ["Website baru", "Website baru"],
+  ["New website", "Website baru"],
+  ["Event / undangan digital", "Event / undangan digital"],
+  ["Event / digital invitation", "Event / undangan digital"],
+  ["Sistem custom", "Sistem custom"],
+  ["Custom system", "Sistem custom"],
+]);
 
 const clean = (value) => String(value ?? "").trim();
 const escapeHtml = (value) =>
@@ -57,7 +66,7 @@ const validateHumanSubmission = (payload) => {
   const projectType = clean(payload.projectType);
   const brief = clean(payload.brief);
   if (!hasContactMethod(contact)) return "Please enter a valid email or WhatsApp number.";
-  if (!PROJECT_TYPES.has(projectType)) return "Please select a valid project type.";
+  if (!PROJECT_TYPE_LABELS.has(projectType)) return "Please select a valid project type.";
   if (looksRandom(name, { minWords: 1, maxSingleToken: 15 })) return "Please enter a real name.";
   if (brief.length < 25 || wordCount(brief) < 4 || looksRandom(brief, { minWords: 4, maxSingleToken: 22 })) {
     return "Please write a clearer project brief.";
@@ -88,7 +97,7 @@ export default async function handler(request, response) {
 
   const name = clean(payload.name);
   const contact = clean(payload.contact);
-  const projectType = clean(payload.projectType);
+  const projectType = PROJECT_TYPE_LABELS.get(clean(payload.projectType)) || clean(payload.projectType);
   const brief = clean(payload.brief);
 
   if (!name || !contact || !projectType || !brief) {
