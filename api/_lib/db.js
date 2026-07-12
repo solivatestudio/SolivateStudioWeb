@@ -112,20 +112,20 @@ export function ensureSchema() {
       )`,
     ]);
     await Promise.all([
-      sql`CREATE INDEX IF NOT EXISTS traffic_events_created_at_idx ON traffic_events (created_at DESC)`,
-      sql`CREATE INDEX IF NOT EXISTS traffic_events_session_idx ON traffic_events (session_hash, created_at DESC)`,
-      sql`CREATE INDEX IF NOT EXISTS cms_resources_type_idx ON cms_resources (resource_type, sort_order, updated_at DESC)`,
-      sql`CREATE INDEX IF NOT EXISTS finance_entries_project_idx ON finance_entries (project_id, entry_date DESC)`,
-      sql`CREATE INDEX IF NOT EXISTS project_milestones_project_idx ON project_milestones (project_id, due_date ASC)`,
-      sql`CREATE INDEX IF NOT EXISTS project_documents_project_idx ON project_documents (project_id, issued_date DESC)`,
-    ]);
-    await Promise.all([
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS start_date DATE`,
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS operational_cost NUMERIC(14, 2) NOT NULL DEFAULT 0`,
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS pic_fee NUMERIC(14, 2) NOT NULL DEFAULT 0`,
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'unpaid'`,
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS payment_received NUMERIC(14, 2) NOT NULL DEFAULT 0`,
       sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS project_id TEXT REFERENCES projects(id) ON DELETE SET NULL`,
+    ]);
+    await Promise.all([
+      sql`CREATE INDEX IF NOT EXISTS traffic_events_created_at_idx ON traffic_events (created_at DESC)`,
+      sql`CREATE INDEX IF NOT EXISTS traffic_events_session_idx ON traffic_events (session_hash, created_at DESC)`,
+      sql`CREATE INDEX IF NOT EXISTS cms_resources_type_idx ON cms_resources (resource_type, sort_order, updated_at DESC)`,
+      sql`CREATE INDEX IF NOT EXISTS finance_entries_project_idx ON finance_entries (project_id, entry_date DESC)`,
+      sql`CREATE INDEX IF NOT EXISTS project_milestones_project_idx ON project_milestones (project_id, due_date ASC)`,
+      sql`CREATE INDEX IF NOT EXISTS project_documents_project_idx ON project_documents (project_id, issued_date DESC)`,
     ]);
   })().catch((error) => {
     schemaPromise = undefined;
