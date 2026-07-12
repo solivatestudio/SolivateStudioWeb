@@ -49,7 +49,7 @@ const validateHumanSubmission = (payload) => {
   if (clean(payload.company)) return "Submission rejected.";
   const startedAt = Number(payload.startedAt || 0);
   const elapsed = Date.now() - startedAt;
-  if (!startedAt || elapsed < 3500 || elapsed > 1000 * 60 * 60 * 3) {
+  if (!startedAt || elapsed < 1500 || elapsed > 1000 * 60 * 60 * 3) {
     return "Please refresh the page and submit again.";
   }
   const name = clean(payload.name);
@@ -59,7 +59,7 @@ const validateHumanSubmission = (payload) => {
   if (!hasContactMethod(contact)) return "Please enter a valid email or WhatsApp number.";
   if (!PROJECT_TYPES.has(projectType)) return "Please select a valid project type.";
   if (looksRandom(name, { minWords: 1, maxSingleToken: 15 })) return "Please enter a real name.";
-  if (brief.length < 40 || wordCount(brief) < 7 || looksRandom(brief, { minWords: 7, maxSingleToken: 22 })) {
+  if (brief.length < 25 || wordCount(brief) < 4 || looksRandom(brief, { minWords: 4, maxSingleToken: 22 })) {
     return "Please write a clearer project brief.";
   }
   return "";

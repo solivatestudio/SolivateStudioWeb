@@ -824,10 +824,19 @@ const organizationSchema = JSON.stringify({
       const contactForm = document.querySelector("[data-contact-form]");
       const success = document.querySelector("[data-success]");
       const formError = document.querySelector("[data-form-error]");
-      contactForm?.querySelector("[data-started-at]")?.setAttribute("value", String(Date.now()));
+      const refreshStartedAt = () => {
+        contactForm?.querySelector("[data-started-at]")?.setAttribute("value", String(Date.now()));
+      };
+      refreshStartedAt();
       contactForm?.addEventListener("submit", (event) => {
         event.preventDefault();
         formError?.setAttribute("hidden", "");
+        if (formError) {
+          formError.textContent = translations["form.error"]?.[document.documentElement.lang === "en" ? "en" : "id"] || formError.textContent;
+        }
+        if (!contactForm.querySelector("[data-started-at]")?.getAttribute("value")) {
+          refreshStartedAt();
+        }
         const formData = new FormData(contactForm);
         const submit = contactForm.querySelector('button[type="submit"]');
         const submitText = submit?.querySelector("[data-i18n]");
@@ -852,14 +861,21 @@ const organizationSchema = JSON.stringify({
             turnstileToken: formData.get("cf-turnstile-response")
           })
         })
-          .then((response) => {
-            if (!response.ok) throw new Error("Form submit failed");
+          .then(async (response) => {
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+              throw new Error(data.message || translations["form.error"]?.[activeLang] || "Brief belum terkirim.");
+            }
             contactForm.setAttribute("hidden", "");
             success?.removeAttribute("hidden");
             contactForm.reset();
-          })
-          .catch(() => {
             window.turnstile?.reset();
+          })
+          .catch((error) => {
+            window.turnstile?.reset();
+            if (formError) {
+              formError.textContent = error?.message || translations["form.error"]?.[activeLang] || "Brief belum terkirim.";
+            }
             formError?.removeAttribute("hidden");
           })
           .finally(() => {
@@ -870,6 +886,7 @@ const organizationSchema = JSON.stringify({
       document.querySelector("[data-reset-form]")?.addEventListener("click", () => {
         success?.setAttribute("hidden", "");
         contactForm?.removeAttribute("hidden");
+        refreshStartedAt();
       });
 
       if (!window.matchMedia("(hover: none)").matches) {
