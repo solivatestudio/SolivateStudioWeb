@@ -1,0 +1,281 @@
+---
+const {
+  resource,
+  title,
+  description,
+  fields,
+  empty = "Belum ada data."
+} = Astro.props;
+---
+
+<section class="cms-resource-head">
+  <div>
+    <p class="cms-kicker">Resource CMS</p>
+    <h2>{title}</h2>
+    <p>{description}</p>
+  </div>
+  <div class="cms-toolbar-actions">
+    <a class="admin-button ghost" href="/" target="_blank" rel="noreferrer">Preview</a>
+    <button class="admin-button accent" type="button" data-new-item>Tambah item</button>
+  </div>
+</section>
+
+<p class="admin-error" data-cms-error hidden></p>
+
+<section class="cms-crud-shell" data-cms-crud>
+  <aside class="cms-crud-list">
+    <div class="cms-crud-list-head">
+      <span data-item-count>0 item</span>
+      <button type="button" data-refresh title="Refresh">↻</button>
+    </div>
+    <div data-items></div>
+  </aside>
+
+  <main class="cms-crud-editor">
+    <form data-editor>
+      <input type="hidden" name="id" />
+      <div class="cms-editor-status">
+        <div>
+          <span data-editor-mode>Pilih item</span>
+          <h3 data-editor-title>Belum ada item dipilih</h3>
+        </div>
+        <label class="cms-switch">
+          <input type="checkbox" name="is_published" checked />
+          <span></span>
+          Published
+        </label>
+      </div>
+
+      <div class="cms-system-row">
+        <label class="admin-field">
+          <span>Urutan</span>
+          <input name="sort_order" type="number" min="0" step="10" />
+        </label>
+        <label class="admin-field">
+          <span>Slug / ID</span>
+          <input name="custom_id" type="text" placeholder="otomatis jika kosong" />
+        </label>
+      </div>
+
+      <div class="cms-resource-fields" data-fields></div>
+
+      <div class="cms-editor-actions">
+        <button class="admin-button accent" type="submit">Simpan</button>
+        <button class="admin-button ghost" type="button" data-reset-editor>Reset</button>
+        <button class="admin-button danger" type="button" data-delete-item hidden>Hapus</button>
+      </div>
+    </form>
+  </main>
+</section>
+
+<script is:inline define:vars={{ resource, fields, empty }}>
+  window.addEventListener("DOMContentLoaded", () => {
+    const root = document.querySelector("[data-cms-crud]");
+    if (!root) return;
+
+    const listRoot = root.querySelector("[data-items]");
+    const fieldsRoot = root.querySelector("[data-fields]");
+    const countNode = document.querySelector("[data-item-count]");
+    const errorNode = document.querySelector("[data-cms-error]");
+    const form = root.querySelector("[data-editor]");
+    const titleNode = root.querySelector("[data-editor-title]");
+    const modeNode = root.querySelector("[data-editor-mode]");
+    const deleteButton = root.querySelector("[data-delete-item]");
+    let items = [];
+    let current = null;
+
+    const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;"
+    }[char]));
+    const listText = (value) => Array.isArray(value) ? value.join("\n") : String(value ?? "");
+    const slug = (value) => String(value || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80);
+    const fieldValue = (field, data = {}) => field.type === "list" ? listText(data[field.key]) : (data[field.key] ?? "");
+    const primaryLabel = (item) => {
+      const data = item?.data || {};
+      return data.name_id || data.title || data.question_id || item?.id || "Untitled";
+    };
+    const secondaryLabel = (item) => {
+      const data = item?.data || {};
+      return data.price_id || data.url || data.answer_id || "Draft content";
+    };
+    const setError = (message = "") => {
+      if (!errorNode) return;
+      errorNode.textContent = message;
+      errorNode.hidden = !message;
+    };
+
+    const inputMarkup = (field, value) => {
+      if (field.type === "textarea" || field.type === "list") {
+        return `<textarea name="${esc(field.key)}" data-field="${esc(field.key)}" data-type="${field.type}" ${field.required ? "required" : ""}>${esc(value)}</textarea>`;
+      }
+      if (field.type === "select") {
+        return `<select name="${esc(field.key)}" data-field="${esc(field.key)}">${(field.options || []).map((option) => `<option value="${esc(option.value)}" ${option.value === value ? "selected" : ""}>${esc(option.label)}</option>`).join("")}</select>`;
+      }
+      if (field.type === "checkbox") {
+        return `<label class="cms-check"><input type="checkbox" name="${esc(field.key)}" data-field="${esc(field.key)}" ${value ? "checked" : ""} /> <span>${esc(field.help || field.label)}</span></label>`;
+      }
+      if (field.type === "image") {
+        return `
+          <div class="cms-image-field">
+            <input name="${esc(field.key)}" data-field="${esc(field.key)}" type="url" value="${esc(value)}" placeholder="/images/project.webp atau URL Blob" />
+            <label>
+              <input type="file" accept="image/png,image/jpeg,image/webp" data-upload-for="${esc(field.key)}" />
+              <span>Upload gambar</span>
+            </label>
+            <img src="${esc(value || "/solivate-logo.webp")}" alt="" data-image-preview="${esc(field.key)}" loading="lazy" />
+          </div>`;
+      }
+      return `<input name="${esc(field.key)}" data-field="${esc(field.key)}" type="${field.type || "text"}" value="${esc(value)}" ${field.required ? "required" : ""} />`;
+    };
+
+    const renderFields = (data = {}) => {
+      fieldsRoot.innerHTML = fields.map((field) => `
+        <label class="admin-field ${field.full ? "full" : ""}">
+          <span>${esc(field.label)}</span>
+          ${inputMarkup(field, fieldValue(field, data))}
+          ${field.help && field.type !== "checkbox" ? `<small>${esc(field.help)}</small>` : ""}
+        </label>
+      `).join("");
+
+      fieldsRoot.querySelectorAll("[data-upload-for]").forEach((input) => {
+        input.addEventListener("change", async () => {
+          const file = input.files?.[0];
+          if (!file) return;
+          if (file.size > 4 * 1024 * 1024) {
+            window.showAdminToast("Ukuran gambar maksimal 4MB.", "error");
+            input.value = "";
+            return;
+          }
+          try {
+            const response = await fetch(`/api/admin/upload?filename=${encodeURIComponent(file.name)}`, {
+              method: "POST",
+              credentials: "same-origin",
+              headers: { "Content-Type": file.type },
+              body: file
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.message || "Upload gagal.");
+            const target = fieldsRoot.querySelector(`[data-field="${input.dataset.uploadFor}"]`);
+            const preview = fieldsRoot.querySelector(`[data-image-preview="${input.dataset.uploadFor}"]`);
+            if (target) target.value = data.url;
+            if (preview) preview.src = data.url;
+            window.showAdminToast("Gambar berhasil diupload.");
+          } catch (error) {
+            window.showAdminToast(error.message, "error");
+          } finally {
+            input.value = "";
+          }
+        });
+      });
+    };
+
+    const renderList = () => {
+      countNode.textContent = `${items.length} item`;
+      if (!items.length) {
+        listRoot.innerHTML = `<div class="admin-empty">${esc(empty)}</div>`;
+        return;
+      }
+      listRoot.innerHTML = items.map((item) => `
+        <button class="cms-item-row ${current?.id === item.id ? "active" : ""}" type="button" data-edit="${esc(item.id)}">
+          <span>${esc(String(item.sort_order).padStart(2, "0"))}</span>
+          <strong>${esc(primaryLabel(item))}</strong>
+          <small>${esc(secondaryLabel(item))}</small>
+          <i>${item.is_published ? "Published" : "Draft"}</i>
+        </button>
+      `).join("");
+    };
+
+    const edit = (item = null) => {
+      current = item;
+      const data = item?.data || {};
+      form.elements.id.value = item?.id || "";
+      form.elements.custom_id.value = item?.id || "";
+      form.elements.custom_id.disabled = Boolean(item?.id);
+      form.elements.sort_order.value = item?.sort_order ?? ((items.length + 1) * 10);
+      form.elements.is_published.checked = item?.is_published ?? true;
+      modeNode.textContent = item ? "Edit item" : "Tambah item baru";
+      titleNode.textContent = item ? primaryLabel(item) : "Draft baru";
+      deleteButton.hidden = !item;
+      renderFields(data);
+      renderList();
+    };
+
+    const collect = () => {
+      const data = {};
+      fields.forEach((field) => {
+        const input = fieldsRoot.querySelector(`[data-field="${field.key}"]`);
+        if (!input) return;
+        if (field.type === "checkbox") data[field.key] = input.checked;
+        else if (field.type === "list") data[field.key] = input.value.split("\n").map((line) => line.trim()).filter(Boolean);
+        else data[field.key] = input.value.trim();
+      });
+      return {
+        id: form.elements.id.value || slug(form.elements.custom_id.value || data.name_id || data.title || data.question_id),
+        sort_order: Number(form.elements.sort_order.value || 0),
+        is_published: form.elements.is_published.checked,
+        data
+      };
+    };
+
+    const load = async () => {
+      setError("");
+      const data = await window.adminApi(`/api/admin/cms-resource?type=${resource}`);
+      items = data.items || [];
+      renderList();
+      if (!current && items[0]) edit(items[0]);
+      if (!items.length) edit(null);
+    };
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      try {
+        const payload = collect();
+        const method = form.elements.id.value ? "PUT" : "POST";
+        const saved = await window.adminApi(`/api/admin/cms-resource?type=${resource}`, {
+          method,
+          body: JSON.stringify(payload)
+        });
+        window.showAdminToast("Data tersimpan.");
+        current = { id: saved.id, ...payload };
+        await load();
+        edit(items.find((item) => item.id === saved.id) || items[0] || null);
+      } catch (error) {
+        window.showAdminToast(error.message, "error");
+      }
+    });
+
+    deleteButton.addEventListener("click", async () => {
+      if (!current || !confirm("Hapus item ini?")) return;
+      try {
+        await window.adminApi(`/api/admin/cms-resource?type=${resource}`, {
+          method: "DELETE",
+          body: JSON.stringify({ id: current.id })
+        });
+        current = null;
+        window.showAdminToast("Item dihapus.");
+        await load();
+      } catch (error) {
+        window.showAdminToast(error.message, "error");
+      }
+    });
+
+    listRoot.addEventListener("click", (event) => {
+      const id = event.target.closest("[data-edit]")?.dataset.edit;
+      if (!id) return;
+      edit(items.find((item) => item.id === id));
+    });
+
+    document.querySelector("[data-new-item]")?.addEventListener("click", () => edit(null));
+    document.querySelector("[data-refresh]")?.addEventListener("click", load);
+    document.querySelector("[data-reset-editor]")?.addEventListener("click", () => edit(current));
+
+    load().catch((error) => {
+      setError(error.message);
+      window.showAdminToast(error.message, "error");
+    });
+  });
+</script>

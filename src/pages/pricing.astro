@@ -489,6 +489,51 @@ const pricingSchema = JSON.stringify({
     <script is:inline>
       const translations = JSON.parse(document.getElementById("pricing-i18n-data")?.textContent || "{}");
       const header = document.querySelector("[data-header]");
+      let cmsResources = {};
+      const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#039;"
+      }[char]));
+      const cmsText = (data, key, lang) => data?.[`${key}_${lang}`] || data?.[`${key}_id`] || data?.[key] || "";
+      const cmsList = (data, key, lang) => Array.isArray(data?.[`${key}_${lang}`]) ? data[`${key}_${lang}`] : [];
+      const pricingCard = (item, lang) => {
+        const data = item.data || {};
+        const features = cmsList(data, "features", lang);
+        return `<article class="pricing-detail-card ${data.group === "business" ? "business" : ""} ${data.featured ? "featured" : ""}">
+          <span class="pricing-label">${escapeHtml(cmsText(data, "badge", lang))}</span>
+          <h3>${escapeHtml(cmsText(data, "name", lang))}</h3>
+          <strong>${escapeHtml(cmsText(data, "price", lang))}</strong>
+          <p>${escapeHtml(cmsText(data, "description", lang))}</p>
+          <ul>${features.map((feature) => `<li>${escapeHtml(feature)}</li>`).join("")}</ul>
+        </article>`;
+      };
+      const renderCmsPricing = (lang = document.documentElement.lang || "id") => {
+        const activeLang = lang === "en" ? "en" : "id";
+        const pricing = cmsResources.pricing || [];
+        const personal = pricing.filter((item) => item.data?.group === "personal");
+        const business = pricing.filter((item) => item.data?.group === "business");
+        const custom = pricing.find((item) => item.data?.group === "custom");
+        const personalGrid = document.querySelector(".pricing-detail-grid.compact");
+        const businessGrid = document.querySelector(".pricing-detail-band .pricing-detail-grid");
+        if (personalGrid && personal.length) personalGrid.innerHTML = personal.map((item) => pricingCard(item, activeLang)).join("");
+        if (businessGrid && business.length) businessGrid.innerHTML = business.map((item) => pricingCard(item, activeLang)).join("");
+        if (custom) {
+          const data = custom.data || {};
+          const priceBox = document.querySelector(".custom-price-box");
+          const featureGrid = document.querySelector(".custom-feature-grid");
+          const customTitle = document.querySelector(".custom-pricing h2");
+          if (customTitle) customTitle.textContent = cmsText(data, "name", activeLang);
+          if (priceBox) {
+            priceBox.innerHTML = `<span>${activeLang === "en" ? "Starting price" : "Harga mulai dari"}</span><strong>${escapeHtml(cmsText(data, "price", activeLang))}</strong><p>${escapeHtml(cmsText(data, "description", activeLang))}</p>`;
+          }
+          if (featureGrid) {
+            featureGrid.innerHTML = cmsList(data, "features", activeLang).map((feature) => `<article><span></span><p>${escapeHtml(feature)}</p></article>`).join("");
+          }
+        }
+      };
       const updateHeader = () => {
         const y = Math.max(0, window.scrollY);
         header?.classList.toggle("is-scrolled", y > 24);
@@ -516,6 +561,7 @@ const pricingSchema = JSON.stringify({
           button.classList.toggle("active", active);
           button.setAttribute("aria-pressed", String(active));
         });
+        renderCmsPricing(activeLang);
       };
 
       document.querySelectorAll("[data-lang-switch]").forEach((button) => {
@@ -525,6 +571,14 @@ const pricingSchema = JSON.stringify({
         ? window.localStorage.getItem("solivate-language")
         : "id";
       setLanguage(savedLanguage || "id");
+
+      fetch("/api/public/content?type=pricing")
+        .then((response) => response.ok ? response.json() : null)
+        .then((data) => {
+          cmsResources = data?.resources || {};
+          renderCmsPricing(document.documentElement.lang);
+        })
+        .catch(() => {});
 
       document.querySelectorAll("[data-top]").forEach((trigger) => {
         trigger.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));

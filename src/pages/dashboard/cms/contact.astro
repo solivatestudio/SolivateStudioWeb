@@ -1,0 +1,93 @@
+---
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+---
+
+<DashboardLayout title="Contact CMS" active="contact" mode="cms" eyebrow="Website CMS">
+  <section class="cms-resource-head">
+    <div>
+      <p class="cms-kicker">Contact settings</p>
+      <h2>Kelola kontak, medsos, dan CTA.</h2>
+      <p>Data ini dipakai footer, floating WhatsApp, dan bagian contact website.</p>
+    </div>
+    <a class="admin-button ghost" href="/#contact" target="_blank" rel="noreferrer">Preview contact</a>
+  </section>
+
+  <p class="admin-error" data-contact-error hidden></p>
+
+  <section class="admin-panel cms-settings-panel">
+    <form class="admin-form" data-contact-settings>
+      <label class="admin-field">
+        <span>Email bisnis</span>
+        <input name="contact_email" type="email" required />
+      </label>
+      <label class="admin-field">
+        <span>WhatsApp</span>
+        <input name="contact_whatsapp" type="tel" required />
+      </label>
+      <label class="admin-field full">
+        <span>Instagram URL</span>
+        <input name="contact_instagram" type="url" />
+      </label>
+      <label class="admin-field full">
+        <span>Judul contact ID</span>
+        <textarea name="copy:contact.title:id"></textarea>
+      </label>
+      <label class="admin-field full">
+        <span>Judul contact EN</span>
+        <textarea name="copy:contact.title:en"></textarea>
+      </label>
+      <label class="admin-field full">
+        <span>Deskripsi contact ID</span>
+        <textarea name="copy:contact.lead:id"></textarea>
+      </label>
+      <label class="admin-field full">
+        <span>Deskripsi contact EN</span>
+        <textarea name="copy:contact.lead:en"></textarea>
+      </label>
+      <div class="cms-editor-actions full">
+        <button class="admin-button accent" type="submit">Simpan settings</button>
+      </div>
+    </form>
+  </section>
+
+  <script is:inline>
+    window.addEventListener("DOMContentLoaded", async () => {
+      const form = document.querySelector("[data-contact-settings]");
+      const errorNode = document.querySelector("[data-contact-error]");
+      const defaults = {
+        contact_email: "solivatestudio@gmail.com",
+        contact_whatsapp: "6281219118993",
+        contact_instagram: "https://www.instagram.com/solivatestudio/",
+        "copy:contact.title:id": "Punya website atau ide produk yang ingin dibangun?",
+        "copy:contact.title:en": "Have a website or product idea to build?",
+        "copy:contact.lead:id": "Kirim brief singkat untuk website UMKM, komunitas, event, undangan digital, atau sistem custom. Kami akan bantu susun scope yang realistis.",
+        "copy:contact.lead:en": "Send a short brief for an SME website, community, event, digital invitation, or custom system. We will help define a realistic scope."
+      };
+
+      try {
+        const data = await window.adminApi("/api/admin/data?resource=cms");
+        const entries = { ...defaults, ...(data.entries || {}) };
+        Object.entries(entries).forEach(([key, value]) => {
+          if (form.elements[key]) form.elements[key].value = value;
+        });
+      } catch (error) {
+        errorNode.textContent = error.message;
+        errorNode.hidden = false;
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const entries = Object.fromEntries(new FormData(form));
+        try {
+          await window.adminApi("/api/admin/data?resource=cms", {
+            method: "PUT",
+            body: JSON.stringify({ entries })
+          });
+          window.showAdminToast("Contact settings tersimpan.");
+        } catch (error) {
+          window.showAdminToast(error.message, "error");
+        }
+      });
+    });
+  </script>
+</DashboardLayout>

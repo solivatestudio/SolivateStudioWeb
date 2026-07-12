@@ -10,7 +10,13 @@ const managementNavigation = [
   ["traffic", "Live Traffic", "/dashboard/traffic"]
 ];
 const navigation = mode === "cms"
-  ? [["cms", "Content editor", "/dashboard/cms"]]
+  ? [
+      ["cms", "CMS Overview", "/dashboard/cms"],
+      ["pricing", "Pricing", "/dashboard/cms/pricing"],
+      ["projects", "Projects", "/dashboard/cms/projects"],
+      ["faq", "FAQ", "/dashboard/cms/faq"],
+      ["contact", "Contact", "/dashboard/cms/contact"]
+    ]
   : managementNavigation;
 ---
 

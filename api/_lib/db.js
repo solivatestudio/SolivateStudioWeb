@@ -70,11 +70,21 @@ export function ensureSchema() {
       entity_type TEXT NOT NULL,
       entity_id TEXT NOT NULL DEFAULT '',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )`
+      )`,
+      sql`CREATE TABLE IF NOT EXISTS cms_resources (
+      id TEXT PRIMARY KEY,
+      resource_type TEXT NOT NULL,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      data JSONB NOT NULL DEFAULT '{}'::jsonb,
+      is_published BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )`,
     ]);
     await Promise.all([
       sql`CREATE INDEX IF NOT EXISTS traffic_events_created_at_idx ON traffic_events (created_at DESC)`,
-      sql`CREATE INDEX IF NOT EXISTS traffic_events_session_idx ON traffic_events (session_hash, created_at DESC)`
+      sql`CREATE INDEX IF NOT EXISTS traffic_events_session_idx ON traffic_events (session_hash, created_at DESC)`,
+      sql`CREATE INDEX IF NOT EXISTS cms_resources_type_idx ON cms_resources (resource_type, sort_order, updated_at DESC)`,
     ]);
   })().catch((error) => {
     schemaPromise = undefined;

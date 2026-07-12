@@ -1,0 +1,21 @@
+---
+import CmsCrudPage from "../../../components/dashboard/CmsCrudPage.astro";
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+
+const fields = [
+  { key: "question_id", label: "Pertanyaan ID", type: "textarea", required: true, full: true },
+  { key: "question_en", label: "Pertanyaan EN", type: "textarea", required: true, full: true },
+  { key: "answer_id", label: "Jawaban ID", type: "textarea", required: true, full: true },
+  { key: "answer_en", label: "Jawaban EN", type: "textarea", required: true, full: true }
+];
+---
+
+<DashboardLayout title="FAQ CMS" active="faq" mode="cms" eyebrow="Website CMS">
+  <CmsCrudPage
+    resource="faq"
+    title="Kelola FAQ website"
+    description="FAQ ditampilkan di contact section. Buat pertanyaan yang membantu calon klien paham scope, proses, dan cara mulai."
+    fields={fields}
+    empty="Belum ada FAQ."
+  />
+</DashboardLayout>

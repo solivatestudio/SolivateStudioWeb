@@ -629,6 +629,84 @@ const organizationSchema = JSON.stringify({
     <script is:inline>
       const translations = JSON.parse(document.getElementById("i18n-data")?.textContent || "{}");
       const header = document.querySelector("[data-header]");
+      let cmsResources = {};
+
+      const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#039;"
+      }[char]));
+      const cmsText = (data, key, lang) => data?.[`${key}_${lang}`] || data?.[`${key}_id`] || data?.[key] || "";
+      const cmsList = (data, key, lang) => Array.isArray(data?.[`${key}_${lang}`]) ? data[`${key}_${lang}`] : [];
+      const enableFaqToggles = () => {
+        document.querySelectorAll("[data-faq]").forEach((item) => {
+          const button = item.querySelector("[data-faq-trigger]");
+          const panel = item.querySelector("[data-faq-panel]");
+          button?.addEventListener("click", () => {
+            const open = panel?.hasAttribute("hidden");
+            document.querySelectorAll("[data-faq-panel]").forEach((current) => current.setAttribute("hidden", ""));
+            document.querySelectorAll("[data-faq-trigger]").forEach((current) => current.setAttribute("aria-expanded", "false"));
+            if (open && panel) {
+              panel.removeAttribute("hidden");
+              button.setAttribute("aria-expanded", "true");
+            }
+          });
+        });
+      };
+      const renderCmsResources = (lang = document.documentElement.lang || "id") => {
+        const activeLang = lang === "en" ? "en" : "id";
+        const pricing = (cmsResources.pricing || []).filter((item) => item.data?.homepage).slice(0, 3);
+        const pricingGrid = document.querySelector(".pricing-grid");
+        if (pricingGrid && pricing.length) {
+          pricingGrid.innerHTML = pricing.map((item) => {
+            const data = item.data || {};
+            const featured = data.featured ? " featured" : "";
+            const features = cmsList(data, "features", activeLang).slice(0, 4);
+            return `<article class="pricing-card${featured}">
+              <span class="pricing-label">${escapeHtml(cmsText(data, "badge", activeLang))}</span>
+              <div class="card-title">${escapeHtml(cmsText(data, "name", activeLang))}</div>
+              <strong>${escapeHtml(cmsText(data, "price", activeLang))}</strong>
+              <p>${escapeHtml(cmsText(data, "description", activeLang))}</p>
+              <ul>${features.map((feature) => `<li>${escapeHtml(feature)}</li>`).join("")}</ul>
+            </article>`;
+          }).join("");
+        }
+
+        const projects = (cmsResources.projects || []).filter((item) => item.data?.homepage).slice(0, 6);
+        const workGrid = document.querySelector(".work-grid");
+        if (workGrid && projects.length) {
+          workGrid.innerHTML = projects.map((item, index) => {
+            const data = item.data || {};
+            const url = data.url || "#contact";
+            const external = url.startsWith("http");
+            return `<a class="work-card" data-project-card="${index + 1}" href="${escapeHtml(url)}" ${external ? 'target="_blank" rel="noreferrer"' : ""}>
+              <img data-project-image src="${escapeHtml(data.image_url || "/solivate-logo.webp")}" alt="${escapeHtml(data.title)}" width="1440" height="900" loading="lazy" decoding="async" />
+              <div>
+                <span>${escapeHtml(cmsText(data, "type", activeLang))}</span>
+                <p class="card-heading" data-project-title>${escapeHtml(data.title)}</p>
+              </div>
+            </a>`;
+          }).join("");
+        }
+
+        const faqItems = (cmsResources.faq || []).slice(0, 6);
+        const faqList = document.querySelector(".faq-list");
+        if (faqList && faqItems.length) {
+          faqList.innerHTML = faqItems.map((item, index) => {
+            const data = item.data || {};
+            return `<article class="faq-item" data-faq>
+              <button type="button" data-faq-trigger aria-expanded="${index === 0 ? "true" : "false"}">
+                <span>${escapeHtml(cmsText(data, "question", activeLang))}</span>
+                <span class="chevron" aria-hidden="true"></span>
+              </button>
+              <p data-faq-panel ${index === 0 ? "" : "hidden"}>${escapeHtml(cmsText(data, "answer", activeLang))}</p>
+            </article>`;
+          }).join("");
+          enableFaqToggles();
+        }
+      };
 
       const updateHeader = () => {
         const y = Math.max(0, window.scrollY);
@@ -661,6 +739,7 @@ const organizationSchema = JSON.stringify({
           button.classList.toggle("active", active);
           button.setAttribute("aria-pressed", String(active));
         });
+        renderCmsResources(activeLang);
       };
 
       let ticking = false;
@@ -716,6 +795,14 @@ const organizationSchema = JSON.stringify({
         })
         .catch(() => {});
 
+      fetch("/api/public/content")
+        .then((response) => response.ok ? response.json() : null)
+        .then((data) => {
+          cmsResources = data?.resources || {};
+          renderCmsResources(document.documentElement.lang);
+        })
+        .catch(() => {});
+
       document.querySelectorAll("[data-scroll]").forEach((trigger) => {
         trigger.addEventListener("click", () => {
           const target = document.getElementById(trigger.getAttribute("data-scroll"));
@@ -727,19 +814,7 @@ const organizationSchema = JSON.stringify({
         trigger.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
       });
 
-      document.querySelectorAll("[data-faq]").forEach((item) => {
-        const button = item.querySelector("[data-faq-trigger]");
-        const panel = item.querySelector("[data-faq-panel]");
-        button?.addEventListener("click", () => {
-          const open = panel?.hasAttribute("hidden");
-          document.querySelectorAll("[data-faq-panel]").forEach((current) => current.setAttribute("hidden", ""));
-          document.querySelectorAll("[data-faq-trigger]").forEach((current) => current.setAttribute("aria-expanded", "false"));
-          if (open && panel) {
-            panel.removeAttribute("hidden");
-            button.setAttribute("aria-expanded", "true");
-          }
-        });
-      });
+      enableFaqToggles();
 
       const contactForm = document.querySelector("[data-contact-form]");
       const success = document.querySelector("[data-success]");

@@ -1,0 +1,23 @@
+---
+import CmsCrudPage from "../../../components/dashboard/CmsCrudPage.astro";
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+
+const fields = [
+  { key: "title", label: "Nama project", required: true },
+  { key: "type_id", label: "Label ID", required: true },
+  { key: "type_en", label: "Label EN", required: true },
+  { key: "url", label: "URL project", type: "url", full: true },
+  { key: "image_url", label: "Thumbnail project", type: "image", full: true, help: "Upload JPG, PNG, atau WebP maksimal 4MB." },
+  { key: "homepage", label: "Tampil di homepage", type: "checkbox", help: "Masukkan project ini ke section homepage." }
+];
+---
+
+<DashboardLayout title="Project CMS" active="projects" mode="cms" eyebrow="Website CMS">
+  <CmsCrudPage
+    resource="projects"
+    title="Kelola project showcase"
+    description="Tambah, edit, reorder, publish, dan upload thumbnail project yang tampil di homepage maupun daftar project."
+    fields={fields}
+    empty="Belum ada project showcase."
+  />
+</DashboardLayout>

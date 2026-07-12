@@ -1,0 +1,34 @@
+---
+import CmsCrudPage from "../../../components/dashboard/CmsCrudPage.astro";
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+
+const fields = [
+  { key: "group", label: "Kategori", type: "select", options: [
+    { value: "personal", label: "Personal & Event" },
+    { value: "business", label: "Landing / Multi-Page" },
+    { value: "custom", label: "Custom Eksklusif" }
+  ] },
+  { key: "name_id", label: "Nama paket ID", required: true },
+  { key: "name_en", label: "Nama paket EN", required: true },
+  { key: "badge_id", label: "Badge ID" },
+  { key: "badge_en", label: "Badge EN" },
+  { key: "price_id", label: "Harga ID", required: true },
+  { key: "price_en", label: "Harga EN", required: true },
+  { key: "description_id", label: "Deskripsi ID", type: "textarea", full: true },
+  { key: "description_en", label: "Deskripsi EN", type: "textarea", full: true },
+  { key: "features_id", label: "Benefit ID", type: "list", full: true, help: "Satu benefit per baris." },
+  { key: "features_en", label: "Benefit EN", type: "list", full: true, help: "Satu benefit per baris." },
+  { key: "featured", label: "Featured card", type: "checkbox", help: "Tandai sebagai paket highlight." },
+  { key: "homepage", label: "Tampil di homepage", type: "checkbox", help: "Masukkan item ini ke section pricing homepage." }
+];
+---
+
+<DashboardLayout title="Pricing CMS" active="pricing" mode="cms" eyebrow="Website CMS">
+  <CmsCrudPage
+    resource="pricing"
+    title="Kelola paket pricing"
+    description="Setiap paket adalah record terpisah. Ubah harga, benefit, kategori, highlight, dan visibility homepage dari sini."
+    fields={fields}
+    empty="Belum ada paket pricing."
+  />
+</DashboardLayout>
