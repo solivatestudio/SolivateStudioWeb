@@ -90,6 +90,7 @@ const staticI18n = {
 
 const i18nJson = JSON.stringify(staticI18n);
 const initialText = (key: string) => staticI18n[key as keyof typeof staticI18n]?.id ?? key;
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
 ---
 
 <!doctype html>
@@ -108,6 +109,7 @@ const initialText = (key: string) => staticI18n[key as keyof typeof staticI18n]?
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={`${siteUrl}/solivate-logo.webp`} />
     <link rel="icon" type="image/png" href="/favicon.png" />
+    {turnstileSiteKey && <script is:inline async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>}
   </head>
   <body>
     <Header compact i18n />
@@ -180,6 +182,8 @@ const initialText = (key: string) => staticI18n[key as keyof typeof staticI18n]?
               <label for="message" data-i18n="apply.message">{initialText("apply.message")}</label>
               <textarea id="message" name="message" maxlength="2000" placeholder={initialText("apply.message_placeholder")} data-i18n-placeholder="apply.message_placeholder"></textarea>
             </div>
+
+            {turnstileSiteKey && <div class="turnstile-wrap full"><div class="cf-turnstile" data-sitekey={turnstileSiteKey}></div></div>}
 
             <p class="apply-form-error full" data-form-error data-i18n="apply.error" hidden>{initialText("apply.error")}</p>
 
@@ -286,7 +290,8 @@ const initialText = (key: string) => staticI18n[key as keyof typeof staticI18n]?
             position: formData.get("position"),
             portfolio: formData.get("portfolio"),
             reason: formData.get("reason"),
-            message: formData.get("message")
+            message: formData.get("message"),
+            turnstileToken: formData.get("cf-turnstile-response")
           })
         })
           .then((response) => {
@@ -297,6 +302,7 @@ const initialText = (key: string) => staticI18n[key as keyof typeof staticI18n]?
             successScreen?.scrollIntoView({ behavior: "smooth", block: "center" });
           })
           .catch(() => {
+            window.turnstile?.reset();
             formError?.removeAttribute("hidden");
           })
           .finally(() => {

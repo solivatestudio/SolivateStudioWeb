@@ -261,6 +261,7 @@ const serviceCategoryI18n = Object.fromEntries(
 const i18nJson = JSON.stringify({ ...i18n, ...serviceCategoryI18n });
 const siteUrl = "https://solivate.com";
 const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
 const pageTitle = "Jasa Website UMKM & Digital Agency | Solivate Studio";
 const pageDescription = tx("meta.description");
 const organizationSchema = JSON.stringify({
@@ -360,6 +361,7 @@ const organizationSchema = JSON.stringify({
         </script>
       </>
     )}
+    {turnstileSiteKey && <script is:inline async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>}
   </head>
   <body>
     <Header home i18n />
@@ -607,6 +609,7 @@ const organizationSchema = JSON.stringify({
                 <span data-i18n="form.brief">{tx("form.brief")}</span>
                 <textarea required name="brief" placeholder={tx("form.brief.placeholder")} data-i18n-placeholder="form.brief.placeholder"></textarea>
               </label>
+              {turnstileSiteKey && <div class="turnstile-wrap"><div class="cf-turnstile" data-sitekey={turnstileSiteKey}></div></div>}
               <p class="form-error" data-form-error data-i18n="form.error" hidden>{tx("form.error")}</p>
               <button class="btn-primary" type="submit">
                 <span data-i18n="form.submit">{tx("form.submit")}</span>
@@ -845,7 +848,8 @@ const organizationSchema = JSON.stringify({
             projectType: formData.get("projectType"),
             brief: formData.get("brief"),
             company: formData.get("company"),
-            startedAt: formData.get("startedAt")
+            startedAt: formData.get("startedAt"),
+            turnstileToken: formData.get("cf-turnstile-response")
           })
         })
           .then((response) => {
@@ -855,6 +859,7 @@ const organizationSchema = JSON.stringify({
             contactForm.reset();
           })
           .catch(() => {
+            window.turnstile?.reset();
             formError?.removeAttribute("hidden");
           })
           .finally(() => {

@@ -1,3 +1,5 @@
+import { turnstileToken, verifyTurnstile } from "./_lib/turnstile.js";
+
 const RESEND_API_URL = "https://api.resend.com/emails";
 const FALLBACK_TO_EMAIL = "solivatestudio@gmail.com";
 const FALLBACK_FROM_EMAIL = "Solivate Studio <onboarding@resend.dev>";
@@ -38,6 +40,11 @@ export default async function handler(request, response) {
 
   const payload =
     typeof request.body === "object" && request.body ? request.body : {};
+  const turnstile = await verifyTurnstile(turnstileToken(payload), request);
+  if (!turnstile.ok) {
+    return response.status(400).json({ message: turnstile.message });
+  }
+
   const name = clean(payload.name);
   const email = clean(payload.email);
   const whatsapp = clean(payload.whatsapp);

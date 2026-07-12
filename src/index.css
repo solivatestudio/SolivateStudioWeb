@@ -42,6 +42,13 @@
   pointer-events: none !important;
 }
 
+.turnstile-wrap {
+  display: flex;
+  align-items: center;
+  min-height: 70px;
+  overflow-x: auto;
+}
+
 * {
   box-sizing: border-box;
 }

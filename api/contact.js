@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { db, ensureSchema } from "./_lib/db.js";
+import { turnstileToken, verifyTurnstile } from "./_lib/turnstile.js";
 
 const RESEND_API_URL = "https://api.resend.com/emails";
 const FALLBACK_TO_EMAIL = "solivatestudio@gmail.com";
@@ -80,6 +81,11 @@ export default async function handler(request, response) {
 
   const payload =
     typeof request.body === "object" && request.body ? request.body : {};
+  const turnstile = await verifyTurnstile(turnstileToken(payload), request);
+  if (!turnstile.ok) {
+    return response.status(400).json({ message: turnstile.message });
+  }
+
   const name = clean(payload.name);
   const contact = clean(payload.contact);
   const projectType = clean(payload.projectType);
