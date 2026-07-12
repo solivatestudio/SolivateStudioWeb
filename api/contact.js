@@ -1,6 +1,10 @@
+import crypto from "node:crypto";
+import { db, ensureSchema } from "./_lib/db.js";
+
 const RESEND_API_URL = "https://api.resend.com/emails";
 const FALLBACK_TO_EMAIL = "solivatestudio@gmail.com";
 const FALLBACK_FROM_EMAIL = "Solivate Studio <onboarding@resend.dev>";
+const PROJECT_TYPES = new Set(["Redesign website", "Website baru", "Event / undangan digital", "Sistem custom"]);
 
 const clean = (value) => String(value ?? "").trim();
 const escapeHtml = (value) =>
@@ -13,6 +17,51 @@ const escapeHtml = (value) =>
 const getEmailFromContact = (value) => {
   const match = value.match(/[^\s<>()]+@[^\s<>()]+\.[^\s<>()]+/);
   return match?.[0] || "";
+};
+const getIp = (request) =>
+  String(request.headers["x-forwarded-for"] || request.headers["x-real-ip"] || "")
+    .split(",")[0]
+    .trim() || "unknown";
+const hashIp = (request) =>
+  crypto
+    .createHash("sha256")
+    .update(`${process.env.TRACKING_SALT || process.env.SESSION_SECRET || "solivate"}:${getIp(request)}`)
+    .digest("hex");
+const wordCount = (value) => clean(value).split(/\s+/).filter(Boolean).length;
+const hasContactMethod = (value) => {
+  const text = clean(value);
+  const hasEmail = /[^\s<>()]+@[^\s<>()]+\.[^\s<>()]+/.test(text);
+  const digits = text.replace(/\D/g, "");
+  return hasEmail || digits.length >= 9;
+};
+const looksRandom = (value, { minWords = 2, maxSingleToken = 18 } = {}) => {
+  const text = clean(value);
+  const compact = text.replace(/[^a-zA-Z]/g, "");
+  if (compact.length >= maxSingleToken && wordCount(text) < minWords) return true;
+  const longTokens = text.split(/\s+/).filter((token) => /[a-zA-Z]{18,}/.test(token));
+  if (longTokens.length) return true;
+  const vowels = (compact.match(/[aeiouAEIOU]/g) || []).length;
+  if (compact.length >= 16 && vowels / Math.max(compact.length, 1) < 0.18) return true;
+  return false;
+};
+const validateHumanSubmission = (payload) => {
+  if (clean(payload.company)) return "Submission rejected.";
+  const startedAt = Number(payload.startedAt || 0);
+  const elapsed = Date.now() - startedAt;
+  if (!startedAt || elapsed < 3500 || elapsed > 1000 * 60 * 60 * 3) {
+    return "Please refresh the page and submit again.";
+  }
+  const name = clean(payload.name);
+  const contact = clean(payload.contact);
+  const projectType = clean(payload.projectType);
+  const brief = clean(payload.brief);
+  if (!hasContactMethod(contact)) return "Please enter a valid email or WhatsApp number.";
+  if (!PROJECT_TYPES.has(projectType)) return "Please select a valid project type.";
+  if (looksRandom(name, { minWords: 1, maxSingleToken: 15 })) return "Please enter a real name.";
+  if (brief.length < 40 || wordCount(brief) < 7 || looksRandom(brief, { minWords: 7, maxSingleToken: 22 })) {
+    return "Please write a clearer project brief.";
+  }
+  return "";
 };
 
 export default async function handler(request, response) {
@@ -42,6 +91,11 @@ export default async function handler(request, response) {
       .json({ message: "Please complete all required fields." });
   }
 
+  const validationError = validateHumanSubmission(payload);
+  if (validationError) {
+    return response.status(400).json({ message: validationError });
+  }
+
   if (
     name.length > 120 ||
     contact.length > 160 ||
@@ -51,6 +105,21 @@ export default async function handler(request, response) {
     return response
       .status(400)
       .json({ message: "Submitted content is too long." });
+  }
+
+  await ensureSchema();
+  const sql = db();
+  const ipHash = hashIp(request);
+  const [limits] = await Promise.all([
+    sql`SELECT
+      COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '1 hour')::int AS hour_count,
+      COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '1 day')::int AS day_count
+      FROM contact_submissions
+      WHERE ip_hash = ${ipHash}`,
+    sql`DELETE FROM contact_submissions WHERE created_at < NOW() - INTERVAL '14 days'`
+  ]);
+  if (Number(limits[0]?.hour_count || 0) >= 2 || Number(limits[0]?.day_count || 0) >= 5) {
+    return response.status(429).json({ message: "Too many submissions. Please try again later." });
   }
 
   const submittedAt = new Intl.DateTimeFormat("id-ID", {
@@ -111,6 +180,8 @@ export default async function handler(request, response) {
     console.error("Resend email failed:", detail);
     return response.status(502).json({ message: "Email failed to send." });
   }
+
+  await sql`INSERT INTO contact_submissions (ip_hash, contact) VALUES (${ipHash}, ${contact.slice(0, 180)})`;
 
   if (replyEmail) {
     const autoReplyHtml = `

@@ -110,6 +110,12 @@ export function ensureSchema() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )`,
+      sql`CREATE TABLE IF NOT EXISTS contact_submissions (
+      id BIGSERIAL PRIMARY KEY,
+      ip_hash TEXT NOT NULL,
+      contact TEXT NOT NULL DEFAULT '',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )`,
     ]);
     await Promise.all([
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS start_date DATE`,
@@ -126,6 +132,7 @@ export function ensureSchema() {
       sql`CREATE INDEX IF NOT EXISTS finance_entries_project_idx ON finance_entries (project_id, entry_date DESC)`,
       sql`CREATE INDEX IF NOT EXISTS project_milestones_project_idx ON project_milestones (project_id, due_date ASC)`,
       sql`CREATE INDEX IF NOT EXISTS project_documents_project_idx ON project_documents (project_id, issued_date DESC)`,
+      sql`CREATE INDEX IF NOT EXISTS contact_submissions_ip_idx ON contact_submissions (ip_hash, created_at DESC)`,
     ]);
   })().catch((error) => {
     schemaPromise = undefined;
