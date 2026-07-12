@@ -361,7 +361,7 @@ const pricingSchema = JSON.stringify({
             <span data-i18n="quote.label">{tx("quote.label")}</span>
             <strong>Rp 49.000</strong>
             <p data-i18n="quote.desc">{tx("quote.desc")}</p>
-            <a class="btn-primary" href="https://wa.me/6281219118993" target="_blank" rel="noreferrer">
+            <a class="btn-primary" href="https://wa.me/6281219118993" target="_blank" rel="noreferrer" data-whatsapp-cta>
               <span data-i18n="quote.cta">{tx("quote.cta")}</span>
               <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
             </a>
@@ -577,6 +577,18 @@ const pricingSchema = JSON.stringify({
         .then((data) => {
           cmsResources = data?.resources || {};
           renderCmsPricing(document.documentElement.lang);
+        })
+        .catch(() => {});
+
+      fetch("/api/public/cms")
+        .then((response) => response.ok ? response.json() : null)
+        .then((data) => {
+          const whatsapp = String(data?.entries?.contact_whatsapp || "").replace(/\D/g, "");
+          if (!whatsapp) return;
+          const text = encodeURIComponent("Halo Solivate Studio, saya mau konsultasi gratis untuk project website.");
+          document.querySelectorAll("[data-whatsapp-cta]").forEach((node) => {
+            node.href = `https://wa.me/${whatsapp}?text=${text}`;
+          });
         })
         .catch(() => {});
 

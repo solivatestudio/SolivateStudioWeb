@@ -133,12 +133,16 @@ const navLinks = [
         const instagram = String(entries.contact_instagram || "").trim();
         const emailNode = document.querySelector('[data-public-contact="email"]');
         const whatsappNode = document.querySelector('[data-public-contact="whatsapp"]');
+        const floatingWhatsappNode = document.querySelector(".floating-wa");
         const instagramNode = document.querySelector('[data-public-contact="instagram"]');
         if (email && emailNode) { emailNode.textContent = email; emailNode.href = `mailto:${email}`; }
         if (whatsapp && whatsappNode) whatsappNode.href = `https://wa.me/${whatsapp}`;
+        if (whatsapp && floatingWhatsappNode) {
+          const text = encodeURIComponent("Halo Solivate Studio, saya mau konsultasi gratis untuk project website.");
+          floatingWhatsappNode.href = `https://wa.me/${whatsapp}?text=${text}`;
+        }
         if (instagram && instagramNode) instagramNode.href = instagram;
       })
       .catch(() => {});
   })();
 </script>
-
