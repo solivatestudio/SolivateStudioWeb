@@ -1562,6 +1562,139 @@ button {
   max-width: 980px;
 }
 
+.project-workspace {
+  overflow: hidden;
+}
+.project-summary-grid .admin-stat-value {
+  font-size: clamp(24px, 2.3vw, 34px);
+}
+.compact-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.project-command-card {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid var(--admin-line);
+  background: #fff;
+}
+.project-command-card + .project-command-card {
+  margin-top: 12px;
+}
+.project-command-card header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--admin-line);
+}
+.project-command-card h3 {
+  margin: 9px 0 5px;
+  font-size: 20px;
+}
+.project-command-card p {
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: 11px;
+}
+.project-money-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  border: 1px solid var(--admin-line);
+}
+.project-money-grid div {
+  min-width: 0;
+  padding: 13px;
+  border-right: 1px solid var(--admin-line);
+  background: #fbfcfd;
+}
+.project-money-grid div:last-child {
+  border-right: 0;
+}
+.project-money-grid small {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--admin-muted);
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.project-money-grid strong {
+  display: block;
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.project-status-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+}
+.project-status-line > span {
+  color: var(--admin-muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+.project-subgrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.project-subgrid section {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--admin-line);
+  background: #f8fafb;
+}
+.project-subgrid h4 {
+  margin: 0 0 12px;
+  font-size: 12px;
+}
+.ops-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--admin-line);
+}
+.ops-row:last-child {
+  border-bottom: 0;
+}
+.ops-row strong,
+.ops-row span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ops-row strong {
+  font-size: 11px;
+}
+.ops-row span {
+  margin-top: 3px;
+  color: var(--admin-muted);
+  font-size: 9px;
+}
+.ops-row em {
+  padding: 5px 7px;
+  color: var(--admin-navy);
+  background: #eaf2fb;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.ops-row.late em {
+  color: #b42318;
+  background: #fff1f0;
+}
+
 @keyframes cmsPulse {
   to {
     opacity: 0.35;
@@ -1719,6 +1852,19 @@ button {
   .cms-item-row {
     flex: 0 0 260px;
   }
+  .project-command-card header,
+  .project-subgrid {
+    grid-template-columns: 1fr;
+  }
+  .project-command-card header {
+    flex-direction: column;
+  }
+  .project-money-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .project-money-grid div:nth-child(3n) {
+    border-right: 0;
+  }
 }
 @media (max-width: 560px) {
   .admin-grid.stats {
@@ -1807,5 +1953,26 @@ button {
     width: 100%;
     height: auto;
     aspect-ratio: 16 / 9;
+  }
+  .compact-form,
+  .project-money-grid {
+    grid-template-columns: 1fr;
+  }
+  .project-money-grid div {
+    border-right: 0;
+    border-bottom: 1px solid var(--admin-line);
+  }
+  .project-money-grid div:last-child {
+    border-bottom: 0;
+  }
+  .project-status-line {
+    grid-template-columns: 1fr;
+  }
+  .ops-row {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+  .ops-row .admin-button {
+    width: 100%;
   }
 }

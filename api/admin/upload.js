@@ -3,7 +3,14 @@ import { requireAdmin } from "../_lib/auth.js";
 import { fail, methodNotAllowed } from "../_lib/http.js";
 
 const MAX_BYTES = 4 * 1024 * 1024;
-const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const ALLOWED_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+]);
 
 export const config = {
   api: {
@@ -18,15 +25,15 @@ export default async function handler(request, response) {
   try {
     const contentType = String(request.headers["content-type"] || "");
     const contentLength = Number(request.headers["content-length"] || 0);
-    if (!IMAGE_TYPES.has(contentType)) {
+    if (!ALLOWED_TYPES.has(contentType)) {
       return response
         .status(400)
-        .json({ message: "Upload hanya menerima JPG, PNG, atau WebP." });
+        .json({ message: "Upload hanya menerima JPG, PNG, WebP, PDF, DOC, atau DOCX." });
     }
     if (contentLength > MAX_BYTES) {
       return response
         .status(400)
-        .json({ message: "Ukuran gambar maksimal 4MB." });
+        .json({ message: "Ukuran file maksimal 4MB." });
     }
 
     const filename = String(request.query?.filename || "image.webp")

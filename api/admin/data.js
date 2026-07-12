@@ -4,12 +4,18 @@ import { audit, db, ensureSchema } from "../_lib/db.js";
 import { fail, jsonBody, methodNotAllowed } from "../_lib/http.js";
 
 const clean = (value, max = 500) => String(value ?? "").trim().slice(0, max);
-const number = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
+const number = (value, fallback = 0) => (Number.isFinite(Number(value)) ? Number(value) : fallback);
+const dateOrNull = (value) => (clean(value, 20) ? clean(value, 20) : null);
+const PROJECT_STATUSES = new Set(["planning", "active", "review", "completed", "on-hold", "pending"]);
+const PAYMENT_STATUSES = new Set(["paid", "dp", "unpaid", "pending", "overdue"]);
+const MILESTONE_STATUSES = new Set(["pending", "on-progress", "completed", "late"]);
+const DOCUMENT_TYPES = new Set(["invoice", "mou", "receipt", "operational", "contract", "other"]);
+const DOCUMENT_STATUSES = new Set(["draft", "sent", "paid", "signed", "archived"]);
 
 async function getOverview(sql) {
-  const [projects, finance, traffic, trafficTrend, financeTrend] = await Promise.all([
+  const [projects, finance, traffic, trafficTrend, financeTrend, outstanding, overdue, monthlyProfit] = await Promise.all([
     sql`SELECT COUNT(*)::int AS total,
-      COUNT(*) FILTER (WHERE status IN ('planning', 'active', 'review'))::int AS active,
+      COUNT(*) FILTER (WHERE status IN ('planning', 'active', 'review', 'pending'))::int AS active,
       COALESCE(ROUND(AVG(progress)), 0)::int AS progress
       FROM projects`,
     sql`SELECT
@@ -30,9 +36,78 @@ async function getOverview(sql) {
       COALESCE(SUM(entry.amount) FILTER (WHERE entry.type = 'expense'), 0) AS expense
       FROM generate_series(date_trunc('month', CURRENT_DATE) - INTERVAL '5 months', date_trunc('month', CURRENT_DATE), INTERVAL '1 month') month
       LEFT JOIN finance_entries entry ON entry.entry_date >= month AND entry.entry_date < month + INTERVAL '1 month'
-      GROUP BY month ORDER BY month`
+      GROUP BY month ORDER BY month`,
+    sql`SELECT id, name, client, budget, payment_received, payment_status,
+      GREATEST(budget - payment_received, 0) AS outstanding
+      FROM projects
+      WHERE payment_status IN ('dp', 'unpaid', 'pending', 'overdue') OR payment_received < budget
+      ORDER BY outstanding DESC, deadline NULLS LAST
+      LIMIT 8`,
+    sql`SELECT project.name, project.client, milestone.title, milestone.due_date, milestone.status
+      FROM project_milestones milestone
+      JOIN projects project ON project.id = milestone.project_id
+      WHERE milestone.status != 'completed' AND milestone.due_date < CURRENT_DATE
+      ORDER BY milestone.due_date ASC
+      LIMIT 8`,
+    sql`SELECT
+      COALESCE(SUM(budget), 0) AS booked,
+      COALESCE(SUM(payment_received), 0) AS received,
+      COALESCE(SUM(operational_cost + pic_fee), 0) AS planned_cost,
+      COALESCE(SUM(payment_received - operational_cost - pic_fee), 0) AS projected_profit
+      FROM projects
+      WHERE date_trunc('month', COALESCE(start_date, created_at::date)) = date_trunc('month', CURRENT_DATE)`
   ]);
-  return { projects: projects[0], finance: finance[0], traffic: traffic[0], trafficTrend, financeTrend };
+  return {
+    projects: projects[0],
+    finance: finance[0],
+    traffic: traffic[0],
+    trafficTrend,
+    financeTrend,
+    outstanding,
+    overdue,
+    monthlyProfit: monthlyProfit[0]
+  };
+}
+
+async function getProjects(sql) {
+  const rows = await sql`
+    SELECT project.*,
+      COALESCE(SUM(finance.amount) FILTER (WHERE finance.type = 'income'), 0) AS income_total,
+      COALESCE(SUM(finance.amount) FILTER (WHERE finance.type = 'expense'), 0) AS expense_total
+    FROM projects project
+    LEFT JOIN finance_entries finance ON finance.project_id = project.id
+    GROUP BY project.id
+    ORDER BY
+      CASE project.status WHEN 'active' THEN 1 WHEN 'review' THEN 2 WHEN 'planning' THEN 3 WHEN 'pending' THEN 4 ELSE 5 END,
+      project.deadline NULLS LAST,
+      project.updated_at DESC
+  `;
+  const [milestones, documents] = await Promise.all([
+    sql`SELECT * FROM project_milestones ORDER BY due_date NULLS LAST, created_at ASC`,
+    sql`SELECT * FROM project_documents ORDER BY issued_date DESC NULLS LAST, created_at DESC`
+  ]);
+  const byProject = (items) => items.reduce((map, item) => {
+    map[item.project_id] ||= [];
+    map[item.project_id].push(item);
+    return map;
+  }, {});
+  const milestoneMap = byProject(milestones);
+  const documentMap = byProject(documents);
+  return rows.map((project) => {
+    const plannedCost = Number(project.operational_cost || 0) + Number(project.pic_fee || 0);
+    const actualExpense = Number(project.expense_total || 0);
+    const received = Number(project.payment_received || 0) || Number(project.income_total || 0);
+    return {
+      ...project,
+      milestones: milestoneMap[project.id] || [],
+      documents: documentMap[project.id] || [],
+      planned_cost: plannedCost,
+      actual_expense: actualExpense,
+      profit_plan: Number(project.budget || 0) - plannedCost,
+      profit_actual: received - actualExpense,
+      outstanding: Math.max(0, Number(project.budget || 0) - received)
+    };
+  });
 }
 
 export default async function handler(request, response) {
@@ -54,19 +129,18 @@ export default async function handler(request, response) {
         const rows = await sql`SELECT key, value, status, updated_at FROM cms_entries ORDER BY key`;
         return response.status(200).json({ entries: Object.fromEntries(rows.map((row) => [row.key, row.value])) });
       }
-      if (resource === "projects") {
-        const rows = await sql`SELECT * FROM projects ORDER BY
-          CASE status WHEN 'active' THEN 1 WHEN 'review' THEN 2 WHEN 'planning' THEN 3 ELSE 4 END,
-          deadline NULLS LAST, updated_at DESC`;
-        return response.status(200).json({ items: rows });
-      }
+      if (resource === "projects") return response.status(200).json({ items: await getProjects(sql) });
       if (resource === "finance") {
-        const rows = await sql`SELECT * FROM finance_entries ORDER BY entry_date DESC, created_at DESC LIMIT 250`;
+        const rows = await sql`SELECT finance.*, project.name AS project_name
+          FROM finance_entries finance
+          LEFT JOIN projects project ON project.id = finance.project_id
+          ORDER BY finance.entry_date DESC, finance.created_at DESC LIMIT 250`;
         const totals = await sql`SELECT
           COALESCE(SUM(amount) FILTER (WHERE type = 'income'), 0) AS income,
           COALESCE(SUM(amount) FILTER (WHERE type = 'expense'), 0) AS expense
           FROM finance_entries`;
-        return response.status(200).json({ items: rows, totals: totals[0] });
+        const projects = await sql`SELECT id, name, client FROM projects ORDER BY updated_at DESC LIMIT 200`;
+        return response.status(200).json({ items: rows, totals: totals[0], projects });
       }
       if (resource === "performance") {
         const rows = await sql`SELECT * FROM performance_metrics ORDER BY updated_at DESC`;
@@ -104,18 +178,68 @@ export default async function handler(request, response) {
       }
       const name = clean(body.name, 160);
       if (!name) return response.status(400).json({ message: "Nama project wajib diisi." });
-      const client = clean(body.client, 160);
-      const status = ["planning", "active", "review", "completed", "on-hold"].includes(body.status) ? body.status : "planning";
-      const progress = Math.min(100, Math.max(0, number(body.progress)));
-      const deadline = body.deadline || null;
-      const budget = Math.max(0, number(body.budget));
-      const notes = clean(body.notes, 2000);
-      await sql`INSERT INTO projects (id, name, client, status, progress, deadline, budget, notes)
-        VALUES (${id}, ${name}, ${client}, ${status}, ${progress}, ${deadline}, ${budget}, ${notes})
-        ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, client = EXCLUDED.client,
-          status = EXCLUDED.status, progress = EXCLUDED.progress, deadline = EXCLUDED.deadline,
-          budget = EXCLUDED.budget, notes = EXCLUDED.notes, updated_at = NOW()`;
+      const status = PROJECT_STATUSES.has(body.status) ? body.status : "planning";
+      const paymentStatus = PAYMENT_STATUSES.has(body.payment_status) ? body.payment_status : "unpaid";
+      await sql`INSERT INTO projects (
+          id, name, client, status, progress, start_date, deadline, budget,
+          operational_cost, pic_fee, payment_status, payment_received, notes
+        )
+        VALUES (
+          ${id}, ${name}, ${clean(body.client, 160)}, ${status},
+          ${Math.min(100, Math.max(0, number(body.progress)))}, ${dateOrNull(body.start_date)},
+          ${dateOrNull(body.deadline)}, ${Math.max(0, number(body.budget))},
+          ${Math.max(0, number(body.operational_cost))}, ${Math.max(0, number(body.pic_fee))},
+          ${paymentStatus}, ${Math.max(0, number(body.payment_received))}, ${clean(body.notes, 2000)}
+        )
+        ON CONFLICT (id) DO UPDATE SET
+          name = EXCLUDED.name, client = EXCLUDED.client, status = EXCLUDED.status,
+          progress = EXCLUDED.progress, start_date = EXCLUDED.start_date, deadline = EXCLUDED.deadline,
+          budget = EXCLUDED.budget, operational_cost = EXCLUDED.operational_cost, pic_fee = EXCLUDED.pic_fee,
+          payment_status = EXCLUDED.payment_status, payment_received = EXCLUDED.payment_received,
+          notes = EXCLUDED.notes, updated_at = NOW()`;
       await audit(session.username, request.method === "POST" ? "create" : "update", "project", id);
+      return response.status(200).json({ ok: true, id });
+    }
+
+    if (resource === "milestones") {
+      const id = clean(body.id, 80) || crypto.randomUUID();
+      if (request.method === "DELETE") {
+        await sql`DELETE FROM project_milestones WHERE id = ${id}`;
+        await audit(session.username, "delete", "milestone", id);
+        return response.status(200).json({ ok: true });
+      }
+      const title = clean(body.title, 180);
+      const projectId = clean(body.project_id, 80);
+      if (!title || !projectId) return response.status(400).json({ message: "Project dan judul termin wajib diisi." });
+      const status = MILESTONE_STATUSES.has(body.status) ? body.status : "pending";
+      await sql`INSERT INTO project_milestones (id, project_id, title, due_date, status, amount, notes)
+        VALUES (${id}, ${projectId}, ${title}, ${dateOrNull(body.due_date)}, ${status}, ${Math.max(0, number(body.amount))}, ${clean(body.notes, 1000)})
+        ON CONFLICT (id) DO UPDATE SET project_id = EXCLUDED.project_id, title = EXCLUDED.title,
+          due_date = EXCLUDED.due_date, status = EXCLUDED.status, amount = EXCLUDED.amount,
+          notes = EXCLUDED.notes, updated_at = NOW()`;
+      await audit(session.username, request.method === "POST" ? "create" : "update", "milestone", id);
+      return response.status(200).json({ ok: true, id });
+    }
+
+    if (resource === "documents") {
+      const id = clean(body.id, 80) || crypto.randomUUID();
+      if (request.method === "DELETE") {
+        await sql`DELETE FROM project_documents WHERE id = ${id}`;
+        await audit(session.username, "delete", "document", id);
+        return response.status(200).json({ ok: true });
+      }
+      const title = clean(body.title, 180);
+      const projectId = clean(body.project_id, 80);
+      if (!title || !projectId) return response.status(400).json({ message: "Project dan judul dokumen wajib diisi." });
+      const type = DOCUMENT_TYPES.has(body.document_type) ? body.document_type : "other";
+      const status = DOCUMENT_STATUSES.has(body.status) ? body.status : "draft";
+      await sql`INSERT INTO project_documents (id, project_id, title, document_type, file_url, amount, status, issued_date, notes)
+        VALUES (${id}, ${projectId}, ${title}, ${type}, ${clean(body.file_url, 800)}, ${Math.max(0, number(body.amount))}, ${status}, ${dateOrNull(body.issued_date)}, ${clean(body.notes, 1000)})
+        ON CONFLICT (id) DO UPDATE SET project_id = EXCLUDED.project_id, title = EXCLUDED.title,
+          document_type = EXCLUDED.document_type, file_url = EXCLUDED.file_url, amount = EXCLUDED.amount,
+          status = EXCLUDED.status, issued_date = EXCLUDED.issued_date, notes = EXCLUDED.notes,
+          updated_at = NOW()`;
+      await audit(session.username, request.method === "POST" ? "create" : "update", "document", id);
       return response.status(200).json({ ok: true, id });
     }
 
@@ -129,15 +253,12 @@ export default async function handler(request, response) {
       const type = body.type === "expense" ? "expense" : "income";
       const description = clean(body.description, 240);
       if (!description) return response.status(400).json({ message: "Deskripsi wajib diisi." });
-      const category = clean(body.category, 100) || "General";
-      const amount = Math.max(0, number(body.amount));
-      const paymentStatus = ["paid", "pending", "overdue"].includes(body.payment_status) ? body.payment_status : "paid";
-      const entryDate = body.entry_date || new Date().toISOString().slice(0, 10);
-      await sql`INSERT INTO finance_entries (id, entry_date, type, category, description, amount, payment_status)
-        VALUES (${id}, ${entryDate}, ${type}, ${category}, ${description}, ${amount}, ${paymentStatus})
-        ON CONFLICT (id) DO UPDATE SET entry_date = EXCLUDED.entry_date, type = EXCLUDED.type,
-          category = EXCLUDED.category, description = EXCLUDED.description, amount = EXCLUDED.amount,
-          payment_status = EXCLUDED.payment_status, updated_at = NOW()`;
+      const paymentStatus = ["paid", "pending", "overdue", "dp"].includes(body.payment_status) ? body.payment_status : "paid";
+      await sql`INSERT INTO finance_entries (id, project_id, entry_date, type, category, description, amount, payment_status)
+        VALUES (${id}, ${clean(body.project_id, 80) || null}, ${dateOrNull(body.entry_date) || new Date().toISOString().slice(0, 10)}, ${type}, ${clean(body.category, 100) || "General"}, ${description}, ${Math.max(0, number(body.amount))}, ${paymentStatus})
+        ON CONFLICT (id) DO UPDATE SET project_id = EXCLUDED.project_id, entry_date = EXCLUDED.entry_date,
+          type = EXCLUDED.type, category = EXCLUDED.category, description = EXCLUDED.description,
+          amount = EXCLUDED.amount, payment_status = EXCLUDED.payment_status, updated_at = NOW()`;
       await audit(session.username, request.method === "POST" ? "create" : "update", "finance", id);
       return response.status(200).json({ ok: true, id });
     }

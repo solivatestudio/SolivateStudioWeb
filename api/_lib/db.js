@@ -28,20 +28,50 @@ export function ensureSchema() {
       client TEXT NOT NULL DEFAULT '',
       status TEXT NOT NULL DEFAULT 'planning',
       progress INTEGER NOT NULL DEFAULT 0 CHECK (progress BETWEEN 0 AND 100),
+      start_date DATE,
       deadline DATE,
       budget NUMERIC(14, 2) NOT NULL DEFAULT 0,
+      operational_cost NUMERIC(14, 2) NOT NULL DEFAULT 0,
+      pic_fee NUMERIC(14, 2) NOT NULL DEFAULT 0,
+      payment_status TEXT NOT NULL DEFAULT 'unpaid',
+      payment_received NUMERIC(14, 2) NOT NULL DEFAULT 0,
       notes TEXT NOT NULL DEFAULT '',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )`,
       sql`CREATE TABLE IF NOT EXISTS finance_entries (
       id TEXT PRIMARY KEY,
+      project_id TEXT REFERENCES projects(id) ON DELETE SET NULL,
       entry_date DATE NOT NULL DEFAULT CURRENT_DATE,
       type TEXT NOT NULL CHECK (type IN ('income', 'expense')),
       category TEXT NOT NULL DEFAULT 'General',
       description TEXT NOT NULL,
       amount NUMERIC(14, 2) NOT NULL DEFAULT 0,
       payment_status TEXT NOT NULL DEFAULT 'paid',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )`,
+      sql`CREATE TABLE IF NOT EXISTS project_milestones (
+      id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      due_date DATE,
+      status TEXT NOT NULL DEFAULT 'pending',
+      amount NUMERIC(14, 2) NOT NULL DEFAULT 0,
+      notes TEXT NOT NULL DEFAULT '',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )`,
+      sql`CREATE TABLE IF NOT EXISTS project_documents (
+      id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      document_type TEXT NOT NULL DEFAULT 'other',
+      file_url TEXT NOT NULL DEFAULT '',
+      amount NUMERIC(14, 2) NOT NULL DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'draft',
+      issued_date DATE,
+      notes TEXT NOT NULL DEFAULT '',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )`,
@@ -85,6 +115,17 @@ export function ensureSchema() {
       sql`CREATE INDEX IF NOT EXISTS traffic_events_created_at_idx ON traffic_events (created_at DESC)`,
       sql`CREATE INDEX IF NOT EXISTS traffic_events_session_idx ON traffic_events (session_hash, created_at DESC)`,
       sql`CREATE INDEX IF NOT EXISTS cms_resources_type_idx ON cms_resources (resource_type, sort_order, updated_at DESC)`,
+      sql`CREATE INDEX IF NOT EXISTS finance_entries_project_idx ON finance_entries (project_id, entry_date DESC)`,
+      sql`CREATE INDEX IF NOT EXISTS project_milestones_project_idx ON project_milestones (project_id, due_date ASC)`,
+      sql`CREATE INDEX IF NOT EXISTS project_documents_project_idx ON project_documents (project_id, issued_date DESC)`,
+    ]);
+    await Promise.all([
+      sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS start_date DATE`,
+      sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS operational_cost NUMERIC(14, 2) NOT NULL DEFAULT 0`,
+      sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS pic_fee NUMERIC(14, 2) NOT NULL DEFAULT 0`,
+      sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'unpaid'`,
+      sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS payment_received NUMERIC(14, 2) NOT NULL DEFAULT 0`,
+      sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS project_id TEXT REFERENCES projects(id) ON DELETE SET NULL`,
     ]);
   })().catch((error) => {
     schemaPromise = undefined;

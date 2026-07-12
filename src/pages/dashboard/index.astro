@@ -10,13 +10,15 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
     <article class="admin-stat"><p class="admin-stat-label">Active visitors</p><div class="admin-stat-value admin-skeleton"></div><span class="admin-stat-note">5 menit terakhir</span></article>
     <article class="admin-stat blue"><p class="admin-stat-label">Visits today</p><div class="admin-stat-value admin-skeleton"></div><span class="admin-stat-note">Pageviews hari ini</span></article>
     <article class="admin-stat coral"><p class="admin-stat-label">Active projects</p><div class="admin-stat-value admin-skeleton"></div><span class="admin-stat-note">Sedang berjalan</span></article>
-    <article class="admin-stat"><p class="admin-stat-label">Net this month</p><div class="admin-stat-value admin-skeleton"></div><span class="admin-stat-note">Pemasukan dikurangi biaya</span></article>
+    <article class="admin-stat"><p class="admin-stat-label">Profit month</p><div class="admin-stat-value admin-skeleton"></div><span class="admin-stat-note">Received - cost - fee PIC</span></article>
   </section>
   <section class="admin-grid two" style="margin-top:16px">
     <article class="admin-panel admin-chart-panel"><div class="admin-panel-head"><div><h2>Traffic pulse</h2><p>Pageviews selama 7 hari terakhir</p></div><span class="chart-legend"><i></i> Pageviews</span></div><div class="admin-chart-wrap compact"><canvas data-overview-traffic></canvas></div></article>
     <article class="admin-panel admin-chart-panel"><div class="admin-panel-head"><div><h2>Financial movement</h2><p>Pemasukan dan pengeluaran 6 bulan</p></div><div class="chart-legends"><span class="chart-legend"><i></i> Income</span><span class="chart-legend expense"><i></i> Expense</span></div></div><div class="admin-chart-wrap compact"><canvas data-overview-finance></canvas></div></article>
     <article class="admin-panel"><div class="admin-panel-head"><div><h2>Progress portfolio</h2><p>Rata-rata progress seluruh project</p></div></div><div class="admin-progress"><span data-progress style="width:0%"></span></div><p data-progress-label style="margin:14px 0 0;font-size:12px;color:var(--admin-muted)">Memuat...</p></article>
-    <article class="admin-panel"><div class="admin-panel-head"><div><h2>Quick access</h2><p>Aksi yang paling sering dipakai</p></div></div><div class="admin-actions"><a class="admin-button ghost" href="/dashboard/cms">Edit website</a><a class="admin-button ghost" href="/dashboard/finance">Catat transaksi</a><a class="admin-button ghost" href="/dashboard/traffic">Lihat traffic</a></div></article>
+    <article class="admin-panel"><div class="admin-panel-head"><div><h2>Outstanding payment</h2><p>Project yang belum lunas</p></div></div><div class="traffic-list" data-outstanding-list></div></article>
+    <article class="admin-panel"><div class="admin-panel-head"><div><h2>Overdue timeline</h2><p>Termin lewat deadline</p></div></div><div class="traffic-list" data-overdue-list></div></article>
+    <article class="admin-panel"><div class="admin-panel-head"><div><h2>Quick access</h2><p>Aksi yang paling sering dipakai</p></div></div><div class="admin-actions"><a class="admin-button ghost" href="/dashboard/projects">Kelola project</a><a class="admin-button ghost" href="/dashboard/finance">Catat transaksi</a><a class="admin-button ghost" href="/dashboard/traffic">Lihat traffic</a></div></article>
   </section>
   <script>
     // @ts-nocheck -- browser dashboard data is validated by the authenticated API.
@@ -24,10 +26,14 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
     window.addEventListener("DOMContentLoaded", async () => {
       try {
         const data = await window.adminApi("/api/admin/data?resource=overview");
-        const values = [data.traffic.active, data.traffic.today, data.projects.active, window.formatRupiah(Number(data.finance.income) - Number(data.finance.expense))];
+        const profitMonth = Number(data.monthlyProfit.projected_profit || 0);
+        const values = [data.traffic.active, data.traffic.today, data.projects.active, window.formatRupiah(profitMonth)];
         document.querySelectorAll("[data-overview] .admin-stat-value").forEach((node, index) => { node.classList.remove("admin-skeleton"); node.textContent = values[index]; });
         document.querySelector("[data-progress]").style.width = `${data.projects.progress}%`;
         document.querySelector("[data-progress-label]").textContent = `${data.projects.progress}% rata-rata dari ${data.projects.total} project`;
+        const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+        document.querySelector("[data-outstanding-list]").innerHTML = data.outstanding.length ? data.outstanding.map((item) => `<div class="traffic-row"><strong>${esc(item.name)}<br><span>${esc(item.client || "Internal")} · ${esc(item.payment_status)}</span></strong><span>${window.formatRupiah(item.outstanding)}</span></div>`).join("") : '<div class="admin-empty">Tidak ada outstanding.</div>';
+        document.querySelector("[data-overdue-list]").innerHTML = data.overdue.length ? data.overdue.map((item) => `<div class="traffic-row"><strong>${esc(item.name)}<br><span>${esc(item.title)}</span></strong><span>${window.formatDate(item.due_date)}</span></div>`).join("") : '<div class="admin-empty">Tidak ada termin telat.</div>';
         const baseOptions = { responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: "index" }, plugins: { legend: { display: false }, tooltip: { backgroundColor: "#071526", padding: 11, titleFont: { family: "Plus Jakarta Sans", size: 9 }, bodyFont: { family: "Plus Jakarta Sans", size: 10, weight: "bold" } } }, scales: { x: { grid: { display: false }, border: { display: false }, ticks: { color: "#6d7785", font: { family: "Plus Jakarta Sans", size: 8, weight: 600 } } }, y: { beginAtZero: true, border: { display: false }, grid: { color: "rgba(7,21,38,.07)" }, ticks: { precision: 0, color: "#6d7785", font: { family: "Plus Jakarta Sans", size: 8 } } } } };
         const trafficContext = document.querySelector("[data-overview-traffic]").getContext("2d");
         const trafficGradient = trafficContext.createLinearGradient(0, 0, 0, 220); trafficGradient.addColorStop(0, "rgba(2,62,138,.22)"); trafficGradient.addColorStop(1, "rgba(2,62,138,0)");

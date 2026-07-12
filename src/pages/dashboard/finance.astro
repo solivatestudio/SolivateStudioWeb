@@ -1,34 +1,71 @@
 ---
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 ---
+
 <DashboardLayout title="Finance" active="finance" eyebrow="Cash visibility">
-  <section class="admin-intro"><div><h2>Arus kas sederhana, keputusan lebih tenang.</h2><p>Catat pemasukan, pengeluaran, dan status pembayaran tanpa sistem akuntansi yang berat.</p></div></section>
-  <section class="admin-grid stats" style="margin-bottom:16px">
-    <article class="admin-stat"><p class="admin-stat-label">Total income</p><div class="admin-stat-value" data-income>Rp0</div><span class="admin-stat-note">Seluruh transaksi</span></article>
-    <article class="admin-stat coral"><p class="admin-stat-label">Total expense</p><div class="admin-stat-value" data-expense>Rp0</div><span class="admin-stat-note">Seluruh pengeluaran</span></article>
-    <article class="admin-stat blue"><p class="admin-stat-label">Current balance</p><div class="admin-stat-value" data-balance>Rp0</div><span class="admin-stat-note">Income - expense</span></article>
+  <section class="admin-intro">
+    <div><h2>Arus kas per project, bukan cuma angka global.</h2><p>Catat income, biaya operasional, fee, invoice payment, dan status pembayaran yang tersambung ke project.</p></div>
   </section>
+
+  <section class="admin-grid stats" style="margin-bottom:16px">
+    <article class="admin-stat"><p class="admin-stat-label">Total income</p><div class="admin-stat-value" data-income>Rp0</div><span class="admin-stat-note">Seluruh pemasukan</span></article>
+    <article class="admin-stat coral"><p class="admin-stat-label">Total expense</p><div class="admin-stat-value" data-expense>Rp0</div><span class="admin-stat-note">Seluruh pengeluaran</span></article>
+    <article class="admin-stat blue"><p class="admin-stat-label">Net balance</p><div class="admin-stat-value" data-balance>Rp0</div><span class="admin-stat-note">Income - expense</span></article>
+    <article class="admin-stat"><p class="admin-stat-label">Linked projects</p><div class="admin-stat-value" data-project-count>0</div><span class="admin-stat-note">Project aktif di finance</span></article>
+  </section>
+
   <section class="admin-panel" style="margin-bottom:16px">
-    <div class="admin-panel-head"><div><h2>Catat transaksi</h2><p>Transaksi baru masuk ke ringkasan secara otomatis.</p></div></div>
+    <div class="admin-panel-head"><div><h2>Catat transaksi</h2><p>Pilih project terkait supaya breakdown profit tetap akurat.</p></div></div>
     <form class="admin-form" data-finance-form>
+      <label class="admin-field full"><span>Project terkait</span><select name="project_id"><option value="">General / internal</option></select></label>
       <label class="admin-field"><span>Tanggal</span><input name="entry_date" type="date" required /></label>
       <label class="admin-field"><span>Tipe</span><select name="type"><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option></select></label>
-      <label class="admin-field"><span>Kategori</span><input name="category" placeholder="Project, operasional..." /></label>
-      <label class="admin-field"><span>Status</span><select name="payment_status"><option value="paid">Paid</option><option value="pending">Pending</option><option value="overdue">Overdue</option></select></label>
+      <label class="admin-field"><span>Kategori</span><select name="category"><option>Project payment</option><option>Operational cost</option><option>Fee PIC</option><option>Subscription</option><option>Marketing</option><option>General</option></select></label>
+      <label class="admin-field"><span>Status</span><select name="payment_status"><option value="paid">Paid</option><option value="dp">DP</option><option value="pending">Pending</option><option value="overdue">Overdue</option></select></label>
       <label class="admin-field full"><span>Deskripsi</span><input name="description" required /></label>
       <label class="admin-field"><span>Jumlah</span><input name="amount" type="number" min="0" step="1000" required /></label>
       <div class="admin-actions" style="align-items:end"><button class="admin-button accent" type="submit">Simpan transaksi</button></div>
     </form>
   </section>
-  <section class="admin-panel"><div class="admin-panel-head"><div><h2>Riwayat transaksi</h2><p data-finance-count>Memuat...</p></div></div><div data-finance-list><div class="admin-empty">Memuat transaksi...</div></div></section>
+
+  <section class="admin-panel">
+    <div class="admin-panel-head"><div><h2>Riwayat transaksi</h2><p data-finance-count>Memuat...</p></div></div>
+    <div data-finance-list><div class="admin-empty">Memuat transaksi...</div></div>
+  </section>
+
   <script is:inline>
     window.addEventListener("DOMContentLoaded", () => {
-      const form = document.querySelector("[data-finance-form]"); const list = document.querySelector("[data-finance-list]");
+      const form = document.querySelector("[data-finance-form]");
+      const list = document.querySelector("[data-finance-list]");
       form.elements.entry_date.value = new Date().toISOString().slice(0,10);
       const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
-      const load = async () => { const data = await window.adminApi("/api/admin/data?resource=finance"); const income = Number(data.totals.income); const expense = Number(data.totals.expense); document.querySelector("[data-income]").textContent = window.formatRupiah(income); document.querySelector("[data-expense]").textContent = window.formatRupiah(expense); document.querySelector("[data-balance]").textContent = window.formatRupiah(income-expense); document.querySelector("[data-finance-count]").textContent = `${data.items.length} transaksi`; list.innerHTML = data.items.length ? `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th>Tipe</th><th>Status</th><th>Jumlah</th><th></th></tr></thead><tbody>${data.items.map((item) => `<tr><td>${window.formatDate(item.entry_date)}</td><td><strong>${esc(item.description)}</strong></td><td>${esc(item.category)}</td><td><span class="admin-badge ${item.type}">${item.type}</span></td><td><span class="admin-badge ${item.payment_status}">${item.payment_status}</span></td><td>${window.formatRupiah(item.amount)}</td><td><button class="admin-button danger" data-delete="${item.id}">Hapus</button></td></tr>`).join("")}</tbody></table></div>` : '<div class="admin-empty">Belum ada transaksi.</div>'; };
-      form.addEventListener("submit", async (event) => { event.preventDefault(); try { await window.adminApi("/api/admin/data?resource=finance", { method:"POST", body:JSON.stringify(Object.fromEntries(new FormData(form))) }); form.reset(); form.elements.entry_date.value = new Date().toISOString().slice(0,10); await load(); window.showAdminToast("Transaksi tersimpan."); } catch(error) { window.showAdminToast(error.message,"error"); } });
-      list.addEventListener("click", async (event) => { const id = event.target.closest("[data-delete]")?.dataset.delete; if (id && confirm("Hapus transaksi ini?")) { await window.adminApi("/api/admin/data?resource=finance", { method:"DELETE", body:JSON.stringify({id}) }); await load(); window.showAdminToast("Transaksi dihapus."); } });
+      const load = async () => {
+        const data = await window.adminApi("/api/admin/data?resource=finance");
+        const income = Number(data.totals.income);
+        const expense = Number(data.totals.expense);
+        form.elements.project_id.innerHTML = `<option value="">General / internal</option>${(data.projects || []).map((project) => `<option value="${esc(project.id)}">${esc(project.name)} · ${esc(project.client || "Internal")}</option>`).join("")}`;
+        document.querySelector("[data-income]").textContent = window.formatRupiah(income);
+        document.querySelector("[data-expense]").textContent = window.formatRupiah(expense);
+        document.querySelector("[data-balance]").textContent = window.formatRupiah(income - expense);
+        document.querySelector("[data-project-count]").textContent = String(new Set(data.items.map((item) => item.project_id).filter(Boolean)).size);
+        document.querySelector("[data-finance-count]").textContent = `${data.items.length} transaksi`;
+        list.innerHTML = data.items.length ? `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Tanggal</th><th>Project</th><th>Deskripsi</th><th>Kategori</th><th>Tipe</th><th>Status</th><th>Jumlah</th><th></th></tr></thead><tbody>${data.items.map((item) => `<tr><td>${window.formatDate(item.entry_date)}</td><td>${esc(item.project_name || "General")}</td><td><strong>${esc(item.description)}</strong></td><td>${esc(item.category)}</td><td><span class="admin-badge ${item.type}">${item.type}</span></td><td><span class="admin-badge ${item.payment_status}">${item.payment_status}</span></td><td>${window.formatRupiah(item.amount)}</td><td><button class="admin-button danger" data-delete="${item.id}">Hapus</button></td></tr>`).join("")}</tbody></table></div>` : '<div class="admin-empty">Belum ada transaksi.</div>';
+      };
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        try {
+          await window.adminApi("/api/admin/data?resource=finance", { method:"POST", body:JSON.stringify(Object.fromEntries(new FormData(form))) });
+          form.reset(); form.elements.entry_date.value = new Date().toISOString().slice(0,10);
+          await load(); window.showAdminToast("Transaksi tersimpan.");
+        } catch(error) { window.showAdminToast(error.message,"error"); }
+      });
+      list.addEventListener("click", async (event) => {
+        const id = event.target.closest("[data-delete]")?.dataset.delete;
+        if (id && confirm("Hapus transaksi ini?")) {
+          await window.adminApi("/api/admin/data?resource=finance", { method:"DELETE", body:JSON.stringify({id}) });
+          await load(); window.showAdminToast("Transaksi dihapus.");
+        }
+      });
       load().catch((error) => { list.innerHTML = `<p class="admin-error">${esc(error.message)}</p>`; });
     });
   </script>
