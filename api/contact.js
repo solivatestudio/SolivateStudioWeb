@@ -46,7 +46,7 @@ const looksRandom = (value, { minWords = 2, maxSingleToken = 18 } = {}) => {
   return false;
 };
 const validateHumanSubmission = (payload) => {
-  if (clean(payload.company)) return "Submission rejected.";
+  if (clean(payload.website) || clean(payload.company)) return "Submission rejected.";
   const startedAt = Number(payload.startedAt || 0);
   const elapsed = Date.now() - startedAt;
   if (!startedAt || elapsed < 1500 || elapsed > 1000 * 60 * 60 * 3) {

@@ -183,7 +183,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
               <textarea id="message" name="message" maxlength="2000" placeholder={initialText("apply.message_placeholder")} data-i18n-placeholder="apply.message_placeholder"></textarea>
             </div>
 
-            {turnstileSiteKey && <div class="turnstile-wrap full"><div class="cf-turnstile" data-sitekey={turnstileSiteKey}></div></div>}
+            {turnstileSiteKey && <div class="turnstile-wrap full"><div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-appearance="always" data-theme="light" data-retry="auto" data-refresh-expired="auto"></div></div>}
 
             <p class="apply-form-error full" data-form-error data-i18n="apply.error" hidden>{initialText("apply.error")}</p>
 

@@ -586,7 +586,7 @@ const organizationSchema = JSON.stringify({
 
           <div class="contact-card">
             <form data-contact-form>
-              <input type="text" name="company" autocomplete="off" tabindex="-1" aria-hidden="true" class="form-honeypot" />
+              <input type="text" name="website" autocomplete="new-password" tabindex="-1" aria-hidden="true" class="form-honeypot" />
               <input type="hidden" name="startedAt" data-started-at />
               <label>
                 <span data-i18n="form.name">{tx("form.name")}</span>
@@ -609,7 +609,7 @@ const organizationSchema = JSON.stringify({
                 <span data-i18n="form.brief">{tx("form.brief")}</span>
                 <textarea required name="brief" placeholder={tx("form.brief.placeholder")} data-i18n-placeholder="form.brief.placeholder"></textarea>
               </label>
-              {turnstileSiteKey && <div class="turnstile-wrap"><div class="cf-turnstile" data-sitekey={turnstileSiteKey}></div></div>}
+              {turnstileSiteKey && <div class="turnstile-wrap"><div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-appearance="always" data-theme="light" data-retry="auto" data-refresh-expired="auto"></div></div>}
               <p class="form-error" data-form-error data-i18n="form.error" hidden>{tx("form.error")}</p>
               <button class="btn-primary" type="submit">
                 <span data-i18n="form.submit">{tx("form.submit")}</span>
@@ -856,7 +856,7 @@ const organizationSchema = JSON.stringify({
             contact: formData.get("contact"),
             projectType: formData.get("projectType"),
             brief: formData.get("brief"),
-            company: formData.get("company"),
+            website: formData.get("website"),
             startedAt: formData.get("startedAt"),
             turnstileToken: formData.get("cf-turnstile-response")
           })
