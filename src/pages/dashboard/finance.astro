@@ -7,14 +7,22 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
     <div><h2>Arus kas per project, bukan cuma angka global.</h2><p>Catat income, biaya operasional, fee, invoice payment, dan status pembayaran yang tersambung ke project.</p></div>
   </section>
 
-  <section class="admin-grid stats" style="margin-bottom:16px">
+  <section class="admin-grid stats management-summary" style="margin-bottom:16px">
     <article class="admin-stat"><p class="admin-stat-label">Total income</p><div class="admin-stat-value" data-income>Rp0</div><span class="admin-stat-note">Seluruh pemasukan</span></article>
     <article class="admin-stat coral"><p class="admin-stat-label">Total expense</p><div class="admin-stat-value" data-expense>Rp0</div><span class="admin-stat-note">Seluruh pengeluaran</span></article>
     <article class="admin-stat blue"><p class="admin-stat-label">Net balance</p><div class="admin-stat-value" data-balance>Rp0</div><span class="admin-stat-note">Income - expense</span></article>
     <article class="admin-stat"><p class="admin-stat-label">Linked projects</p><div class="admin-stat-value" data-project-count>0</div><span class="admin-stat-note">Project aktif di finance</span></article>
   </section>
 
-  <section class="admin-panel" style="margin-bottom:16px">
+  <section class="admin-panel management-list-section">
+    <div class="admin-panel-head">
+      <div><h2>Riwayat transaksi</h2><p data-finance-count>Memuat...</p></div>
+      <button class="admin-button accent" type="button" data-add-finance>Tambah transaksi</button>
+    </div>
+    <div data-finance-list><div class="admin-empty">Memuat transaksi...</div></div>
+  </section>
+
+  <section class="admin-panel management-editor" style="margin-bottom:16px">
     <div class="admin-panel-head"><div><h2>Catat transaksi</h2><p>Pilih project terkait supaya breakdown profit tetap akurat.</p></div></div>
     <form class="admin-form" data-finance-form>
       <label class="admin-field full"><span>Project terkait</span><select name="project_id"><option value="">General / internal</option></select></label>
@@ -26,11 +34,6 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
       <label class="admin-field"><span>Jumlah</span><input name="amount" type="number" min="0" step="1000" required /></label>
       <div class="admin-actions" style="align-items:end"><button class="admin-button accent" type="submit">Simpan transaksi</button></div>
     </form>
-  </section>
-
-  <section class="admin-panel">
-    <div class="admin-panel-head"><div><h2>Riwayat transaksi</h2><p data-finance-count>Memuat...</p></div></div>
-    <div data-finance-list><div class="admin-empty">Memuat transaksi...</div></div>
   </section>
 
   <script is:inline>
@@ -59,6 +62,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           await load(); window.showAdminToast("Transaksi tersimpan.");
         } catch(error) { window.showAdminToast(error.message,"error"); }
       });
+      document.querySelector("[data-add-finance]")?.addEventListener("click", () => form.scrollIntoView({ behavior: "smooth", block: "start" }));
       list.addEventListener("click", async (event) => {
         const id = event.target.closest("[data-delete]")?.dataset.delete;
         if (id && confirm("Hapus transaksi ini?")) {

@@ -11,14 +11,22 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
     <button class="admin-button accent" type="button" data-new-project>Tambah project</button>
   </section>
 
-  <section class="admin-grid stats project-summary-grid" style="margin-bottom:16px">
+  <section class="admin-grid stats project-summary-grid management-summary" style="margin-bottom:16px">
     <article class="admin-stat"><p class="admin-stat-label">Booked value</p><div class="admin-stat-value" data-project-booked>Rp0</div><span class="admin-stat-note">Total budget project</span></article>
     <article class="admin-stat blue"><p class="admin-stat-label">Payment received</p><div class="admin-stat-value" data-project-received>Rp0</div><span class="admin-stat-note">Pembayaran masuk</span></article>
     <article class="admin-stat coral"><p class="admin-stat-label">Outstanding</p><div class="admin-stat-value" data-project-outstanding>Rp0</div><span class="admin-stat-note">Belum lunas / DP</span></article>
     <article class="admin-stat"><p class="admin-stat-label">Projected profit</p><div class="admin-stat-value" data-project-profit>Rp0</div><span class="admin-stat-note">Budget - cost - fee PIC</span></article>
   </section>
 
-  <section class="admin-panel project-workspace" style="margin-bottom:16px">
+  <section class="admin-panel management-list-section">
+    <div class="admin-panel-head">
+      <div><h2>Project list</h2><p data-project-count>Memuat data...</p></div>
+      <button class="admin-button accent" type="button" data-new-project>Tambah project</button>
+    </div>
+    <div data-project-list><div class="admin-empty">Memuat project...</div></div>
+  </section>
+
+  <section class="admin-panel project-workspace management-editor" style="margin-bottom:16px">
     <div class="admin-panel-head">
       <div><h2 data-project-form-title>Tambah project</h2><p>Isi data inti proyek dan breakdown keuangan yang dipakai rekap rapat.</p></div>
       <button class="admin-button ghost" type="button" data-project-reset>Reset</button>
@@ -41,7 +49,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
     </form>
   </section>
 
-  <section class="admin-grid two" style="margin-bottom:16px">
+  <section class="admin-grid two management-editor" style="margin-bottom:16px">
     <article class="admin-panel">
       <div class="admin-panel-head"><div><h2>Termin / timeline</h2><p>Deadline per termin biar ketahuan yang telat.</p></div></div>
       <form class="admin-form compact-form" data-milestone-form>
@@ -72,11 +80,6 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         <div class="admin-actions full"><button class="admin-button accent" type="submit">Simpan dokumen</button><button class="admin-button ghost" type="button" data-document-reset>Reset</button></div>
       </form>
     </article>
-  </section>
-
-  <section class="admin-panel">
-    <div class="admin-panel-head"><div><h2>Project list</h2><p data-project-count>Memuat data...</p></div></div>
-    <div data-project-list><div class="admin-empty">Memuat project...</div></div>
   </section>
 
   <script is:inline>
@@ -142,7 +145,9 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
       document.querySelector("[data-project-reset]").addEventListener("click", resetProject);
       document.querySelector("[data-milestone-reset]").addEventListener("click", () => milestoneForm.reset());
       document.querySelector("[data-document-reset]").addEventListener("click", () => documentForm.reset());
-      document.querySelector("[data-new-project]").addEventListener("click", () => { resetProject(); projectForm.scrollIntoView({ behavior: "smooth" }); });
+      document.querySelectorAll("[data-new-project]").forEach((button) => {
+        button.addEventListener("click", () => { resetProject(); projectForm.scrollIntoView({ behavior: "smooth" }); });
+      });
       document.querySelector("[data-doc-upload]").addEventListener("change", async (event) => {
         const file = event.target.files?.[0]; if (!file) return;
         try {

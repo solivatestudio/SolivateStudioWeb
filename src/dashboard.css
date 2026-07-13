@@ -2256,6 +2256,44 @@ button {
 .cms-switch span::after {
   border-radius: 999px;
 }
+.management-list-section {
+  order: 2;
+  margin-bottom: 16px;
+}
+.management-summary {
+  order: 1;
+}
+.management-editor {
+  order: 3;
+}
+.management-editor > .admin-panel,
+.management-editor.admin-panel {
+  border-style: dashed;
+}
+.management-editor .admin-panel-head h2::before {
+  content: "Aksi / ";
+  color: var(--admin-muted);
+  font-weight: 700;
+}
+.management-list-section .admin-panel-head {
+  align-items: center;
+}
+.management-list-section .admin-panel-head h2 {
+  font-size: 20px;
+}
+.management-list-section + .management-editor {
+  margin-top: 0;
+}
+.management-list-section .admin-empty {
+  background: #fbfcfd;
+}
+.traffic-list-first .traffic-primary-list {
+  order: 1;
+}
+.traffic-list-first .traffic-chart-secondary {
+  order: 2;
+  grid-column: 1 / -1;
+}
 
 @media (max-width: 800px) {
   .admin-sidebar {
