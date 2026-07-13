@@ -2,9 +2,33 @@
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 ---
 <DashboardLayout title="Studio Overview" active="overview">
-  <section class="admin-intro">
-    <div><h2>Semua yang penting, dalam satu pandangan.</h2><p>Ringkasan operasional Solivate Studio. Angka diperbarui dari modul project, finance, dan traffic.</p></div>
-    <a class="admin-button accent" href="/dashboard/projects">Tambah project</a>
+  <section class="admin-intro dashboard-command">
+    <div>
+      <p class="dashboard-kicker">Command center</p>
+      <h2>Kontrol kerja harian tanpa banyak klik.</h2>
+      <p>Mulai dari project aktif, cashflow, invoice outstanding, sampai trafik website. Modul dipisah jelas supaya tim bisa langsung masuk ke pekerjaan yang dibutuhkan.</p>
+    </div>
+    <div class="dashboard-primary-actions">
+      <a class="admin-button accent" href="/dashboard/projects">Tambah project</a>
+      <a class="admin-button ghost" href="/dashboard/cms">Kelola website</a>
+    </div>
+  </section>
+  <section class="dashboard-lanes" aria-label="Mode dashboard">
+    <a href="/dashboard/cms">
+      <small>Mode 01</small>
+      <strong>Website CMS</strong>
+      <span>Pricing, showcase, FAQ, kontak, dan aset website.</span>
+    </a>
+    <a href="/dashboard/projects">
+      <small>Mode 02</small>
+      <strong>Management Internal</strong>
+      <span>Project, finance, kinerja tim, dokumen, dan timeline.</span>
+    </a>
+    <a href="/dashboard/traffic">
+      <small>Monitor</small>
+      <strong>Live Traffic</strong>
+      <span>Visitor aktif, sumber traffic, dan performa halaman.</span>
+    </a>
   </section>
   <section class="admin-grid stats" data-overview>
     <article class="admin-stat"><p class="admin-stat-label">Active visitors</p><div class="admin-stat-value admin-skeleton"></div><span class="admin-stat-note">5 menit terakhir</span></article>
@@ -12,7 +36,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
     <article class="admin-stat coral"><p class="admin-stat-label">Active projects</p><div class="admin-stat-value admin-skeleton"></div><span class="admin-stat-note">Sedang berjalan</span></article>
     <article class="admin-stat"><p class="admin-stat-label">Profit month</p><div class="admin-stat-value admin-skeleton"></div><span class="admin-stat-note">Received - cost - fee PIC</span></article>
   </section>
-  <section class="admin-grid two" style="margin-top:16px">
+  <section class="admin-grid two dashboard-overview-grid">
     <article class="admin-panel admin-chart-panel"><div class="admin-panel-head"><div><h2>Traffic pulse</h2><p>Pageviews selama 7 hari terakhir</p></div><span class="chart-legend"><i></i> Pageviews</span></div><div class="admin-chart-wrap compact"><canvas data-overview-traffic></canvas></div></article>
     <article class="admin-panel admin-chart-panel"><div class="admin-panel-head"><div><h2>Financial movement</h2><p>Pemasukan dan pengeluaran 6 bulan</p></div><div class="chart-legends"><span class="chart-legend"><i></i> Income</span><span class="chart-legend expense"><i></i> Expense</span></div></div><div class="admin-chart-wrap compact"><canvas data-overview-finance></canvas></div></article>
     <article class="admin-panel"><div class="admin-panel-head"><div><h2>Progress portfolio</h2><p>Rata-rata progress seluruh project</p></div></div><div class="admin-progress"><span data-progress style="width:0%"></span></div><p data-progress-label style="margin:14px 0 0;font-size:12px;color:var(--admin-muted)">Memuat...</p></article>
@@ -26,20 +50,27 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
     window.addEventListener("DOMContentLoaded", async () => {
       try {
         const data = await window.adminApi("/api/admin/data?resource=overview");
-        const profitMonth = Number(data.monthlyProfit.projected_profit || 0);
-        const values = [data.traffic.active, data.traffic.today, data.projects.active, window.formatRupiah(profitMonth)];
+        const traffic = data.traffic || {};
+        const projects = data.projects || {};
+        const monthlyProfit = data.monthlyProfit || {};
+        const outstanding = data.outstanding || [];
+        const overdue = data.overdue || [];
+        const trafficTrend = data.trafficTrend || [];
+        const financeTrend = data.financeTrend || [];
+        const profitMonth = Number(monthlyProfit.projected_profit || 0);
+        const values = [traffic.active || 0, traffic.today || 0, projects.active || 0, window.formatRupiah(profitMonth)];
         document.querySelectorAll("[data-overview] .admin-stat-value").forEach((node, index) => { node.classList.remove("admin-skeleton"); node.textContent = values[index]; });
-        document.querySelector("[data-progress]").style.width = `${data.projects.progress}%`;
-        document.querySelector("[data-progress-label]").textContent = `${data.projects.progress}% rata-rata dari ${data.projects.total} project`;
+        document.querySelector("[data-progress]").style.width = `${projects.progress || 0}%`;
+        document.querySelector("[data-progress-label]").textContent = `${projects.progress || 0}% rata-rata dari ${projects.total || 0} project`;
         const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
-        document.querySelector("[data-outstanding-list]").innerHTML = data.outstanding.length ? data.outstanding.map((item) => `<div class="traffic-row"><strong>${esc(item.name)}<br><span>${esc(item.client || "Internal")} · ${esc(item.payment_status)}</span></strong><span>${window.formatRupiah(item.outstanding)}</span></div>`).join("") : '<div class="admin-empty">Tidak ada outstanding.</div>';
-        document.querySelector("[data-overdue-list]").innerHTML = data.overdue.length ? data.overdue.map((item) => `<div class="traffic-row"><strong>${esc(item.name)}<br><span>${esc(item.title)}</span></strong><span>${window.formatDate(item.due_date)}</span></div>`).join("") : '<div class="admin-empty">Tidak ada termin telat.</div>';
+        document.querySelector("[data-outstanding-list]").innerHTML = outstanding.length ? outstanding.map((item) => `<div class="traffic-row"><strong>${esc(item.name)}<br><span>${esc(item.client || "Internal")} · ${esc(item.payment_status)}</span></strong><span>${window.formatRupiah(item.outstanding)}</span></div>`).join("") : '<div class="admin-empty">Tidak ada outstanding.</div>';
+        document.querySelector("[data-overdue-list]").innerHTML = overdue.length ? overdue.map((item) => `<div class="traffic-row"><strong>${esc(item.name)}<br><span>${esc(item.title)}</span></strong><span>${window.formatDate(item.due_date)}</span></div>`).join("") : '<div class="admin-empty">Tidak ada termin telat.</div>';
         const baseOptions = { responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: "index" }, plugins: { legend: { display: false }, tooltip: { backgroundColor: "#071526", padding: 11, titleFont: { family: "Plus Jakarta Sans", size: 9 }, bodyFont: { family: "Plus Jakarta Sans", size: 10, weight: "bold" } } }, scales: { x: { grid: { display: false }, border: { display: false }, ticks: { color: "#6d7785", font: { family: "Plus Jakarta Sans", size: 8, weight: 600 } } }, y: { beginAtZero: true, border: { display: false }, grid: { color: "rgba(7,21,38,.07)" }, ticks: { precision: 0, color: "#6d7785", font: { family: "Plus Jakarta Sans", size: 8 } } } } };
         const trafficContext = document.querySelector("[data-overview-traffic]").getContext("2d");
         const trafficGradient = trafficContext.createLinearGradient(0, 0, 0, 220); trafficGradient.addColorStop(0, "rgba(2,62,138,.22)"); trafficGradient.addColorStop(1, "rgba(2,62,138,0)");
-        new Chart(trafficContext, { type: "line", data: { labels: data.trafficTrend.map((item) => new Intl.DateTimeFormat("id-ID", { weekday: "short" }).format(new Date(item.day))), datasets: [{ data: data.trafficTrend.map((item) => Number(item.visits)), borderColor: "#023e8a", backgroundColor: trafficGradient, borderWidth: 3, pointRadius: 2, pointHoverRadius: 5, pointBackgroundColor: "#d7ff3f", pointBorderColor: "#023e8a", fill: true, tension: .4 }] }, options: baseOptions });
+        new Chart(trafficContext, { type: "line", data: { labels: trafficTrend.map((item) => new Intl.DateTimeFormat("id-ID", { weekday: "short" }).format(new Date(item.day))), datasets: [{ data: trafficTrend.map((item) => Number(item.visits)), borderColor: "#023e8a", backgroundColor: trafficGradient, borderWidth: 3, pointRadius: 2, pointHoverRadius: 5, pointBackgroundColor: "#d7ff3f", pointBorderColor: "#023e8a", fill: true, tension: .4 }] }, options: baseOptions });
         const money = (value) => Number(value) / 1000;
-        new Chart(document.querySelector("[data-overview-finance]"), { type: "line", data: { labels: data.financeTrend.map((item) => new Intl.DateTimeFormat("id-ID", { month: "short" }).format(new Date(item.month))), datasets: [{ data: data.financeTrend.map((item) => money(item.income)), borderColor: "#023e8a", backgroundColor: "transparent", borderWidth: 3, pointRadius: 2, tension: .38 }, { data: data.financeTrend.map((item) => money(item.expense)), borderColor: "#ff5a5f", backgroundColor: "transparent", borderWidth: 2, borderDash: [5,5], pointRadius: 2, tension: .38 }] }, options: { ...baseOptions, scales: { ...baseOptions.scales, y: { ...baseOptions.scales.y, ticks: { ...baseOptions.scales.y.ticks, callback: (value) => `Rp${value}k` } } } } });
+        new Chart(document.querySelector("[data-overview-finance]"), { type: "line", data: { labels: financeTrend.map((item) => new Intl.DateTimeFormat("id-ID", { month: "short" }).format(new Date(item.month))), datasets: [{ data: financeTrend.map((item) => money(item.income)), borderColor: "#023e8a", backgroundColor: "transparent", borderWidth: 3, pointRadius: 2, tension: .38 }, { data: financeTrend.map((item) => money(item.expense)), borderColor: "#ff5a5f", backgroundColor: "transparent", borderWidth: 2, borderDash: [5,5], pointRadius: 2, tension: .38 }] }, options: { ...baseOptions, scales: { ...baseOptions.scales, y: { ...baseOptions.scales.y, ticks: { ...baseOptions.scales.y.ticks, callback: (value) => `Rp${value}k` } } } } });
       } catch (error) { window.showAdminToast(error.message, "error"); }
     });
   </script>
