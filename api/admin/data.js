@@ -10,7 +10,7 @@ const PROJECT_STATUSES = new Set(["planning", "active", "review", "completed", "
 const PAYMENT_STATUSES = new Set(["paid", "dp", "unpaid", "pending", "overdue"]);
 const MILESTONE_STATUSES = new Set(["pending", "on-progress", "completed", "late"]);
 const DOCUMENT_TYPES = new Set(["invoice", "mou", "receipt", "operational", "contract", "other"]);
-const DOCUMENT_STATUSES = new Set(["draft", "sent", "paid", "signed", "archived"]);
+const DOCUMENT_STATUSES = new Set(["draft", "pending", "sent", "paid", "signed", "archived"]);
 
 const invoiceId = (projectId) => `invoice-${projectId}`;
 const invoiceNotes = (project, milestones = []) => {
@@ -34,19 +34,39 @@ const invoiceNotes = (project, milestones = []) => {
 async function syncInvoice(sql, projectId) {
   const [project] = await sql`SELECT * FROM projects WHERE id = ${projectId}`;
   if (!project) return;
-  const milestones = await sql`SELECT * FROM project_milestones WHERE project_id = ${projectId} ORDER BY due_date NULLS LAST, created_at ASC`;
+  const [milestones, incomeRows] = await Promise.all([
+    sql`SELECT * FROM project_milestones WHERE project_id = ${projectId} ORDER BY due_date NULLS LAST, created_at ASC`,
+    sql`SELECT COALESCE(SUM(amount), 0) AS received FROM finance_entries WHERE project_id = ${projectId} AND type = 'income'`
+  ]);
   const milestoneTotal = milestones.reduce((total, item) => total + Number(item.amount || 0), 0);
   const amount = milestoneTotal > 0 ? milestoneTotal : Number(project.budget || 0);
+  const received = Number(incomeRows[0]?.received || 0);
+  const invoiceStatus = amount > 0 && received >= amount ? "paid" : "pending";
   const invoiceProject = { ...project, invoice_amount: amount };
   await sql`INSERT INTO project_documents (id, project_id, title, document_type, file_url, amount, status, issued_date, notes)
-    VALUES (${invoiceId(projectId)}, ${projectId}, ${`Invoice - ${project.name}`}, 'invoice', '', ${amount}, 'draft', CURRENT_DATE, ${invoiceNotes(invoiceProject, milestones)})
+    VALUES (${invoiceId(projectId)}, ${projectId}, ${`Invoice - ${project.name}`}, 'invoice', '', ${amount}, ${invoiceStatus}, CURRENT_DATE, ${invoiceNotes(invoiceProject, milestones)})
     ON CONFLICT (id) DO UPDATE SET
       title = EXCLUDED.title,
       amount = EXCLUDED.amount,
       notes = EXCLUDED.notes,
       issued_date = COALESCE(project_documents.issued_date, EXCLUDED.issued_date),
-      status = CASE WHEN project_documents.status IN ('sent', 'paid') THEN project_documents.status ELSE 'draft' END,
+      status = CASE WHEN project_documents.status = 'archived' THEN project_documents.status ELSE EXCLUDED.status END,
       updated_at = NOW()`;
+}
+async function syncProjectPayment(sql, projectId) {
+  if (!projectId) return;
+  const [project] = await sql`SELECT budget FROM projects WHERE id = ${projectId}`;
+  if (!project) return;
+  const [income] = await sql`SELECT COALESCE(SUM(amount), 0) AS received
+    FROM finance_entries
+    WHERE project_id = ${projectId} AND type = 'income'`;
+  const received = Number(income?.received || 0);
+  const target = Number(project.budget || 0);
+  const paymentStatus = received <= 0 ? "unpaid" : (target > 0 && received >= target ? "paid" : "dp");
+  await sql`UPDATE projects
+    SET payment_received = ${received}, payment_status = ${paymentStatus}, updated_at = NOW()
+    WHERE id = ${projectId}`;
+  await syncInvoice(sql, projectId);
 }
 
 async function getOverview(sql) {
@@ -288,7 +308,9 @@ export default async function handler(request, response) {
     if (resource === "finance") {
       const id = clean(body.id, 80) || crypto.randomUUID();
       if (request.method === "DELETE") {
+        const [existing] = await sql`SELECT project_id FROM finance_entries WHERE id = ${id}`;
         await sql`DELETE FROM finance_entries WHERE id = ${id}`;
+        if (existing?.project_id) await syncProjectPayment(sql, existing.project_id);
         await audit(session.username, "delete", "finance", id);
         return response.status(200).json({ ok: true });
       }
@@ -296,11 +318,15 @@ export default async function handler(request, response) {
       const description = clean(body.description, 240);
       if (!description) return response.status(400).json({ message: "Deskripsi wajib diisi." });
       const paymentStatus = ["paid", "pending", "overdue", "dp"].includes(body.payment_status) ? body.payment_status : "paid";
+      const projectId = clean(body.project_id, 80) || null;
+      const [existing] = await sql`SELECT project_id FROM finance_entries WHERE id = ${id}`;
       await sql`INSERT INTO finance_entries (id, project_id, entry_date, type, category, description, amount, payment_status)
-        VALUES (${id}, ${clean(body.project_id, 80) || null}, ${dateOrNull(body.entry_date) || new Date().toISOString().slice(0, 10)}, ${type}, ${clean(body.category, 100) || "General"}, ${description}, ${Math.max(0, number(body.amount))}, ${paymentStatus})
+        VALUES (${id}, ${projectId}, ${dateOrNull(body.entry_date) || new Date().toISOString().slice(0, 10)}, ${type}, ${clean(body.category, 100) || "General"}, ${description}, ${Math.max(0, number(body.amount))}, ${paymentStatus})
         ON CONFLICT (id) DO UPDATE SET project_id = EXCLUDED.project_id, entry_date = EXCLUDED.entry_date,
           type = EXCLUDED.type, category = EXCLUDED.category, description = EXCLUDED.description,
           amount = EXCLUDED.amount, payment_status = EXCLUDED.payment_status, updated_at = NOW()`;
+      if (existing?.project_id && existing.project_id !== projectId) await syncProjectPayment(sql, existing.project_id);
+      if (projectId) await syncProjectPayment(sql, projectId);
       await audit(session.username, request.method === "POST" ? "create" : "update", "finance", id);
       return response.status(200).json({ ok: true, id });
     }
