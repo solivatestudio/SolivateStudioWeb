@@ -1,6 +1,6 @@
-import { put } from "@vercel/blob";
 import { requireAdmin } from "../_lib/auth.js";
 import { fail, methodNotAllowed } from "../_lib/http.js";
+import { UTApi, UTFile } from "uploadthing/server";
 
 const MAX_BYTES = 4 * 1024 * 1024;
 const ALLOWED_TYPES = new Set([
@@ -40,19 +40,29 @@ export default async function handler(request, response) {
       .replace(/[^a-zA-Z0-9._-]/g, "-")
       .slice(0, 90);
 
-    const blob = await put(`cms/${Date.now()}-${filename}`, request, {
-      access: "public",
-      addRandomSuffix: true,
-      contentType,
-    });
+    const chunks = [];
+    for await (const chunk of request) chunks.push(chunk);
 
-    return response.status(200).json({ url: blob.url });
+    const file = new UTFile(chunks, filename, {
+      type: contentType,
+      customId: `cms/${Date.now()}-${filename}`,
+    });
+    const uploaded = await new UTApi().uploadFiles(file);
+
+    if (uploaded.error) {
+      throw new Error(uploaded.error.message || "Upload gagal.");
+    }
+
+    return response.status(200).json({
+      url: uploaded.data?.ufsUrl,
+      key: uploaded.data?.key,
+    });
   } catch (error) {
-    if (String(error?.message || "").includes("BLOB_READ_WRITE_TOKEN")) {
+    if (String(error?.message || "").includes("UPLOADTHING_TOKEN")) {
       return response
         .status(503)
         .json({
-          message: "BLOB_READ_WRITE_TOKEN belum dikonfigurasi di Vercel.",
+          message: "UPLOADTHING_TOKEN belum dikonfigurasi di Vercel.",
         });
     }
     return fail(response, error);
