@@ -26,7 +26,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
     <div data-project-list><div class="admin-empty">Memuat project...</div></div>
   </section>
 
-  <section class="admin-panel project-workspace management-editor" style="margin-bottom:16px">
+  <section class="admin-panel project-workspace management-editor" style="margin-bottom:16px" data-management-editor hidden>
     <div class="admin-panel-head">
       <div><h2 data-project-form-title>Tambah project</h2><p>Isi data inti proyek dan breakdown keuangan yang dipakai rekap rapat.</p></div>
       <button class="admin-button ghost" type="button" data-project-reset>Reset</button>
@@ -49,7 +49,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
     </form>
   </section>
 
-  <section class="admin-grid two management-editor" style="margin-bottom:16px">
+  <section class="admin-grid two management-editor" style="margin-bottom:16px" data-management-editor hidden>
     <article class="admin-panel">
       <div class="admin-panel-head"><div><h2>Termin / timeline</h2><p>Deadline per termin biar ketahuan yang telat.</p></div></div>
       <form class="admin-form compact-form" data-milestone-form>
@@ -87,12 +87,14 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
       const projectForm = document.querySelector("[data-project-form]");
       const milestoneForm = document.querySelector("[data-milestone-form]");
       const documentForm = document.querySelector("[data-document-form]");
+      const editorPanels = document.querySelectorAll("[data-management-editor]");
       const list = document.querySelector("[data-project-list]");
       let items = [];
       const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
       const iso = (value) => value ? String(value).slice(0,10) : "";
       const money = (value) => window.formatRupiah(Number(value || 0));
       const statusLabel = (status) => ({ active: "on progress", "on-hold": "on hold", unpaid: "belum bayar", paid: "lunas" }[status] || status);
+      const showEditors = () => editorPanels.forEach((panel) => { panel.hidden = false; });
       const resetProject = () => { projectForm.reset(); projectForm.elements.id.value = ""; projectForm.elements.progress.value = 0; document.querySelector("[data-project-form-title]").textContent = "Tambah project"; };
       const fillSelects = () => {
         const options = ['<option value="">Pilih project</option>', ...items.map((item) => `<option value="${esc(item.id)}">${esc(item.name)} · ${esc(item.client || "Internal")}</option>`)].join("");
@@ -146,7 +148,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
       document.querySelector("[data-milestone-reset]").addEventListener("click", () => milestoneForm.reset());
       document.querySelector("[data-document-reset]").addEventListener("click", () => documentForm.reset());
       document.querySelectorAll("[data-new-project]").forEach((button) => {
-        button.addEventListener("click", () => { resetProject(); projectForm.scrollIntoView({ behavior: "smooth" }); });
+        button.addEventListener("click", () => { showEditors(); resetProject(); projectForm.scrollIntoView({ behavior: "smooth" }); });
       });
       document.querySelector("[data-doc-upload]").addEventListener("change", async (event) => {
         const file = event.target.files?.[0]; if (!file) return;
@@ -163,9 +165,9 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         const deleteMilestone = event.target.closest("[data-delete-milestone]")?.dataset.deleteMilestone;
         const documentId = event.target.closest("[data-edit-document]")?.dataset.editDocument;
         const deleteDocument = event.target.closest("[data-delete-document]")?.dataset.deleteDocument;
-        if (projectId) { const item = items.find((entry) => entry.id === projectId); Object.entries(item).forEach(([key, value]) => { if (projectForm.elements[key]) projectForm.elements[key].value = ["start_date","deadline"].includes(key) ? iso(value) : value ?? ""; }); document.querySelector("[data-project-form-title]").textContent = "Edit project"; projectForm.scrollIntoView({ behavior: "smooth" }); }
-        if (milestoneId) { const item = items.flatMap((entry) => entry.milestones || []).find((entry) => entry.id === milestoneId); Object.entries(item).forEach(([key, value]) => { if (milestoneForm.elements[key]) milestoneForm.elements[key].value = key === "due_date" ? iso(value) : value ?? ""; }); milestoneForm.scrollIntoView({ behavior: "smooth" }); }
-        if (documentId) { const item = items.flatMap((entry) => entry.documents || []).find((entry) => entry.id === documentId); Object.entries(item).forEach(([key, value]) => { if (documentForm.elements[key]) documentForm.elements[key].value = key === "issued_date" ? iso(value) : value ?? ""; }); documentForm.scrollIntoView({ behavior: "smooth" }); }
+        if (projectId) { showEditors(); const item = items.find((entry) => entry.id === projectId); Object.entries(item).forEach(([key, value]) => { if (projectForm.elements[key]) projectForm.elements[key].value = ["start_date","deadline"].includes(key) ? iso(value) : value ?? ""; }); document.querySelector("[data-project-form-title]").textContent = "Edit project"; projectForm.scrollIntoView({ behavior: "smooth" }); }
+        if (milestoneId) { showEditors(); const item = items.flatMap((entry) => entry.milestones || []).find((entry) => entry.id === milestoneId); Object.entries(item).forEach(([key, value]) => { if (milestoneForm.elements[key]) milestoneForm.elements[key].value = key === "due_date" ? iso(value) : value ?? ""; }); milestoneForm.scrollIntoView({ behavior: "smooth" }); }
+        if (documentId) { showEditors(); const item = items.flatMap((entry) => entry.documents || []).find((entry) => entry.id === documentId); Object.entries(item).forEach(([key, value]) => { if (documentForm.elements[key]) documentForm.elements[key].value = key === "issued_date" ? iso(value) : value ?? ""; }); documentForm.scrollIntoView({ behavior: "smooth" }); }
         if (deleteProject && confirm("Hapus project ini beserta termin dan dokumennya?")) { await window.adminApi("/api/admin/data?resource=projects", { method: "DELETE", body: JSON.stringify({ id: deleteProject }) }); await load(); }
         if (deleteMilestone && confirm("Hapus termin ini?")) { await window.adminApi("/api/admin/data?resource=milestones", { method: "DELETE", body: JSON.stringify({ id: deleteMilestone }) }); await load(); }
         if (deleteDocument && confirm("Hapus dokumen ini?")) { await window.adminApi("/api/admin/data?resource=documents", { method: "DELETE", body: JSON.stringify({ id: deleteDocument }) }); await load(); }

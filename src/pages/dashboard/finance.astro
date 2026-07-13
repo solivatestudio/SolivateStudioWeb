@@ -22,7 +22,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
     <div data-finance-list><div class="admin-empty">Memuat transaksi...</div></div>
   </section>
 
-  <section class="admin-panel management-editor" style="margin-bottom:16px">
+  <section class="admin-panel management-editor" style="margin-bottom:16px" data-management-editor hidden>
     <div class="admin-panel-head"><div><h2>Catat transaksi</h2><p>Pilih project terkait supaya breakdown profit tetap akurat.</p></div></div>
     <form class="admin-form" data-finance-form>
       <label class="admin-field full"><span>Project terkait</span><select name="project_id"><option value="">General / internal</option></select></label>
@@ -40,6 +40,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
     window.addEventListener("DOMContentLoaded", () => {
       const form = document.querySelector("[data-finance-form]");
       const list = document.querySelector("[data-finance-list]");
+      const editorPanel = document.querySelector("[data-management-editor]");
       form.elements.entry_date.value = new Date().toISOString().slice(0,10);
       const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
       const load = async () => {
@@ -59,10 +60,11 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         try {
           await window.adminApi("/api/admin/data?resource=finance", { method:"POST", body:JSON.stringify(Object.fromEntries(new FormData(form))) });
           form.reset(); form.elements.entry_date.value = new Date().toISOString().slice(0,10);
+          if (editorPanel) editorPanel.hidden = true;
           await load(); window.showAdminToast("Transaksi tersimpan.");
         } catch(error) { window.showAdminToast(error.message,"error"); }
       });
-      document.querySelector("[data-add-finance]")?.addEventListener("click", () => form.scrollIntoView({ behavior: "smooth", block: "start" }));
+      document.querySelector("[data-add-finance]")?.addEventListener("click", () => { if (editorPanel) editorPanel.hidden = false; form.scrollIntoView({ behavior: "smooth", block: "start" }); });
       list.addEventListener("click", async (event) => {
         const id = event.target.closest("[data-delete]")?.dataset.delete;
         if (id && confirm("Hapus transaksi ini?")) {

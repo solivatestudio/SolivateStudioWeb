@@ -51,7 +51,7 @@ const currentLabel = navigation.find(([key]) => key === active)?.[1] || title;
       }).format(new Date(value)) : "-";
     </script>
   </head>
-  <body class="admin-body">
+  <body class="admin-body auth-pending">
     <div class="admin-app">
       <aside class="admin-sidebar" data-sidebar>
         <div class="admin-brand">
@@ -110,7 +110,9 @@ const currentLabel = navigation.find(([key]) => key === active)?.[1] || title;
         toast.classList.add("show");
         window.setTimeout(() => toast.classList.remove("show"), 3000);
       };
-      window.adminApi("/api/admin/me").catch(() => {});
+      window.adminApi("/api/admin/me")
+        .then(() => document.body.classList.remove("auth-pending"))
+        .catch(() => {});
     </script>
   </body>
 </html>

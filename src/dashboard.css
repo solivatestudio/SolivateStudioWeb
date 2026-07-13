@@ -47,6 +47,13 @@ button {
 .admin-app {
   min-height: 100vh;
 }
+.auth-pending .admin-app,
+.auth-pending .admin-toast {
+  visibility: hidden;
+}
+.auth-pending {
+  cursor: progress;
+}
 .admin-sidebar {
   position: fixed;
   inset: 0 auto 0 0;
