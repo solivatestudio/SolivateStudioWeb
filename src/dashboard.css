@@ -1701,6 +1701,34 @@ button {
   color: #b42318;
   background: #fff1f0;
 }
+.document-row {
+  align-items: start;
+}
+.document-row details {
+  margin-top: 8px;
+}
+.document-row summary {
+  width: max-content;
+  color: var(--admin-navy);
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.document-row pre {
+  max-width: 100%;
+  max-height: 220px;
+  margin: 8px 0 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  border: 1px solid var(--admin-line);
+  border-radius: 12px;
+  background: #fff;
+  padding: 12px;
+  color: var(--admin-ink);
+  font-family: inherit;
+  font-size: 10px;
+  line-height: 1.55;
+}
 
 @keyframes cmsPulse {
   to {

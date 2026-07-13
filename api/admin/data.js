@@ -12,6 +12,43 @@ const MILESTONE_STATUSES = new Set(["pending", "on-progress", "completed", "late
 const DOCUMENT_TYPES = new Set(["invoice", "mou", "receipt", "operational", "contract", "other"]);
 const DOCUMENT_STATUSES = new Set(["draft", "sent", "paid", "signed", "archived"]);
 
+const invoiceId = (projectId) => `invoice-${projectId}`;
+const invoiceNotes = (project, milestones = []) => {
+  const lines = [
+    `Client: ${project.client || "Internal"}`,
+    `Project: ${project.name}`,
+    `Scope: ${project.scope || "-"}`,
+    "",
+    "Fitur / deliverables:",
+    project.features || "-",
+    "",
+    "Termin pembayaran:",
+    ...(milestones.length
+      ? milestones.map((item, index) => `${index + 1}. ${item.title} - ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(item.amount || 0))}${item.due_date ? ` - due ${item.due_date}` : ""}`)
+      : [`1. Total project - ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(project.budget || 0))}`]),
+    "",
+    `Total invoice: ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(project.invoice_amount || project.budget || 0))}`,
+  ];
+  return lines.join("\n");
+};
+async function syncInvoice(sql, projectId) {
+  const [project] = await sql`SELECT * FROM projects WHERE id = ${projectId}`;
+  if (!project) return;
+  const milestones = await sql`SELECT * FROM project_milestones WHERE project_id = ${projectId} ORDER BY due_date NULLS LAST, created_at ASC`;
+  const milestoneTotal = milestones.reduce((total, item) => total + Number(item.amount || 0), 0);
+  const amount = milestoneTotal > 0 ? milestoneTotal : Number(project.budget || 0);
+  const invoiceProject = { ...project, invoice_amount: amount };
+  await sql`INSERT INTO project_documents (id, project_id, title, document_type, file_url, amount, status, issued_date, notes)
+    VALUES (${invoiceId(projectId)}, ${projectId}, ${`Invoice - ${project.name}`}, 'invoice', '', ${amount}, 'draft', CURRENT_DATE, ${invoiceNotes(invoiceProject, milestones)})
+    ON CONFLICT (id) DO UPDATE SET
+      title = EXCLUDED.title,
+      amount = EXCLUDED.amount,
+      notes = EXCLUDED.notes,
+      issued_date = COALESCE(project_documents.issued_date, EXCLUDED.issued_date),
+      status = CASE WHEN project_documents.status IN ('sent', 'paid') THEN project_documents.status ELSE 'draft' END,
+      updated_at = NOW()`;
+}
+
 async function getOverview(sql) {
   const [projects, finance, traffic, trafficTrend, financeTrend, outstanding, overdue, monthlyProfit] = await Promise.all([
     sql`SELECT COUNT(*)::int AS total,
@@ -182,21 +219,23 @@ export default async function handler(request, response) {
       const paymentStatus = PAYMENT_STATUSES.has(body.payment_status) ? body.payment_status : "unpaid";
       await sql`INSERT INTO projects (
           id, name, client, status, progress, start_date, deadline, budget,
-          operational_cost, pic_fee, payment_status, payment_received, notes
+          operational_cost, pic_fee, payment_status, payment_received, scope, features, notes
         )
         VALUES (
           ${id}, ${name}, ${clean(body.client, 160)}, ${status},
           ${Math.min(100, Math.max(0, number(body.progress)))}, ${dateOrNull(body.start_date)},
           ${dateOrNull(body.deadline)}, ${Math.max(0, number(body.budget))},
           ${Math.max(0, number(body.operational_cost))}, ${Math.max(0, number(body.pic_fee))},
-          ${paymentStatus}, ${Math.max(0, number(body.payment_received))}, ${clean(body.notes, 2000)}
+          ${paymentStatus}, ${Math.max(0, number(body.payment_received))}, ${clean(body.scope, 3000)},
+          ${clean(body.features, 3000)}, ${clean(body.notes, 2000)}
         )
         ON CONFLICT (id) DO UPDATE SET
           name = EXCLUDED.name, client = EXCLUDED.client, status = EXCLUDED.status,
           progress = EXCLUDED.progress, start_date = EXCLUDED.start_date, deadline = EXCLUDED.deadline,
           budget = EXCLUDED.budget, operational_cost = EXCLUDED.operational_cost, pic_fee = EXCLUDED.pic_fee,
           payment_status = EXCLUDED.payment_status, payment_received = EXCLUDED.payment_received,
-          notes = EXCLUDED.notes, updated_at = NOW()`;
+          scope = EXCLUDED.scope, features = EXCLUDED.features, notes = EXCLUDED.notes, updated_at = NOW()`;
+      await syncInvoice(sql, id);
       await audit(session.username, request.method === "POST" ? "create" : "update", "project", id);
       return response.status(200).json({ ok: true, id });
     }
@@ -204,7 +243,9 @@ export default async function handler(request, response) {
     if (resource === "milestones") {
       const id = clean(body.id, 80) || crypto.randomUUID();
       if (request.method === "DELETE") {
+        const [existing] = await sql`SELECT project_id FROM project_milestones WHERE id = ${id}`;
         await sql`DELETE FROM project_milestones WHERE id = ${id}`;
+        if (existing?.project_id) await syncInvoice(sql, existing.project_id);
         await audit(session.username, "delete", "milestone", id);
         return response.status(200).json({ ok: true });
       }
@@ -217,6 +258,7 @@ export default async function handler(request, response) {
         ON CONFLICT (id) DO UPDATE SET project_id = EXCLUDED.project_id, title = EXCLUDED.title,
           due_date = EXCLUDED.due_date, status = EXCLUDED.status, amount = EXCLUDED.amount,
           notes = EXCLUDED.notes, updated_at = NOW()`;
+      await syncInvoice(sql, projectId);
       await audit(session.username, request.method === "POST" ? "create" : "update", "milestone", id);
       return response.status(200).json({ ok: true, id });
     }

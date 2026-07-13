@@ -35,6 +35,8 @@ export function ensureSchema() {
       pic_fee NUMERIC(14, 2) NOT NULL DEFAULT 0,
       payment_status TEXT NOT NULL DEFAULT 'unpaid',
       payment_received NUMERIC(14, 2) NOT NULL DEFAULT 0,
+      scope TEXT NOT NULL DEFAULT '',
+      features TEXT NOT NULL DEFAULT '',
       notes TEXT NOT NULL DEFAULT '',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -123,6 +125,8 @@ export function ensureSchema() {
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS pic_fee NUMERIC(14, 2) NOT NULL DEFAULT 0`,
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'unpaid'`,
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS payment_received NUMERIC(14, 2) NOT NULL DEFAULT 0`,
+      sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS scope TEXT NOT NULL DEFAULT ''`,
+      sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS features TEXT NOT NULL DEFAULT ''`,
       sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS project_id TEXT REFERENCES projects(id) ON DELETE SET NULL`,
     ]);
     await Promise.all([

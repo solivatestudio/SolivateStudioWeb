@@ -44,6 +44,8 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
       <label class="admin-field"><span>Biaya operasional</span><input name="operational_cost" type="number" min="0" step="1000" /></label>
       <label class="admin-field"><span>Fee PIC</span><input name="pic_fee" type="number" min="0" step="1000" /></label>
       <label class="admin-field"><span>Pembayaran diterima</span><input name="payment_received" type="number" min="0" step="1000" /></label>
+      <label class="admin-field full"><span>Scope project</span><textarea name="scope" placeholder="Contoh: website company profile 5 halaman, CMS konten, integrasi WhatsApp, SEO dasar."></textarea></label>
+      <label class="admin-field full"><span>Fitur / deliverables</span><textarea name="features" placeholder="Tulis satu fitur per baris supaya invoice otomatis lebih rapi."></textarea></label>
       <label class="admin-field full"><span>Catatan</span><textarea name="notes"></textarea></label>
       <div class="admin-actions full"><button class="admin-button accent" type="submit">Simpan project</button></div>
     </form>
@@ -112,7 +114,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         const late = item.status !== "completed" && item.due_date && new Date(item.due_date) < new Date(new Date().toISOString().slice(0,10));
         return `<div class="ops-row ${late ? "late" : ""}"><div><strong>${esc(item.title)}</strong><span>${window.formatDate(item.due_date)} · ${money(item.amount)}</span></div><em>${late ? "late" : esc(item.status)}</em><button class="admin-button ghost" data-edit-milestone="${esc(item.id)}">Edit</button><button class="admin-button danger" data-delete-milestone="${esc(item.id)}">Hapus</button></div>`;
       }).join("") : '<div class="admin-empty">Belum ada termin.</div>';
-      const documentRows = (project) => project.documents?.length ? project.documents.map((item) => `<div class="ops-row"><div><strong>${esc(item.title)}</strong><span>${esc(item.document_type)} · ${window.formatDate(item.issued_date)} · ${money(item.amount)}</span></div><em>${esc(item.status)}</em>${item.file_url ? `<a class="admin-button ghost" href="${esc(item.file_url)}" target="_blank" rel="noreferrer">Buka</a>` : ""}<button class="admin-button ghost" data-edit-document="${esc(item.id)}">Edit</button><button class="admin-button danger" data-delete-document="${esc(item.id)}">Hapus</button></div>`).join("") : '<div class="admin-empty">Belum ada dokumen.</div>';
+      const documentRows = (project) => project.documents?.length ? project.documents.map((item) => `<div class="ops-row document-row"><div><strong>${esc(item.title)}</strong><span>${esc(item.document_type)} · ${window.formatDate(item.issued_date)} · ${money(item.amount)}</span>${item.document_type === "invoice" && item.notes ? `<details><summary>Preview draft invoice</summary><pre>${esc(item.notes)}</pre></details>` : ""}</div><em>${esc(item.status)}</em>${item.file_url ? `<a class="admin-button ghost" href="${esc(item.file_url)}" target="_blank" rel="noreferrer">Buka</a>` : ""}<button class="admin-button ghost" data-edit-document="${esc(item.id)}">Edit</button><button class="admin-button danger" data-delete-document="${esc(item.id)}">Hapus</button></div>`).join("") : '<div class="admin-empty">Belum ada dokumen.</div>';
       const render = () => {
         document.querySelector("[data-project-count]").textContent = `${items.length} project tercatat`;
         totals(); fillSelects();
