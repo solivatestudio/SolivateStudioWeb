@@ -31,7 +31,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
       <label class="admin-field"><span>Kategori</span><select name="category"><option>Project payment</option><option>DP payment</option><option>Final payment</option><option>Operational cost</option><option>Fee PIC</option><option>Subscription</option><option>Marketing</option><option>General</option></select></label>
       <label class="admin-field"><span>Status</span><select name="payment_status"><option value="paid">Paid</option><option value="dp">DP</option><option value="pending">Pending</option><option value="overdue">Overdue</option></select></label>
       <label class="admin-field full"><span>Deskripsi</span><input name="description" required /></label>
-      <label class="admin-field"><span>Jumlah</span><input name="amount" type="number" min="0" step="1000" required /></label>
+      <label class="admin-field"><span>Jumlah</span><input name="amount" inputmode="numeric" data-money placeholder="0" required /></label>
       <div class="admin-actions" style="align-items:end"><button class="admin-button accent" type="submit">Simpan transaksi</button></div>
     </form>
   </section>
@@ -43,6 +43,14 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
       const editorPanel = document.querySelector("[data-management-editor]");
       form.elements.entry_date.value = new Date().toISOString().slice(0,10);
       const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+      const moneyInput = (value) => String(Math.round(Number(value || 0))).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      const cleanMoney = (value) => String(value ?? "").replace(/[^\d]/g, "");
+      form.querySelectorAll("[data-money]").forEach((input) => {
+        input.addEventListener("input", () => {
+          const raw = cleanMoney(input.value);
+          input.value = raw ? moneyInput(raw) : "";
+        });
+      });
       const load = async () => {
         const data = await window.adminApi("/api/admin/data?resource=finance");
         const income = Number(data.totals.income);
@@ -58,7 +66,11 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
         try {
-          await window.adminApi("/api/admin/data?resource=finance", { method:"POST", body:JSON.stringify(Object.fromEntries(new FormData(form))) });
+          const payload = Object.fromEntries(new FormData(form));
+          form.querySelectorAll("[data-money]").forEach((input) => {
+            payload[input.name] = cleanMoney(input.value);
+          });
+          await window.adminApi("/api/admin/data?resource=finance", { method:"POST", body:JSON.stringify(payload) });
           form.reset(); form.elements.entry_date.value = new Date().toISOString().slice(0,10);
           if (editorPanel) editorPanel.hidden = true;
           await load(); window.showAdminToast("Transaksi tersimpan.");

@@ -40,10 +40,10 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
       <label class="admin-field"><span>Tanggal mulai</span><input name="start_date" type="date" /></label>
       <label class="admin-field"><span>Deadline final</span><input name="deadline" type="date" /></label>
       <label class="admin-field"><span>Progress (%)</span><input name="progress" type="number" min="0" max="100" value="0" /></label>
-      <label class="admin-field"><span>Budget project</span><input name="budget" type="number" min="0" step="1000" /></label>
-      <label class="admin-field"><span>Biaya operasional</span><input name="operational_cost" type="number" min="0" step="1000" /></label>
-      <label class="admin-field"><span>Fee PIC</span><input name="pic_fee" type="number" min="0" step="1000" /></label>
-      <label class="admin-field"><span>Pembayaran diterima</span><input name="payment_received" type="number" min="0" step="1000" /></label>
+      <label class="admin-field"><span>Budget project</span><input name="budget" inputmode="numeric" data-money placeholder="0" /></label>
+      <label class="admin-field"><span>Biaya operasional</span><input name="operational_cost" inputmode="numeric" data-money placeholder="0" /></label>
+      <label class="admin-field"><span>Fee PIC</span><input name="pic_fee" inputmode="numeric" data-money placeholder="0" /></label>
+      <label class="admin-field"><span>Pembayaran diterima</span><input name="payment_received" inputmode="numeric" data-money placeholder="0" /></label>
       <label class="admin-field full"><span>Scope project</span><textarea name="scope" placeholder="Contoh: website company profile 5 halaman, CMS konten, integrasi WhatsApp, SEO dasar."></textarea></label>
       <label class="admin-field full"><span>Fitur / deliverables</span><textarea name="features" placeholder="Tulis satu fitur per baris supaya invoice otomatis lebih rapi."></textarea></label>
       <label class="admin-field full"><span>Catatan</span><textarea name="notes"></textarea></label>
@@ -60,7 +60,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         <label class="admin-field"><span>Termin</span><input name="title" placeholder="Termin 1 - desain" required /></label>
         <label class="admin-field"><span>Deadline termin</span><input name="due_date" type="date" /></label>
         <label class="admin-field"><span>Status</span><select name="status"><option value="pending">Pending</option><option value="on-progress">On progress</option><option value="completed">Completed</option><option value="late">Late</option></select></label>
-        <label class="admin-field"><span>Nominal</span><input name="amount" type="number" min="0" step="1000" /></label>
+        <label class="admin-field"><span>Nominal</span><input name="amount" inputmode="numeric" data-money placeholder="0" /></label>
         <label class="admin-field full"><span>Catatan</span><input name="notes" /></label>
         <div class="admin-actions full"><button class="admin-button accent" type="submit">Simpan termin</button><button class="admin-button ghost" type="button" data-milestone-reset>Reset</button></div>
       </form>
@@ -75,7 +75,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         <label class="admin-field"><span>Tipe</span><select name="document_type"><option value="invoice">Invoice</option><option value="mou">MOU</option><option value="receipt">Receipt</option><option value="operational">Biaya operasional</option><option value="contract">Kontrak</option><option value="other">Lainnya</option></select></label>
         <label class="admin-field"><span>Status</span><select name="status"><option value="draft">Draft</option><option value="pending">Pending</option><option value="sent">Sent</option><option value="paid">Paid</option><option value="signed">Signed</option><option value="archived">Archived</option></select></label>
         <label class="admin-field"><span>Tanggal</span><input name="issued_date" type="date" /></label>
-        <label class="admin-field"><span>Nominal</span><input name="amount" type="number" min="0" step="1000" /></label>
+        <label class="admin-field"><span>Nominal</span><input name="amount" inputmode="numeric" data-money placeholder="0" /></label>
         <label class="admin-field full"><span>File URL</span><input name="file_url" type="url" placeholder="Upload atau paste link dokumen" /></label>
         <label class="admin-field full"><span>Upload dokumen</span><input type="file" data-doc-upload accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg,image/webp" /></label>
         <label class="admin-field full"><span>Catatan</span><input name="notes" /></label>
@@ -95,6 +95,16 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
       const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
       const iso = (value) => value ? String(value).slice(0,10) : "";
       const money = (value) => window.formatRupiah(Number(value || 0));
+      const moneyInput = (value) => String(Math.round(Number(value || 0))).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      const cleanMoney = (value) => String(value ?? "").replace(/[^\d]/g, "");
+      const setupMoneyInputs = () => {
+        document.querySelectorAll("[data-money]").forEach((input) => {
+          input.addEventListener("input", () => {
+            const raw = cleanMoney(input.value);
+            input.value = raw ? moneyInput(raw) : "";
+          });
+        });
+      };
       const statusLabel = (status) => ({ active: "on progress", "on-hold": "on hold", unpaid: "belum bayar", paid: "lunas" }[status] || status);
       const showEditors = () => editorPanels.forEach((panel) => { panel.hidden = false; });
       const resetProject = () => { projectForm.reset(); projectForm.elements.id.value = ""; projectForm.elements.progress.value = 0; document.querySelector("[data-project-form-title]").textContent = "Tambah project"; };
@@ -114,7 +124,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         const late = item.status !== "completed" && item.due_date && new Date(item.due_date) < new Date(new Date().toISOString().slice(0,10));
         return `<div class="ops-row ${late ? "late" : ""}"><div><strong>${esc(item.title)}</strong><span>${window.formatDate(item.due_date)} · ${money(item.amount)}</span></div><em>${late ? "late" : esc(item.status)}</em><button class="admin-button ghost" data-edit-milestone="${esc(item.id)}">Edit</button><button class="admin-button danger" data-delete-milestone="${esc(item.id)}">Hapus</button></div>`;
       }).join("") : '<div class="admin-empty">Belum ada termin.</div>';
-      const documentRows = (project) => project.documents?.length ? project.documents.map((item) => `<div class="ops-row document-row"><div><strong>${esc(item.title)}</strong><span>${esc(item.document_type)} · ${window.formatDate(item.issued_date)} · ${money(item.amount)}</span>${item.document_type === "invoice" && item.notes ? `<details><summary>Preview draft invoice</summary><pre>${esc(item.notes)}</pre></details>` : ""}</div><em>${esc(item.status)}</em>${item.file_url ? `<a class="admin-button ghost" href="${esc(item.file_url)}" target="_blank" rel="noreferrer">Buka</a>` : ""}<button class="admin-button ghost" data-edit-document="${esc(item.id)}">Edit</button><button class="admin-button danger" data-delete-document="${esc(item.id)}">Hapus</button></div>`).join("") : '<div class="admin-empty">Belum ada dokumen.</div>';
+      const documentRows = (project) => project.documents?.length ? project.documents.map((item) => `<div class="ops-row document-row"><div><strong>${esc(item.title)}</strong><span>${esc(item.document_type)} · ${window.formatDate(item.issued_date)} · ${money(item.amount)}</span>${item.document_type === "invoice" && item.notes ? `<details class="invoice-preview" open><summary>Lihat invoice auto-generate</summary><pre>${esc(item.notes)}</pre></details>` : ""}</div><em>${esc(item.status)}</em>${item.file_url ? `<a class="admin-button ghost" href="${esc(item.file_url)}" target="_blank" rel="noreferrer">Buka</a>` : ""}<button class="admin-button ghost" data-edit-document="${esc(item.id)}">Edit</button><button class="admin-button danger" data-delete-document="${esc(item.id)}">Hapus</button></div>`).join("") : '<div class="admin-empty">Belum ada dokumen.</div>';
       const render = () => {
         document.querySelector("[data-project-count]").textContent = `${items.length} project tercatat`;
         totals(); fillSelects();
@@ -139,6 +149,9 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
       const load = async () => { const data = await window.adminApi("/api/admin/data?resource=projects"); items = data.items || []; render(); };
       const submit = async (resource, form) => {
         const data = Object.fromEntries(new FormData(form));
+        form.querySelectorAll("[data-money]").forEach((input) => {
+          data[input.name] = cleanMoney(input.value);
+        });
         await window.adminApi(`/api/admin/data?resource=${resource}`, { method: data.id ? "PUT" : "POST", body: JSON.stringify(data) });
         form.reset(); if (form.elements.id) form.elements.id.value = "";
         await load(); window.showAdminToast("Data berhasil disimpan.");
@@ -167,13 +180,14 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         const deleteMilestone = event.target.closest("[data-delete-milestone]")?.dataset.deleteMilestone;
         const documentId = event.target.closest("[data-edit-document]")?.dataset.editDocument;
         const deleteDocument = event.target.closest("[data-delete-document]")?.dataset.deleteDocument;
-        if (projectId) { showEditors(); const item = items.find((entry) => entry.id === projectId); Object.entries(item).forEach(([key, value]) => { if (projectForm.elements[key]) projectForm.elements[key].value = ["start_date","deadline"].includes(key) ? iso(value) : value ?? ""; }); document.querySelector("[data-project-form-title]").textContent = "Edit project"; projectForm.scrollIntoView({ behavior: "smooth" }); }
-        if (milestoneId) { showEditors(); const item = items.flatMap((entry) => entry.milestones || []).find((entry) => entry.id === milestoneId); Object.entries(item).forEach(([key, value]) => { if (milestoneForm.elements[key]) milestoneForm.elements[key].value = key === "due_date" ? iso(value) : value ?? ""; }); milestoneForm.scrollIntoView({ behavior: "smooth" }); }
-        if (documentId) { showEditors(); const item = items.flatMap((entry) => entry.documents || []).find((entry) => entry.id === documentId); Object.entries(item).forEach(([key, value]) => { if (documentForm.elements[key]) documentForm.elements[key].value = key === "issued_date" ? iso(value) : value ?? ""; }); documentForm.scrollIntoView({ behavior: "smooth" }); }
+        if (projectId) { showEditors(); const item = items.find((entry) => entry.id === projectId); Object.entries(item).forEach(([key, value]) => { if (projectForm.elements[key]) projectForm.elements[key].value = projectForm.elements[key].matches?.("[data-money]") ? moneyInput(value) : (["start_date","deadline"].includes(key) ? iso(value) : value ?? ""); }); document.querySelector("[data-project-form-title]").textContent = "Edit project"; projectForm.scrollIntoView({ behavior: "smooth" }); }
+        if (milestoneId) { showEditors(); const item = items.flatMap((entry) => entry.milestones || []).find((entry) => entry.id === milestoneId); Object.entries(item).forEach(([key, value]) => { if (milestoneForm.elements[key]) milestoneForm.elements[key].value = milestoneForm.elements[key].matches?.("[data-money]") ? moneyInput(value) : (key === "due_date" ? iso(value) : value ?? ""); }); milestoneForm.scrollIntoView({ behavior: "smooth" }); }
+        if (documentId) { showEditors(); const item = items.flatMap((entry) => entry.documents || []).find((entry) => entry.id === documentId); Object.entries(item).forEach(([key, value]) => { if (documentForm.elements[key]) documentForm.elements[key].value = documentForm.elements[key].matches?.("[data-money]") ? moneyInput(value) : (key === "issued_date" ? iso(value) : value ?? ""); }); documentForm.scrollIntoView({ behavior: "smooth" }); }
         if (deleteProject && confirm("Hapus project ini beserta termin dan dokumennya?")) { await window.adminApi("/api/admin/data?resource=projects", { method: "DELETE", body: JSON.stringify({ id: deleteProject }) }); await load(); }
         if (deleteMilestone && confirm("Hapus termin ini?")) { await window.adminApi("/api/admin/data?resource=milestones", { method: "DELETE", body: JSON.stringify({ id: deleteMilestone }) }); await load(); }
         if (deleteDocument && confirm("Hapus dokumen ini?")) { await window.adminApi("/api/admin/data?resource=documents", { method: "DELETE", body: JSON.stringify({ id: deleteDocument }) }); await load(); }
       });
+      setupMoneyInputs();
       load().catch((error) => { list.innerHTML = `<p class="admin-error">${esc(error.message)}</p>`; });
     });
   </script>
