@@ -118,6 +118,16 @@ export function ensureSchema() {
       contact TEXT NOT NULL DEFAULT '',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )`,
+      sql`CREATE TABLE IF NOT EXISTS project_invoice_items (
+      id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+      description TEXT NOT NULL DEFAULT '',
+      quantity NUMERIC(10, 2) NOT NULL DEFAULT 1,
+      unit_price NUMERIC(14, 2) NOT NULL DEFAULT 0,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )`,
     ]);
     await Promise.all([
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS start_date DATE`,
@@ -127,6 +137,11 @@ export function ensureSchema() {
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS payment_received NUMERIC(14, 2) NOT NULL DEFAULT 0`,
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS scope TEXT NOT NULL DEFAULT ''`,
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS features TEXT NOT NULL DEFAULT ''`,
+      sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS pricing_model TEXT NOT NULL DEFAULT 'fixed'`,
+      sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS project_type TEXT NOT NULL DEFAULT 'other'`,
+      sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS client_contact TEXT NOT NULL DEFAULT ''`,
+      sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS client_address TEXT NOT NULL DEFAULT ''`,
+      sql`ALTER TABLE project_documents ADD COLUMN IF NOT EXISTS notes_data JSONB`,
       sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS project_id TEXT REFERENCES projects(id) ON DELETE SET NULL`,
     ]);
     await Promise.all([
@@ -137,6 +152,7 @@ export function ensureSchema() {
       sql`CREATE INDEX IF NOT EXISTS project_milestones_project_idx ON project_milestones (project_id, due_date ASC)`,
       sql`CREATE INDEX IF NOT EXISTS project_documents_project_idx ON project_documents (project_id, issued_date DESC)`,
       sql`CREATE INDEX IF NOT EXISTS contact_submissions_ip_idx ON contact_submissions (ip_hash, created_at DESC)`,
+      sql`CREATE INDEX IF NOT EXISTS project_invoice_items_project_idx ON project_invoice_items (project_id, sort_order)`,
     ]);
   })().catch((error) => {
     schemaPromise = undefined;

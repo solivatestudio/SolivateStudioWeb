@@ -11,47 +11,136 @@ const PAYMENT_STATUSES = new Set(["paid", "dp", "unpaid", "pending", "overdue"])
 const MILESTONE_STATUSES = new Set(["pending", "on-progress", "completed", "late"]);
 const DOCUMENT_TYPES = new Set(["invoice", "mou", "receipt", "operational", "contract", "other"]);
 const DOCUMENT_STATUSES = new Set(["draft", "pending", "sent", "paid", "signed", "archived"]);
+const PRICING_MODELS = new Set(["fixed", "line_items"]);
+const PROJECT_TYPES = new Set(["umkm", "masjid", "event", "wedding", "company", "other"]);
 
 const invoiceId = (projectId) => `invoice-${projectId}`;
-const invoiceNotes = (project, milestones = []) => {
+const idrFormat = (value) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(value || 0));
+const dateCompact = () => {
+  const now = new Date();
+  return `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
+};
+const invoiceNumber = (project) => {
+  const compact = dateCompact();
+  const short = String(project.id || "").replace(/-/g, "").slice(0, 6).toUpperCase();
+  return `INV-${compact}-${short}`;
+};
+const buildInvoicePayload = async (sql, project, milestones, lineItems) => {
+  const items = (lineItems || []).slice().sort((a, b) => Number(a.sort_order) - Number(b.sort_order));
+  const itemRows = items.map((item) => ({
+    description: clean(item.description, 200) || "Item",
+    quantity: Number(item.quantity || 1),
+    unit_price: Number(item.unit_price || 0),
+    subtotal: Number(item.quantity || 1) * Number(item.unit_price || 0)
+  }));
+  const lineItemsTotal = itemRows.reduce((total, item) => total + item.subtotal, 0);
+  const milestoneTotal = (milestones || []).reduce((total, item) => total + Number(item.amount || 0), 0);
+  const model = project.pricing_model === "line_items" ? "line_items" : "fixed";
+  const subtotal = model === "line_items" ? lineItemsTotal : Number(project.budget || 0);
+  const total = subtotal;
+  const [incomeRows] = await sql`SELECT COALESCE(SUM(amount), 0) AS received FROM finance_entries WHERE project_id = ${project.id} AND type = 'income'`;
+  const received = Number(incomeRows?.received || 0);
+  const status = total > 0 && received >= total ? "paid" : (received > 0 ? "dp" : "pending");
+  const dueDate = (milestones || []).map((m) => m.due_date).filter(Boolean).sort().pop() || project.deadline || null;
+  return {
+    invoice_number: invoiceNumber(project),
+    issued_date: new Date().toISOString().slice(0, 10),
+    due_date: dueDate,
+    currency: "IDR",
+    project: {
+      id: project.id,
+      name: project.name,
+      type: project.project_type || "other",
+      pricing_model: model,
+      scope: project.scope || "",
+      features: project.features || "",
+      notes: project.notes || ""
+    },
+    client: {
+      name: project.client || "Client",
+      contact: project.client_contact || "",
+      address: project.client_address || ""
+    },
+    provider: {
+      name: "Solivate Studio",
+      email: process.env.CONTACT_EMAIL || "hello@solivate.com",
+      phone: process.env.CONTACT_PHONE || "+62 812-0000-0000",
+      website: "https://solivate.com",
+      address: process.env.CONTACT_ADDRESS || "Indonesia"
+    },
+    line_items: itemRows,
+    milestones: (milestones || []).map((m) => ({
+      title: m.title,
+      amount: Number(m.amount || 0),
+      due_date: m.due_date || null,
+      status: m.status || "pending"
+    })),
+    subtotal,
+    line_items_total: lineItemsTotal,
+    milestone_total: milestoneTotal,
+    total,
+    received,
+    balance: Math.max(0, total - received),
+    status
+  };
+};
+const legacyInvoiceText = (project, milestones, lineItems, payload) => {
   const lines = [
+    `Invoice: ${payload.invoice_number}`,
     `Client: ${project.client || "Internal"}`,
     `Project: ${project.name}`,
     `Scope: ${project.scope || "-"}`,
     "",
     "Fitur / deliverables:",
     project.features || "-",
-    "",
-    "Termin pembayaran:",
-    ...(milestones.length
-      ? milestones.map((item, index) => `${index + 1}. ${item.title} - ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(item.amount || 0))}${item.due_date ? ` - due ${item.due_date}` : ""}`)
-      : [`1. Total project - ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(project.budget || 0))}`]),
-    "",
-    `Total invoice: ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(project.invoice_amount || project.budget || 0))}`,
+    ""
   ];
+  if (project.pricing_model === "line_items" && lineItems?.length) {
+    lines.push("Item / fitur:");
+    lineItems.forEach((item, index) => {
+      lines.push(`${index + 1}. ${item.description} - ${item.quantity} x ${idrFormat(item.unit_price)} = ${idrFormat(Number(item.quantity || 1) * Number(item.unit_price || 0))}`);
+    });
+    lines.push("");
+  }
+  lines.push("Termin pembayaran:");
+  if (milestones?.length) {
+    milestones.forEach((item, index) => {
+      lines.push(`${index + 1}. ${item.title} - ${idrFormat(item.amount)}${item.due_date ? ` - due ${item.due_date}` : ""}`);
+    });
+  } else {
+    lines.push(`1. Total project - ${idrFormat(project.budget || 0)}`);
+  }
+  lines.push("");
+  lines.push(`Total invoice: ${idrFormat(payload.total)}`);
   return lines.join("\n");
 };
 async function syncInvoice(sql, projectId) {
   const [project] = await sql`SELECT * FROM projects WHERE id = ${projectId}`;
   if (!project) return;
-  const [milestones, incomeRows] = await Promise.all([
+  const [milestones, lineItems, incomeRows] = await Promise.all([
     sql`SELECT * FROM project_milestones WHERE project_id = ${projectId} ORDER BY due_date NULLS LAST, created_at ASC`,
+    sql`SELECT * FROM project_invoice_items WHERE project_id = ${projectId} ORDER BY sort_order ASC, created_at ASC`,
     sql`SELECT COALESCE(SUM(amount), 0) AS received FROM finance_entries WHERE project_id = ${projectId} AND type = 'income'`
   ]);
+  const payload = await buildInvoicePayload(sql, project, milestones, lineItems);
   const milestoneTotal = milestones.reduce((total, item) => total + Number(item.amount || 0), 0);
-  const amount = milestoneTotal > 0 ? milestoneTotal : Number(project.budget || 0);
+  const amount = payload.total;
   const received = Number(incomeRows[0]?.received || 0);
   const invoiceStatus = amount > 0 && received >= amount ? "paid" : "pending";
-  const invoiceProject = { ...project, invoice_amount: amount };
-  await sql`INSERT INTO project_documents (id, project_id, title, document_type, file_url, amount, status, issued_date, notes)
-    VALUES (${invoiceId(projectId)}, ${projectId}, ${`Invoice - ${project.name}`}, 'invoice', '', ${amount}, ${invoiceStatus}, CURRENT_DATE, ${invoiceNotes(invoiceProject, milestones)})
+  const legacyText = legacyInvoiceText(project, milestones, lineItems, payload);
+  await sql`INSERT INTO project_documents (id, project_id, title, document_type, file_url, amount, status, issued_date, notes, notes_data)
+    VALUES (${invoiceId(projectId)}, ${projectId}, ${`Invoice - ${project.name}`}, 'invoice', '', ${amount}, ${invoiceStatus}, CURRENT_DATE, ${legacyText}, ${JSON.stringify(payload)})
     ON CONFLICT (id) DO UPDATE SET
       title = EXCLUDED.title,
       amount = EXCLUDED.amount,
       notes = EXCLUDED.notes,
+      notes_data = EXCLUDED.notes_data,
       issued_date = COALESCE(project_documents.issued_date, EXCLUDED.issued_date),
       status = CASE WHEN project_documents.status = 'archived' THEN project_documents.status ELSE EXCLUDED.status END,
       updated_at = NOW()`;
+  if (milestoneTotal > 0 && amount !== milestoneTotal) {
+    return;
+  }
 }
 async function syncProjectPayment(sql, projectId) {
   if (!projectId) return;
@@ -139,9 +228,10 @@ async function getProjects(sql) {
       project.deadline NULLS LAST,
       project.updated_at DESC
   `;
-  const [milestones, documents] = await Promise.all([
+  const [milestones, documents, lineItems] = await Promise.all([
     sql`SELECT * FROM project_milestones ORDER BY due_date NULLS LAST, created_at ASC`,
-    sql`SELECT * FROM project_documents ORDER BY issued_date DESC NULLS LAST, created_at DESC`
+    sql`SELECT * FROM project_documents ORDER BY issued_date DESC NULLS LAST, created_at DESC`,
+    sql`SELECT * FROM project_invoice_items ORDER BY sort_order ASC, created_at ASC`
   ]);
   const byProject = (items) => items.reduce((map, item) => {
     map[item.project_id] ||= [];
@@ -150,19 +240,27 @@ async function getProjects(sql) {
   }, {});
   const milestoneMap = byProject(milestones);
   const documentMap = byProject(documents);
+  const lineItemMap = byProject(lineItems);
   return rows.map((project) => {
     const plannedCost = Number(project.operational_cost || 0) + Number(project.pic_fee || 0);
     const actualExpense = Number(project.expense_total || 0);
     const received = Number(project.payment_received || 0) || Number(project.income_total || 0);
+    const items = lineItemMap[project.id] || [];
+    const lineItemsTotal = items.reduce((total, item) => total + Number(item.quantity || 1) * Number(item.unit_price || 0), 0);
+    const pricingModel = project.pricing_model === "line_items" ? "line_items" : "fixed";
+    const effectiveBudget = pricingModel === "line_items" ? lineItemsTotal : Number(project.budget || 0);
     return {
       ...project,
       milestones: milestoneMap[project.id] || [],
       documents: documentMap[project.id] || [],
+      line_items: items,
+      line_items_total: lineItemsTotal,
+      effective_budget: effectiveBudget,
       planned_cost: plannedCost,
       actual_expense: actualExpense,
-      profit_plan: Number(project.budget || 0) - plannedCost,
+      profit_plan: effectiveBudget - plannedCost,
       profit_actual: received - actualExpense,
-      outstanding: Math.max(0, Number(project.budget || 0) - received)
+      outstanding: Math.max(0, effectiveBudget - received)
     };
   });
 }
@@ -187,6 +285,46 @@ export default async function handler(request, response) {
         return response.status(200).json({ entries: Object.fromEntries(rows.map((row) => [row.key, row.value])) });
       }
       if (resource === "projects") return response.status(200).json({ items: await getProjects(sql) });
+      if (resource === "project") {
+        const projectId = clean(request.query?.id, 80);
+        if (!projectId) return response.status(400).json({ message: "id wajib diisi." });
+        const [project] = await sql`SELECT * FROM projects WHERE id = ${projectId}`;
+        if (!project) return response.status(404).json({ message: "Project tidak ditemukan." });
+        const [milestones, lineItems, documents] = await Promise.all([
+          sql`SELECT * FROM project_milestones WHERE project_id = ${projectId} ORDER BY due_date NULLS LAST, created_at ASC`,
+          sql`SELECT * FROM project_invoice_items WHERE project_id = ${projectId} ORDER BY sort_order ASC, created_at ASC`,
+          sql`SELECT * FROM project_documents WHERE project_id = ${projectId} ORDER BY issued_date DESC NULLS LAST, created_at DESC`
+        ]);
+        return response.status(200).json({ project, milestones, line_items: lineItems, documents });
+      }
+      if (resource === "regenerate_invoice") {
+        const projectId = clean(request.query?.project_id, 80);
+        if (!projectId) return response.status(400).json({ message: "project_id wajib diisi." });
+        await syncInvoice(sql, projectId);
+        await audit(session.username, "regenerate", "invoice", projectId);
+        return response.status(200).json({ ok: true });
+      }
+      if (resource === "invoice") {
+        const projectId = clean(request.query?.project_id, 80);
+        if (!projectId) return response.status(400).json({ message: "project_id wajib diisi." });
+        const [project] = await sql`SELECT * FROM projects WHERE id = ${projectId}`;
+        if (!project) return response.status(404).json({ message: "Project tidak ditemukan." });
+        const [milestones, lineItems, documents] = await Promise.all([
+          sql`SELECT * FROM project_milestones WHERE project_id = ${projectId} ORDER BY due_date NULLS LAST, created_at ASC`,
+          sql`SELECT * FROM project_invoice_items WHERE project_id = ${projectId} ORDER BY sort_order ASC, created_at ASC`,
+          sql`SELECT * FROM project_documents WHERE project_id = ${projectId} ORDER BY issued_date DESC NULLS LAST, created_at DESC`
+        ]);
+        const [invoiceDoc] = await sql`SELECT * FROM project_documents WHERE id = ${invoiceId(projectId)}`;
+        const payload = await buildInvoicePayload(sql, project, milestones, lineItems);
+        return response.status(200).json({
+          project,
+          milestones,
+          line_items: lineItems,
+          documents,
+          invoice: invoiceDoc || null,
+          payload
+        });
+      }
       if (resource === "finance") {
         const rows = await sql`SELECT finance.*, project.name AS project_name
           FROM finance_entries finance
@@ -237,9 +375,12 @@ export default async function handler(request, response) {
       if (!name) return response.status(400).json({ message: "Nama project wajib diisi." });
       const status = PROJECT_STATUSES.has(body.status) ? body.status : "planning";
       const paymentStatus = PAYMENT_STATUSES.has(body.payment_status) ? body.payment_status : "unpaid";
+      const pricingModel = PRICING_MODELS.has(body.pricing_model) ? body.pricing_model : "fixed";
+      const projectType = PROJECT_TYPES.has(body.project_type) ? body.project_type : "other";
       await sql`INSERT INTO projects (
           id, name, client, status, progress, start_date, deadline, budget,
-          operational_cost, pic_fee, payment_status, payment_received, scope, features, notes
+          operational_cost, pic_fee, payment_status, payment_received, scope, features, notes,
+          pricing_model, project_type, client_contact, client_address
         )
         VALUES (
           ${id}, ${name}, ${clean(body.client, 160)}, ${status},
@@ -247,16 +388,70 @@ export default async function handler(request, response) {
           ${dateOrNull(body.deadline)}, ${Math.max(0, number(body.budget))},
           ${Math.max(0, number(body.operational_cost))}, ${Math.max(0, number(body.pic_fee))},
           ${paymentStatus}, ${Math.max(0, number(body.payment_received))}, ${clean(body.scope, 3000)},
-          ${clean(body.features, 3000)}, ${clean(body.notes, 2000)}
+          ${clean(body.features, 3000)}, ${clean(body.notes, 2000)},
+          ${pricingModel}, ${projectType},
+          ${clean(body.client_contact, 200)}, ${clean(body.client_address, 500)}
         )
         ON CONFLICT (id) DO UPDATE SET
           name = EXCLUDED.name, client = EXCLUDED.client, status = EXCLUDED.status,
           progress = EXCLUDED.progress, start_date = EXCLUDED.start_date, deadline = EXCLUDED.deadline,
           budget = EXCLUDED.budget, operational_cost = EXCLUDED.operational_cost, pic_fee = EXCLUDED.pic_fee,
           payment_status = EXCLUDED.payment_status, payment_received = EXCLUDED.payment_received,
-          scope = EXCLUDED.scope, features = EXCLUDED.features, notes = EXCLUDED.notes, updated_at = NOW()`;
+          scope = EXCLUDED.scope, features = EXCLUDED.features, notes = EXCLUDED.notes,
+          pricing_model = EXCLUDED.pricing_model, project_type = EXCLUDED.project_type,
+          client_contact = EXCLUDED.client_contact, client_address = EXCLUDED.client_address,
+          updated_at = NOW()`;
+      if (Array.isArray(body.line_items)) {
+        await sql`DELETE FROM project_invoice_items WHERE project_id = ${id}`;
+        for (let index = 0; index < body.line_items.length; index += 1) {
+          const item = body.line_items[index] || {};
+          const description = clean(item.description, 240);
+          if (!description) continue;
+          const itemId = clean(item.id, 80) || crypto.randomUUID();
+          await sql`INSERT INTO project_invoice_items (id, project_id, description, quantity, unit_price, sort_order)
+            VALUES (${itemId}, ${id}, ${description},
+              ${Math.max(0, number(item.quantity, 1))},
+              ${Math.max(0, number(item.unit_price))},
+              ${index})`;
+        }
+      }
       await syncInvoice(sql, id);
       await audit(session.username, request.method === "POST" ? "create" : "update", "project", id);
+      return response.status(200).json({ ok: true, id });
+    }
+
+    if (resource === "invoice_items") {
+      const projectId = clean(body.project_id, 80);
+      if (request.method === "GET") {
+        if (!projectId) return response.status(400).json({ message: "project_id wajib diisi." });
+        const rows = await sql`SELECT * FROM project_invoice_items WHERE project_id = ${projectId} ORDER BY sort_order ASC, created_at ASC`;
+        return response.status(200).json({ items: rows });
+      }
+      if (request.method === "DELETE") {
+        const id = clean(body.id, 80);
+        if (!id) return response.status(400).json({ message: "id wajib diisi." });
+        const [existing] = await sql`SELECT project_id FROM project_invoice_items WHERE id = ${id}`;
+        await sql`DELETE FROM project_invoice_items WHERE id = ${id}`;
+        if (existing?.project_id) await syncInvoice(sql, existing.project_id);
+        await audit(session.username, "delete", "invoice_item", id);
+        return response.status(200).json({ ok: true });
+      }
+      if (!projectId) return response.status(400).json({ message: "project_id wajib diisi." });
+      const description = clean(body.description, 240);
+      if (!description) return response.status(400).json({ message: "Deskripsi item wajib diisi." });
+      const id = clean(body.id, 80) || crypto.randomUUID();
+      const [sortRow] = await sql`SELECT COALESCE(MAX(sort_order), -1) + 1 AS next FROM project_invoice_items WHERE project_id = ${projectId}`;
+      const sortOrder = number(body.sort_order, Number(sortRow?.next ?? 0));
+      await sql`INSERT INTO project_invoice_items (id, project_id, description, quantity, unit_price, sort_order)
+        VALUES (${id}, ${projectId}, ${description},
+          ${Math.max(0, number(body.quantity, 1))},
+          ${Math.max(0, number(body.unit_price))},
+          ${sortOrder})
+        ON CONFLICT (id) DO UPDATE SET description = EXCLUDED.description,
+          quantity = EXCLUDED.quantity, unit_price = EXCLUDED.unit_price,
+          sort_order = EXCLUDED.sort_order, updated_at = NOW()`;
+      await syncInvoice(sql, projectId);
+      await audit(session.username, request.method === "POST" ? "create" : "update", "invoice_item", id);
       return response.status(200).json({ ok: true, id });
     }
 

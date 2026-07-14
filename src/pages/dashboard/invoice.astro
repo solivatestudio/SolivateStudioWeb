@@ -1,0 +1,225 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+---
+<DashboardLayout title="Invoice" active="projects" eyebrow="Invoice generator">
+  <section class="admin-intro">
+    <div>
+      <h2>Invoice siap kirim ke client.</h2>
+      <p>Logo Solivate, info project, item / fitur, termin pembayaran, dan status pelunasan. Klik "Print" untuk save sebagai PDF lewat dialog browser.</p>
+    </div>
+    <a class="admin-button ghost" href="/dashboard/projects">← Kembali ke project</a>
+  </section>
+
+  <div class="invoice-toolbar" data-invoice-toolbar>
+    <div>
+      <strong data-invoice-number>Memuat invoice...</strong>
+      <p data-invoice-subtitle style="margin:2px 0 0;font-size:12px;color:var(--admin-muted)"></p>
+    </div>
+    <div class="invoice-toolbar-actions">
+      <button class="admin-button ghost" type="button" data-invoice-regenerate>↻ Regenerate</button>
+      <a class="admin-button ghost" target="_blank" rel="noreferrer" data-invoice-edit>Edit project</a>
+      <button class="admin-button accent" type="button" data-invoice-print>🖨 Print / Save PDF</button>
+    </div>
+  </div>
+
+  <article class="invoice-page" data-invoice-page>
+    <div class="invoice-empty">Memuat invoice...</div>
+  </article>
+
+  <script>
+    // @ts-nocheck -- dashboard auth + dynamic invoice payload
+    const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+    const money = (value) => window.formatRupiah(Number(value || 0));
+    const dateOnly = (value) => value ? new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(value)) : "-";
+
+    function statusBadge(status) {
+      const label = { paid: "Lunas", dp: "DP / Sebagian", pending: "Belum Dibayar" }[status] || status;
+      return `<span class="invoice-status-badge ${esc(status)}">${esc(label)}</span>`;
+    }
+
+    function renderEmpty(message) {
+      const page = document.querySelector("[data-invoice-page]");
+      page.innerHTML = `<div class="invoice-empty">${esc(message)}</div>`;
+      document.querySelector("[data-invoice-number]").textContent = "Invoice tidak ditemukan";
+      document.querySelector("[data-invoice-subtitle]").textContent = "";
+      const editLink = document.querySelector("[data-invoice-edit]");
+      if (editLink) editLink.style.display = "none";
+    }
+
+    function renderLineItemsTable(items) {
+      if (!items?.length) {
+        return `<tr><td colspan="4" style="text-align:center;padding:24px;color:#6d7785">Tidak ada item terdefinisi.</td></tr>`;
+      }
+      return items.map((item) => `<tr>
+        <td>${esc(item.description)}</td>
+        <td>${Number(item.quantity || 1)}</td>
+        <td>${money(item.unit_price)}</td>
+        <td><strong>${money(Number(item.quantity || 1) * Number(item.unit_price || 0))}</strong></td>
+      </tr>`).join("");
+    }
+
+    function renderMilestones(milestones) {
+      if (!milestones?.length) {
+        return `<div class="admin-empty">Tidak ada termin pembayaran terpisah — total project sekaligus.</div>`;
+      }
+      return `<div class="invoice-milestones-list">${milestones.map((m, i) => `<div class="invoice-milestone-row">
+        <span class="ms-index">#${i + 1}</span>
+        <span class="ms-title">${esc(m.title)} <span style="font-size:11px;color:#6d7785;margin-left:6px">${esc(m.status || "")}</span></span>
+        <span class="ms-amount">${money(m.amount)}</span>
+        <span class="ms-date">${m.due_date ? `Due ${dateOnly(m.due_date)}` : "-"}</span>
+      </div>`).join("")}</div>`;
+    }
+
+    function renderInvoice(payload, project) {
+      const page = document.querySelector("[data-invoice-page]");
+      const items = payload.line_items || [];
+      const milestones = payload.milestones || [];
+      const lineItemsHtml = renderLineItemsTable(items);
+      const milestonesHtml = renderMilestones(milestones);
+      const showLineItems = items.length > 0;
+      const subTotalRows = showLineItems
+        ? `<div class="invoice-totals-row"><span>Subtotal item</span><strong>${money(payload.subtotal)}</strong></div>`
+        : "";
+
+      page.innerHTML = `
+        <header class="invoice-header">
+          <div class="invoice-header-brand">
+            <img src="/solivate-logo.webp" alt="Solivate Studio" />
+            <span class="invoice-tagline">${esc(payload.provider?.tagline || "Web studio untuk UMKM & brand lokal")}</span>
+          </div>
+          <div class="invoice-header-meta">
+            <h1>INVOICE</h1>
+            <div class="invoice-number">No: ${esc(payload.invoice_number)}</div>
+            <div style="margin-top:8px">${statusBadge(payload.status)}</div>
+          </div>
+        </header>
+
+        <section class="invoice-parties">
+          <div class="invoice-party">
+            <h4>Dari</h4>
+            <div class="invoice-party-name">${esc(payload.provider?.name || "Solivate Studio")}</div>
+            <p>${esc(payload.provider?.address || "Indonesia")}</p>
+            <p>${esc(payload.provider?.email || "")}</p>
+            <p>${esc(payload.provider?.phone || "")}</p>
+          </div>
+          <div class="invoice-party">
+            <h4>Kepada (Client)</h4>
+            <div class="invoice-party-name">${esc(payload.client?.name || "Client")}</div>
+            <p>${esc(payload.client?.address || "—")}</p>
+            <p>${esc(payload.client?.contact || "")}</p>
+          </div>
+        </section>
+
+        <section class="invoice-dates">
+          <div class="invoice-date-block">
+            <div class="invoice-date-label">Tanggal Invoice</div>
+            <div class="invoice-date-value">${dateOnly(payload.issued_date)}</div>
+          </div>
+          <div class="invoice-date-block">
+            <div class="invoice-date-label">Jatuh Tempo</div>
+            <div class="invoice-date-value">${dateOnly(payload.due_date)}</div>
+          </div>
+          <div class="invoice-date-block">
+            <div class="invoice-date-label">Project</div>
+            <div class="invoice-date-value">${esc(payload.project?.name || project.name)}</div>
+          </div>
+        </section>
+
+        <section class="invoice-section">
+          <h3>${showLineItems ? "Item / Fitur" : "Deskripsi Project"}</h3>
+          ${showLineItems
+            ? `<table class="invoice-table">
+                <thead><tr><th>Deskripsi</th><th>Qty</th><th>Harga Satuan</th><th>Subtotal</th></tr></thead>
+                <tbody>${lineItemsHtml}</tbody>
+              </table>
+              <div class="invoice-totals">
+                <div class="invoice-totals-box">
+                  ${subTotalRows}
+                  <div class="invoice-totals-row grand"><span>TOTAL</span><strong>${money(payload.total)}</strong></div>
+                  ${payload.received > 0 ? `<div class="invoice-totals-row" style="margin-top:8px"><span>Sudah dibayar</span><strong style="color:#065f46">${money(payload.received)}</strong></div>` : ""}
+                  ${payload.balance > 0 ? `<div class="invoice-totals-row"><span>Sisa</span><strong style="color:#dc2626">${money(payload.balance)}</strong></div>` : ""}
+                </div>
+              </div>`
+            : `<div class="invoice-scope">${esc(payload.project?.scope || project.scope || "—")}</div>
+              <div class="invoice-totals">
+                <div class="invoice-totals-box">
+                  <div class="invoice-totals-row grand"><span>TOTAL PROJECT</span><strong>${money(payload.total)}</strong></div>
+                  ${payload.received > 0 ? `<div class="invoice-totals-row" style="margin-top:8px"><span>Sudah dibayar</span><strong style="color:#065f46">${money(payload.received)}</strong></div>` : ""}
+                  ${payload.balance > 0 ? `<div class="invoice-totals-row"><span>Sisa</span><strong style="color:#dc2626">${money(payload.balance)}</strong></div>` : ""}
+                </div>
+              </div>`
+          }
+        </section>
+
+        ${milestones.length ? `<section class="invoice-section">
+          <h3>Termin Pembayaran</h3>
+          ${milestonesHtml}
+        </section>` : ""}
+
+        <section class="invoice-section">
+          <h3>Catatan</h3>
+          <div class="invoice-scope">${esc(payload.project?.notes || "Pembayaran dapat ditransfer ke rekening yang akan diinformasikan terpisah. Terima kasih atas kepercayaan Anda.")}</div>
+        </section>
+
+        <footer class="invoice-footer">
+          <div class="invoice-footer-block">
+            <h5>Informasi Pembayaran</h5>
+            <p>Bank: BCA</p>
+            <p>No. Rekening: 123-456-7890</p>
+            <p>Atas nama: Solivate Studio</p>
+          </div>
+          <div class="invoice-footer-block">
+            <h5>Kontak</h5>
+            <p>${esc(payload.provider?.email || "")}</p>
+            <p>${esc(payload.provider?.phone || "")}</p>
+            <p>${esc(payload.provider?.website || "https://solivate.com")}</p>
+          </div>
+        </footer>
+      `;
+
+      document.querySelector("[data-invoice-number]").textContent = `Invoice ${payload.invoice_number}`;
+      document.querySelector("[data-invoice-subtitle]").textContent = `${payload.client?.name || ""} · ${payload.project?.name || ""} · ${money(payload.total)}`;
+      const editLink = document.querySelector("[data-invoice-edit]");
+      if (editLink) editLink.href = `/dashboard/projects?edit=${encodeURIComponent(project.id)}`;
+    }
+
+    function getProjectId() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("project");
+    }
+
+    async function loadInvoice() {
+      const projectId = getProjectId();
+      if (!projectId) {
+        renderEmpty("Pilih project dari daftar untuk membuka invoice.");
+        return;
+      }
+      try {
+        const data = await window.adminApi(`/api/admin/data?resource=invoice&project_id=${encodeURIComponent(projectId)}`);
+        if (!data || !data.payload) {
+          renderEmpty("Invoice belum tersedia untuk project ini.");
+          return;
+        }
+        renderInvoice(data.payload, data.project);
+      } catch (error) {
+        renderEmpty(error.message || "Gagal memuat invoice.");
+        window.showAdminToast?.(error.message, "error");
+      }
+    }
+
+    document.querySelector("[data-invoice-print]")?.addEventListener("click", () => window.print());
+    document.querySelector("[data-invoice-regenerate]")?.addEventListener("click", async () => {
+      const projectId = getProjectId();
+      if (!projectId) return;
+      try {
+        await window.adminApi(`/api/admin/data?resource=regenerate_invoice&project_id=${encodeURIComponent(projectId)}`);
+        window.showAdminToast?.("Invoice di-regenerate.");
+        await loadInvoice();
+      } catch (error) {
+        window.showAdminToast?.(error.message, "error");
+      }
+    });
+
+    window.addEventListener("DOMContentLoaded", loadInvoice);
+  </script>
+</DashboardLayout>
