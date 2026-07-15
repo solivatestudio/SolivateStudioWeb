@@ -291,7 +291,7 @@ async function getOverview(sql) {
     sql`SELECT COUNT(*)::int AS total,
       COUNT(*) FILTER (WHERE status IN ('planning', 'active', 'review', 'pending'))::int AS active,
       COALESCE(ROUND(AVG(progress)), 0)::int AS progress
-      FROM projects`,
+      FROM projects WHERE id != ${GENERAL_PROJECT_ID}`,
     sql`SELECT
       COALESCE(SUM(amount) FILTER (WHERE type = 'income' AND date_trunc('month', entry_date) = date_trunc('month', CURRENT_DATE)), 0) AS income,
       COALESCE(SUM(amount) FILTER (WHERE type = 'expense' AND date_trunc('month', entry_date) = date_trunc('month', CURRENT_DATE)), 0) AS expense
@@ -314,7 +314,8 @@ async function getOverview(sql) {
     sql`SELECT id, name, client, budget, payment_received, payment_status,
       GREATEST(budget - payment_received, 0) AS outstanding
       FROM projects
-      WHERE payment_status IN ('dp', 'unpaid', 'pending', 'overdue') OR payment_received < budget
+      WHERE (payment_status IN ('dp', 'unpaid', 'pending', 'overdue') OR payment_received < budget)
+      AND id != ${GENERAL_PROJECT_ID}
       ORDER BY outstanding DESC, deadline NULLS LAST
       LIMIT 8`,
     sql`SELECT project.name, project.client, milestone.title, milestone.due_date, milestone.status
@@ -329,7 +330,8 @@ async function getOverview(sql) {
       COALESCE(SUM(operational_cost + pic_fee), 0) AS planned_cost,
       COALESCE(SUM(payment_received - operational_cost - pic_fee), 0) AS projected_profit
       FROM projects
-      WHERE date_trunc('month', COALESCE(start_date, created_at::date)) = date_trunc('month', CURRENT_DATE)`
+      WHERE date_trunc('month', COALESCE(start_date, created_at::date)) = date_trunc('month', CURRENT_DATE)
+      AND id != ${GENERAL_PROJECT_ID}`
   ]);
   return {
     projects: projects[0],
@@ -350,6 +352,7 @@ async function getProjects(sql) {
       COALESCE(SUM(finance.amount) FILTER (WHERE finance.type = 'expense'), 0) AS expense_total
     FROM projects project
     LEFT JOIN finance_entries finance ON finance.project_id = project.id
+    WHERE project.id != ${GENERAL_PROJECT_ID}
     GROUP BY project.id
     ORDER BY
       CASE project.status WHEN 'active' THEN 1 WHEN 'review' THEN 2 WHEN 'planning' THEN 3 WHEN 'pending' THEN 4 ELSE 5 END,
@@ -516,7 +519,7 @@ export default async function handler(request, response) {
           COALESCE(SUM(amount) FILTER (WHERE type = 'income'), 0) AS income,
           COALESCE(SUM(amount) FILTER (WHERE type = 'expense'), 0) AS expense
           FROM finance_entries`;
-        const projects = await sql`SELECT id, name, client FROM projects ORDER BY updated_at DESC LIMIT 200`;
+        const projects = await sql`SELECT id, name, client FROM projects WHERE id != ${GENERAL_PROJECT_ID} ORDER BY updated_at DESC LIMIT 200`;
         return response.status(200).json({ items: rows, totals: totals[0], projects });
       }
       if (resource === "performance") {
