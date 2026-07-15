@@ -3146,41 +3146,54 @@ button {
   font-size: 14px;
 }
 @media print {
-  html, body {
+  html, body, .admin-body {
     background: #fff !important;
     height: auto !important;
-    overflow: visible !important;
   }
-  body * {
+  .admin-sidebar,
+  .admin-topbar,
+  .admin-toast,
+  .admin-backdrop,
+  .admin-menu,
+  .admin-intro,
+  .admin-status,
+  .admin-current,
+  .admin-mode-switch,
+  .admin-nav,
+  .admin-sidebar-bottom,
+  .admin-brand,
+  .admin-panel-head,
+  .invoice-toolbar,
+  .dashboard-primary-actions {
     display: none !important;
-    visibility: hidden !important;
   }
-  .invoice-page,
-  .invoice-page * {
-    display: revert !important;
-    visibility: visible !important;
+  .admin-app {
+    min-height: auto !important;
+    background: #fff !important;
+  }
+  .admin-main {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+  .admin-content {
+    padding: 0 !important;
+    max-width: 100% !important;
+    background: #fff !important;
+  }
+  .admin-content > *:not(.invoice-page) {
+    display: none !important;
   }
   .invoice-page {
     display: block !important;
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
     border: 0 !important;
     box-shadow: none !important;
-    padding: 24px 32px !important;
-    margin: 0 auto !important;
+    padding: 30px 40px !important;
     max-width: 21cm !important;
+    margin: 0 auto !important;
     background: #fff !important;
-    color: #000 !important;
-    page-break-after: avoid !important;
     print-color-adjust: exact !important;
     -webkit-print-color-adjust: exact !important;
-  }
-  .invoice-page img {
-    display: inline-block !important;
-  }
-  .invoice-status-badge {
-    display: inline-block !important;
   }
   @page {
     size: A4 portrait;
