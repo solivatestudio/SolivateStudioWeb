@@ -242,16 +242,23 @@ async function syncInvoice(sql, projectId) {
   }
 }
 
+const GENERAL_PROJECT_ID = "__general__";
+async function ensureGeneralProject(sql) {
+  await sql`INSERT INTO projects (id, name, client, status, progress, budget, scope, notes)
+    VALUES (${GENERAL_PROJECT_ID}, 'General / Non-Project', 'Solivate Studio', 'completed', 100, 0, 'Transaksi umum tanpa project tertentu.', 'Auto-generated untuk general invoice & receipt.')
+    ON CONFLICT (id) DO NOTHING`;
+}
 const generalInvoiceId = (financeId) => `general-invoice-${financeId}`;
 async function syncGeneralInvoice(sql, financeId) {
   const [finance] = await sql`SELECT * FROM finance_entries WHERE id = ${financeId}`;
   if (!finance) return null;
+  await ensureGeneralProject(sql);
   const payload = await buildGeneralInvoicePayload(sql, finance);
   const titlePrefix = finance.type === "income" ? "Invoice" : "Receipt";
   const title = `${titlePrefix} - ${clean(finance.description, 80) || clean(finance.category, 80) || finance.id.slice(0, 6)}`;
   const docId = generalInvoiceId(financeId);
   await sql`INSERT INTO project_documents (id, project_id, title, document_type, file_url, amount, status, issued_date, notes, notes_data)
-    VALUES (${docId}, ${finance.project_id || financeId}, ${title}, ${finance.type === "income" ? "general_invoice" : "receipt"}, '', ${payload.total}, ${payload.status === "paid" ? "paid" : (payload.status === "pending" ? "pending" : "draft")}, ${payload.issued_date}, ${title}, ${JSON.stringify(payload)})
+    VALUES (${docId}, ${GENERAL_PROJECT_ID}, ${title}, ${finance.type === "income" ? "general_invoice" : "receipt"}, '', ${payload.total}, ${payload.status === "paid" ? "paid" : (payload.status === "pending" ? "pending" : "draft")}, ${payload.issued_date}, ${title}, ${JSON.stringify(payload)})
     ON CONFLICT (id) DO UPDATE SET
       title = EXCLUDED.title,
       amount = EXCLUDED.amount,
