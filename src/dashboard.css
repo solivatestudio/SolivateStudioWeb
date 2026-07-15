@@ -224,8 +224,8 @@ button {
   box-shadow: 0 0 0 5px rgba(37, 180, 107, 0.12);
 }
 .admin-content {
-  width: min(100%, 1500px);
-  padding: clamp(24px, 4vw, 56px);
+  width: 100%;
+  padding: clamp(20px, 3vw, 48px);
 }
 .admin-menu {
   display: none;
