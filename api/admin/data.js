@@ -9,7 +9,7 @@ const dateOrNull = (value) => (clean(value, 20) ? clean(value, 20) : null);
 const PROJECT_STATUSES = new Set(["planning", "active", "review", "completed", "on-hold", "pending"]);
 const PAYMENT_STATUSES = new Set(["paid", "dp", "unpaid", "pending", "overdue"]);
 const MILESTONE_STATUSES = new Set(["pending", "on-progress", "completed", "late"]);
-const DOCUMENT_TYPES = new Set(["invoice", "mou", "receipt", "operational", "contract", "other"]);
+const DOCUMENT_TYPES = new Set(["invoice", "mou", "receipt", "operational", "contract", "other", "general_invoice"]);
 const DOCUMENT_STATUSES = new Set(["draft", "pending", "sent", "paid", "signed", "archived"]);
 const PRICING_MODELS = new Set(["fixed", "line_items"]);
 const PROJECT_TYPES = new Set(["umkm", "masjid", "event", "wedding", "company", "other"]);
@@ -129,6 +129,60 @@ const buildInvoicePayload = async (sql, project, milestones, lineItems) => {
     status
   };
 };
+
+const buildGeneralInvoicePayload = async (sql, finance) => {
+  const settings = await getInvoiceSettings(sql);
+  const total = Number(finance.amount || 0);
+  const itemRows = [{
+    description: clean(finance.description, 200) || clean(finance.category, 200) || "Item",
+    quantity: 1,
+    unit_price: total,
+    subtotal: total
+  }];
+  const status = finance.type === "income"
+    ? (finance.payment_status === "paid" ? "paid" : (finance.payment_status === "overdue" ? "pending" : finance.payment_status || "pending"))
+    : (finance.payment_status === "paid" ? "paid" : "pending");
+  const title = finance.type === "income" ? "Invoice" : "Receipt / Bukti Pembayaran";
+  return {
+    invoice_number: invoiceNumber({ id: finance.id }),
+    issued_date: finance.entry_date || new Date().toISOString().slice(0, 10),
+    due_date: finance.entry_date || new Date().toISOString().slice(0, 10),
+    currency: "IDR",
+    logo_url: settings.logo_url,
+    tagline: settings.tagline,
+    footer_note: settings.footer_note,
+    document_kind: finance.type === "income" ? "invoice" : "receipt",
+    document_title: title,
+    project: {
+      id: null,
+      name: finance.description || clean(finance.category, 100) || (finance.type === "income" ? "General Income" : "General Expense"),
+      type: "general",
+      pricing_model: "fixed",
+      scope: finance.description_detail || "",
+      features: "",
+      notes: finance.notes || ""
+    },
+    client: {
+      name: finance.client_name || (finance.type === "income" ? "Client" : "Vendor / Penerima"),
+      contact: finance.client_contact || "",
+      address: finance.client_address || ""
+    },
+    provider: settings.provider,
+    bank: settings.bank,
+    line_items: itemRows,
+    milestones: [],
+    subtotal: total,
+    line_items_total: total,
+    milestone_total: 0,
+    total,
+    received: finance.type === "income" && finance.payment_status === "paid" ? total : 0,
+    balance: finance.type === "income" && finance.payment_status === "paid" ? 0 : total,
+    status,
+    category: finance.category || "General",
+    finance_id: finance.id
+  };
+};
+
 const legacyInvoiceText = (project, milestones, lineItems, payload) => {
   const lines = [
     `Invoice: ${payload.invoice_number}`,
@@ -186,6 +240,28 @@ async function syncInvoice(sql, projectId) {
   if (milestoneTotal > 0 && amount !== milestoneTotal) {
     return;
   }
+}
+
+const generalInvoiceId = (financeId) => `general-invoice-${financeId}`;
+async function syncGeneralInvoice(sql, financeId) {
+  const [finance] = await sql`SELECT * FROM finance_entries WHERE id = ${financeId}`;
+  if (!finance) return null;
+  const payload = await buildGeneralInvoicePayload(sql, finance);
+  const titlePrefix = finance.type === "income" ? "Invoice" : "Receipt";
+  const title = `${titlePrefix} - ${clean(finance.description, 80) || clean(finance.category, 80) || finance.id.slice(0, 6)}`;
+  const docId = generalInvoiceId(financeId);
+  await sql`INSERT INTO project_documents (id, project_id, title, document_type, file_url, amount, status, issued_date, notes, notes_data)
+    VALUES (${docId}, ${finance.project_id || financeId}, ${title}, ${finance.type === "income" ? "general_invoice" : "receipt"}, '', ${payload.total}, ${payload.status === "paid" ? "paid" : (payload.status === "pending" ? "pending" : "draft")}, ${payload.issued_date}, ${title}, ${JSON.stringify(payload)})
+    ON CONFLICT (id) DO UPDATE SET
+      title = EXCLUDED.title,
+      amount = EXCLUDED.amount,
+      notes = EXCLUDED.notes,
+      notes_data = EXCLUDED.notes_data,
+      issued_date = EXCLUDED.issued_date,
+      status = EXCLUDED.status,
+      updated_at = NOW()`;
+  await sql`UPDATE finance_entries SET invoice_doc_id = ${docId} WHERE id = ${financeId}`;
+  return docId;
 }
 async function syncProjectPayment(sql, projectId) {
   if (!projectId) return;
@@ -349,9 +425,62 @@ export default async function handler(request, response) {
         await audit(session.username, "regenerate", "invoice", projectId);
         return response.status(200).json({ ok: true });
       }
+      if (resource === "invoices") {
+        const filter = clean(request.query?.filter, 40) || "all";
+        const projectOnly = filter === "project";
+        const generalOnly = filter === "general";
+        let rows;
+        if (generalOnly) {
+          rows = await sql`SELECT doc.*, NULL AS project_name, finance.description AS finance_description, finance.type AS finance_type, finance.invoice_doc_id
+            FROM project_documents doc
+            LEFT JOIN finance_entries finance ON finance.invoice_doc_id = doc.id
+            WHERE doc.document_type IN ('general_invoice', 'receipt')
+            ORDER BY doc.issued_date DESC NULLS LAST, doc.updated_at DESC`;
+        } else if (projectOnly) {
+          rows = await sql`SELECT doc.*, project.name AS project_name, NULL AS finance_description, NULL AS finance_type, NULL AS invoice_doc_id
+            FROM project_documents doc
+            LEFT JOIN projects project ON project.id = doc.project_id
+            WHERE doc.document_type = 'invoice'
+            ORDER BY doc.issued_date DESC NULLS LAST, doc.updated_at DESC`;
+        } else {
+          rows = await sql`SELECT doc.*, project.name AS project_name, finance.description AS finance_description, finance.type AS finance_type, finance.invoice_doc_id
+            FROM project_documents doc
+            LEFT JOIN projects project ON project.id = doc.project_id
+            LEFT JOIN finance_entries finance ON finance.invoice_doc_id = doc.id
+            WHERE doc.document_type IN ('invoice', 'general_invoice', 'receipt')
+            ORDER BY doc.issued_date DESC NULLS LAST, doc.updated_at DESC`;
+        }
+        return response.status(200).json({ items: rows });
+      }
+      if (resource === "regenerate_general_invoice") {
+        const financeId = clean(request.query?.finance_id, 80);
+        if (!financeId) return response.status(400).json({ message: "finance_id wajib diisi." });
+        await syncGeneralInvoice(sql, financeId);
+        await audit(session.username, "regenerate", "general_invoice", financeId);
+        return response.status(200).json({ ok: true });
+      }
       if (resource === "invoice") {
+        const docId = clean(request.query?.doc_id, 200);
+        if (docId) {
+          const [doc] = await sql`SELECT * FROM project_documents WHERE id = ${docId}`;
+          if (!doc) return response.status(404).json({ message: "Invoice tidak ditemukan." });
+          if (doc.document_type === "general_invoice" || doc.document_type === "receipt") {
+            const [finance] = await sql`SELECT * FROM finance_entries WHERE id = ${doc.id.replace("general-invoice-", "")}`;
+            const payload = finance ? await buildGeneralInvoicePayload(sql, finance) : (doc.notes_data || {});
+            return response.status(200).json({ project: null, finance, invoice: doc, payload, mode: "general" });
+          }
+          const projectId = clean(doc.project_id, 80);
+          if (!projectId) return response.status(400).json({ message: "Dokumen tidak terkait project." });
+          const [project] = await sql`SELECT * FROM projects WHERE id = ${projectId}`;
+          const [milestones, lineItems, documents] = await Promise.all([
+            sql`SELECT * FROM project_milestones WHERE project_id = ${projectId} ORDER BY due_date NULLS LAST, created_at ASC`,
+            sql`SELECT * FROM project_invoice_items WHERE project_id = ${projectId} ORDER BY sort_order ASC, created_at ASC`,
+            sql`SELECT * FROM project_documents WHERE project_id = ${projectId} ORDER BY issued_date DESC NULLS LAST, created_at DESC`
+          ]);
+          return response.status(200).json({ project, milestones, line_items: lineItems, documents, invoice: doc, payload: doc.notes_data || {}, mode: "project" });
+        }
         const projectId = clean(request.query?.project_id, 80);
-        if (!projectId) return response.status(400).json({ message: "project_id wajib diisi." });
+        if (!projectId) return response.status(400).json({ message: "project_id atau doc_id wajib diisi." });
         const [project] = await sql`SELECT * FROM projects WHERE id = ${projectId}`;
         if (!project) return response.status(404).json({ message: "Project tidak ditemukan." });
         const [milestones, lineItems, documents] = await Promise.all([
@@ -367,7 +496,8 @@ export default async function handler(request, response) {
           line_items: lineItems,
           documents,
           invoice: invoiceDoc || null,
-          payload
+          payload,
+          mode: "project"
         });
       }
       if (resource === "finance") {
@@ -579,7 +709,8 @@ export default async function handler(request, response) {
     if (resource === "finance") {
       const id = clean(body.id, 80) || crypto.randomUUID();
       if (request.method === "DELETE") {
-        const [existing] = await sql`SELECT project_id FROM finance_entries WHERE id = ${id}`;
+        const [existing] = await sql`SELECT project_id, invoice_doc_id FROM finance_entries WHERE id = ${id}`;
+        if (existing?.invoice_doc_id) await sql`DELETE FROM project_documents WHERE id = ${existing.invoice_doc_id}`;
         await sql`DELETE FROM finance_entries WHERE id = ${id}`;
         if (existing?.project_id) await syncProjectPayment(sql, existing.project_id);
         await audit(session.username, "delete", "finance", id);
@@ -590,14 +721,25 @@ export default async function handler(request, response) {
       if (!description) return response.status(400).json({ message: "Deskripsi wajib diisi." });
       const paymentStatus = ["paid", "pending", "overdue", "dp"].includes(body.payment_status) ? body.payment_status : "paid";
       const projectId = clean(body.project_id, 80) || null;
+      const clientName = clean(body.client_name, 160);
+      const clientContact = clean(body.client_contact, 200);
+      const clientAddress = clean(body.client_address, 500);
+      const descriptionDetail = clean(body.description_detail, 1000);
       const [existing] = await sql`SELECT project_id FROM finance_entries WHERE id = ${id}`;
-      await sql`INSERT INTO finance_entries (id, project_id, entry_date, type, category, description, amount, payment_status)
-        VALUES (${id}, ${projectId}, ${dateOrNull(body.entry_date) || new Date().toISOString().slice(0, 10)}, ${type}, ${clean(body.category, 100) || "General"}, ${description}, ${Math.max(0, number(body.amount))}, ${paymentStatus})
+      await sql`INSERT INTO finance_entries (id, project_id, entry_date, type, category, description, amount, payment_status, client_name, client_contact, client_address, description_detail)
+        VALUES (${id}, ${projectId}, ${dateOrNull(body.entry_date) || new Date().toISOString().slice(0, 10)}, ${type}, ${clean(body.category, 100) || "General"}, ${description}, ${Math.max(0, number(body.amount))}, ${paymentStatus}, ${clientName}, ${clientContact}, ${clientAddress}, ${descriptionDetail})
         ON CONFLICT (id) DO UPDATE SET project_id = EXCLUDED.project_id, entry_date = EXCLUDED.entry_date,
           type = EXCLUDED.type, category = EXCLUDED.category, description = EXCLUDED.description,
-          amount = EXCLUDED.amount, payment_status = EXCLUDED.payment_status, updated_at = NOW()`;
+          amount = EXCLUDED.amount, payment_status = EXCLUDED.payment_status,
+          client_name = EXCLUDED.client_name, client_contact = EXCLUDED.client_contact,
+          client_address = EXCLUDED.client_address, description_detail = EXCLUDED.description_detail,
+          updated_at = NOW()`;
       if (existing?.project_id && existing.project_id !== projectId) await syncProjectPayment(sql, existing.project_id);
-      if (projectId) await syncProjectPayment(sql, projectId);
+      if (projectId) {
+        await syncProjectPayment(sql, projectId);
+      } else {
+        await syncGeneralInvoice(sql, id);
+      }
       await audit(session.username, request.method === "POST" ? "create" : "update", "finance", id);
       return response.status(200).json({ ok: true, id });
     }

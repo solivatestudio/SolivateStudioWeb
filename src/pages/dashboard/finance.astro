@@ -4,12 +4,12 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 
 <DashboardLayout title="Finance" active="finance" eyebrow="Cash visibility">
   <section class="admin-intro">
-    <div><h2>Arus kas per project, bukan cuma angka global.</h2><p>Catat income, biaya operasional, fee, invoice payment, dan status pembayaran yang tersambung ke project.</p></div>
+    <div><h2>Arus kas per project, bukan cuma angka global.</h2><p>Catat income, biaya operasional, fee, invoice payment, dan status pembayaran yang tersambung ke project. Transaksi general (tanpa project) otomatis dibuatkan invoice / receipt.</p></div>
   </section>
 
   <div class="finance-banner">
     <span class="finance-banner-icon">⚡</span>
-    <div><strong>Auto-invoice aktif.</strong> Setiap income yang terkait project otomatis meng-update invoice: status berubah dari belum bayar → DP → lunas. <a href="/dashboard/settings/invoice">Atur branding invoice →</a></div>
+    <div><strong>Auto-invoice aktif.</strong> Income terkait project → invoice project ter-update. Transaksi general (tanpa project) → invoice / receipt otomatis di-generate. <a href="/dashboard/settings/invoice">Atur branding invoice →</a></div>
   </div>
 
   <section class="admin-grid stats management-summary" style="margin-bottom:16px">
@@ -19,33 +19,79 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
     <article class="admin-stat"><p class="admin-stat-label">Linked projects</p><div class="admin-stat-value" data-project-count>0</div><span class="admin-stat-note">Project aktif di finance</span></article>
   </section>
 
-  <section class="admin-panel management-list-section">
-    <div class="admin-panel-head">
-      <div><h2>Riwayat transaksi</h2><p data-finance-count>Memuat...</p></div>
-      <button class="admin-button accent" type="button" data-add-finance>Tambah transaksi</button>
-    </div>
-    <div data-finance-list><div class="admin-empty">Memuat transaksi...</div></div>
+  <div class="finance-tabs">
+    <button class="finance-tab active" type="button" data-tab="transactions">Transaksi</button>
+    <button class="finance-tab" type="button" data-tab="invoices">Invoices <span class="finance-tab-count" data-tab-count-invoices>0</span></button>
+  </div>
+
+  <section data-tab-panel="transactions">
+    <section class="admin-panel management-list-section">
+      <div class="admin-panel-head">
+        <div><h2>Riwayat transaksi</h2><p data-finance-count>Memuat...</p></div>
+        <button class="admin-button accent" type="button" data-add-finance>＋ Tambah transaksi</button>
+      </div>
+      <div data-finance-list><div class="admin-empty">Memuat transaksi...</div></div>
+    </section>
+
+    <section class="admin-panel management-editor" style="margin-bottom:16px" data-management-editor hidden>
+      <div class="admin-panel-head"><div><h2>Catat transaksi</h2><p>Pilih project terkait supaya breakdown profit tetap akurat. Transaksi general (tanpa project) auto-bikin invoice / receipt.</p></div></div>
+      <form class="admin-form" data-finance-form>
+        <label class="admin-field full"><span>Project terkait</span><select name="project_id"><option value="">General / internal (auto invoice)</option></select></label>
+        <label class="admin-field"><span>Tanggal</span><input name="entry_date" type="date" required /></label>
+        <label class="admin-field"><span>Tipe</span>
+          <select name="type">
+            <option value="income">Pemasukan (auto invoice)</option>
+            <option value="expense">Pengeluaran (auto receipt)</option>
+          </select>
+        </label>
+        <label class="admin-field"><span>Kategori</span><select name="category"><option>Project payment</option><option>DP payment</option><option>Final payment</option><option>Operational cost</option><option>Fee PIC</option><option>Subscription</option><option>Marketing</option><option>General</option></select></label>
+        <label class="admin-field"><span>Status</span><select name="payment_status"><option value="paid">Paid</option><option value="dp">DP</option><option value="pending">Pending</option><option value="overdue">Overdue</option></select></label>
+        <label class="admin-field full"><span>Deskripsi</span><input name="description" required placeholder="Misal: Hosting 1 tahun, Jasa konsultasi, Iklan FB, dll." /></label>
+        <label class="admin-field"><span>Jumlah</span><input name="amount" inputmode="numeric" data-money placeholder="0" required /></label>
+        <fieldset class="admin-field full finance-general-fields" data-general-fields>
+          <legend>Detail untuk invoice / receipt (general)</legend>
+          <div class="admin-form" style="gap:10px">
+            <label class="admin-field"><span>Nama client / vendor</span><input name="client_name" placeholder="Nama perusahaan atau personal" /></label>
+            <label class="admin-field"><span>Kontak (email / WA)</span><input name="client_contact" placeholder="email@... / 08xxx" /></label>
+            <label class="admin-field full"><span>Alamat</span><input name="client_address" placeholder="Kota, provinsi" /></label>
+            <label class="admin-field full"><span>Catatan invoice / receipt</span><textarea name="description_detail" rows="2" placeholder="Detail yang muncul di invoice (misal: 'Hosting 1 tahun renewal 2026', 'Iklan FB campaign 1-30 Juni 2026')"></textarea></label>
+          </div>
+        </fieldset>
+        <div class="admin-actions" style="align-items:end"><button class="admin-button accent" type="submit">Simpan transaksi</button></div>
+      </form>
+    </section>
   </section>
 
-  <section class="admin-panel management-editor" style="margin-bottom:16px" data-management-editor hidden>
-    <div class="admin-panel-head"><div><h2>Catat transaksi</h2><p>Pilih project terkait supaya breakdown profit tetap akurat.</p></div></div>
-    <form class="admin-form" data-finance-form>
-      <label class="admin-field full"><span>Project terkait</span><select name="project_id"><option value="">General / internal</option></select></label>
-      <label class="admin-field"><span>Tanggal</span><input name="entry_date" type="date" required /></label>
-      <label class="admin-field"><span>Tipe</span><select name="type"><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option></select></label>
-      <label class="admin-field"><span>Kategori</span><select name="category"><option>Project payment</option><option>DP payment</option><option>Final payment</option><option>Operational cost</option><option>Fee PIC</option><option>Subscription</option><option>Marketing</option><option>General</option></select></label>
-      <label class="admin-field"><span>Status</span><select name="payment_status"><option value="paid">Paid</option><option value="dp">DP</option><option value="pending">Pending</option><option value="overdue">Overdue</option></select></label>
-      <label class="admin-field full"><span>Deskripsi</span><input name="description" required /></label>
-      <label class="admin-field"><span>Jumlah</span><input name="amount" inputmode="numeric" data-money placeholder="0" required /></label>
-      <div class="admin-actions" style="align-items:end"><button class="admin-button accent" type="submit">Simpan transaksi</button></div>
-    </form>
+  <section data-tab-panel="invoices" hidden>
+    <section class="admin-panel">
+      <div class="admin-panel-head">
+        <div><h2>Daftar invoice</h2><p data-invoice-count>Memuat...</p></div>
+        <div class="admin-actions" style="gap:6px">
+          <button class="admin-button ghost active" type="button" data-invoice-filter="all">Semua</button>
+          <button class="admin-button ghost" type="button" data-invoice-filter="project">Project</button>
+          <button class="admin-button ghost" type="button" data-invoice-filter="general">General</button>
+        </div>
+      </div>
+      <div data-invoice-list><div class="admin-empty">Memuat invoice...</div></div>
+    </section>
   </section>
+
+  <style>
+    .finance-tabs { display:flex; gap:0; margin-bottom:14px; border-bottom:1px solid var(--admin-line); }
+    .finance-tab { background:transparent; border:0; padding:12px 18px; font-size:13px; font-weight:700; color:var(--admin-muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; }
+    .finance-tab.active { color:var(--admin-navy); border-bottom-color:var(--admin-navy); }
+    .finance-tab-count { background:rgba(2,62,138,.1); color:var(--admin-navy); padding:1px 7px; border-radius:999px; font-size:10px; font-weight:700; margin-left:4px; }
+    .admin-button.active { background:var(--admin-navy); color:#fff; border-color:var(--admin-navy); }
+    .finance-general-fields { border:1px dashed #c4cdd8; border-radius:12px; padding:14px 16px; margin:0; }
+    .finance-general-fields legend { font-size:11px; font-weight:700; color:var(--admin-muted); text-transform:uppercase; letter-spacing:.05em; padding:0 6px; }
+  </style>
 
   <script is:inline>
     window.addEventListener("DOMContentLoaded", () => {
       const form = document.querySelector("[data-finance-form]");
       const list = document.querySelector("[data-finance-list]");
       const editorPanel = document.querySelector("[data-management-editor]");
+      const generalFields = document.querySelector("[data-general-fields]");
       form.elements.entry_date.value = new Date().toISOString().slice(0,10);
       const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
       const moneyInput = (value) => String(Math.round(Number(value || 0))).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -56,18 +102,85 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           input.value = raw ? moneyInput(raw) : "";
         });
       });
+      const syncGeneralVisibility = () => {
+        const isGeneral = !form.elements.project_id.value;
+        if (generalFields) generalFields.style.display = isGeneral ? "" : "none";
+      };
+      form.elements.project_id.addEventListener("change", syncGeneralVisibility);
+      form.elements.type.addEventListener("change", () => {
+        if (form.elements.type.value === "expense") {
+          form.elements.payment_status.value = "paid";
+        }
+      });
       const load = async () => {
         const data = await window.adminApi("/api/admin/data?resource=finance");
         const income = Number(data.totals.income);
         const expense = Number(data.totals.expense);
-        form.elements.project_id.innerHTML = `<option value="">General / internal</option>${(data.projects || []).map((project) => `<option value="${esc(project.id)}">${esc(project.name)} · ${esc(project.client || "Internal")}</option>`).join("")}`;
+        form.elements.project_id.innerHTML = `<option value="">General / internal (auto invoice)</option>${(data.projects || []).map((project) => `<option value="${esc(project.id)}">${esc(project.name)} · ${esc(project.client || "Internal")}</option>`).join("")}`;
         document.querySelector("[data-income]").textContent = window.formatRupiah(income);
         document.querySelector("[data-expense]").textContent = window.formatRupiah(expense);
         document.querySelector("[data-balance]").textContent = window.formatRupiah(income - expense);
         document.querySelector("[data-project-count]").textContent = String(new Set(data.items.map((item) => item.project_id).filter(Boolean)).size);
         document.querySelector("[data-finance-count]").textContent = `${data.items.length} transaksi`;
-        list.innerHTML = data.items.length ? `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Tanggal</th><th>Project</th><th>Deskripsi</th><th>Kategori</th><th>Tipe</th><th>Status</th><th>Jumlah</th><th></th></tr></thead><tbody>${data.items.map((item) => `<tr><td>${window.formatDate(item.entry_date)}</td><td>${esc(item.project_name || "General")}${item.project_id ? `<span class="invoice-link-badge" title="Auto-linked ke invoice project">⚡ Invoice</span>` : ""}</td><td><strong>${esc(item.description)}</strong></td><td>${esc(item.category)}</td><td><span class="admin-badge ${item.type}">${item.type}</span></td><td><span class="admin-badge ${item.payment_status}">${item.payment_status}</span></td><td>${window.formatRupiah(item.amount)}</td><td style="display:flex;gap:6px">${item.project_id ? `<a class="admin-button ghost" href="/dashboard/invoice?project=${encodeURIComponent(item.project_id)}" target="_blank" rel="noreferrer" title="Lihat invoice">📄</a>` : ""}<button class="admin-button danger" data-delete="${item.id}">Hapus</button></td></tr>`).join("")}</tbody></table></div>` : '<div class="admin-empty">Belum ada transaksi.</div>';
+        syncGeneralVisibility();
+        list.innerHTML = data.items.length ? `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Tanggal</th><th>Project / Client</th><th>Deskripsi</th><th>Kategori</th><th>Tipe</th><th>Status</th><th>Jumlah</th><th></th></tr></thead><tbody>${data.items.map((item) => {
+          const isGeneral = !item.project_id;
+          const target = isGeneral
+            ? `<a class="admin-button ghost" href="/dashboard/invoice?doc=${encodeURIComponent(item.invoice_doc_id || ("general-invoice-" + item.id))}" target="_blank" rel="noreferrer" title="Lihat invoice">📄</a>`
+            : `<a class="admin-button ghost" href="/dashboard/invoice?project=${encodeURIComponent(item.project_id)}" target="_blank" rel="noreferrer" title="Lihat invoice">📄</a>`;
+          return `<tr>
+            <td>${window.formatDate(item.entry_date)}</td>
+            <td>${item.project_id ? esc(item.project_name || "Project") : esc(item.client_name || "General")}${isGeneral ? `<span class="invoice-link-badge" title="Auto-generated invoice">⚡ Auto</span>` : `<span class="invoice-link-badge" title="Auto-linked ke invoice project">⚡ Invoice</span>`}</td>
+            <td><strong>${esc(item.description)}</strong></td>
+            <td>${esc(item.category)}</td>
+            <td><span class="admin-badge ${item.type}">${item.type}</span></td>
+            <td><span class="admin-badge ${item.payment_status}">${item.payment_status}</span></td>
+            <td>${window.formatRupiah(item.amount)}</td>
+            <td style="display:flex;gap:6px">${target}<button class="admin-button danger" data-delete="${item.id}">Hapus</button></td>
+          </tr>`;
+        }).join("")}</tbody></table></div>` : '<div class="admin-empty">Belum ada transaksi.</div>';
       };
+      const loadInvoices = async (filter = "all") => {
+        const listEl = document.querySelector("[data-invoice-list]");
+        const countEl = document.querySelector("[data-invoice-count]");
+        try {
+          const data = await window.adminApi(`/api/admin/data?resource=invoices&filter=${encodeURIComponent(filter)}`);
+          document.querySelector("[data-tab-count-invoices]").textContent = String((data.items || []).length);
+          countEl.textContent = `${(data.items || []).length} invoice`;
+          if (!data.items?.length) { listEl.innerHTML = '<div class="admin-empty">Belum ada invoice.</div>'; return; }
+          listEl.innerHTML = `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Tanggal</th><th>Judul</th><th>Tipe</th><th>Client / Project</th><th>Jumlah</th><th>Status</th><th></th></tr></thead><tbody>${data.items.map((doc) => {
+            const isGeneral = doc.document_type !== "invoice";
+            const target = isGeneral
+              ? `/dashboard/invoice?doc=${encodeURIComponent(doc.id)}`
+              : `/dashboard/invoice?project=${encodeURIComponent(doc.project_id)}`;
+            const clientName = isGeneral ? esc(doc.finance_description || "—") : esc(doc.project_name || "—");
+            return `<tr>
+              <td>${window.formatDate(doc.issued_date)}</td>
+              <td><strong>${esc(doc.title)}</strong></td>
+              <td><span class="admin-badge ${doc.document_type}">${isGeneral ? (doc.document_type === "receipt" ? "Receipt" : "Invoice General") : "Invoice"}</span></td>
+              <td>${clientName}</td>
+              <td>${window.formatRupiah(doc.amount)}</td>
+              <td><span class="admin-badge ${doc.status}">${esc(doc.status)}</span></td>
+              <td><a class="admin-button ghost" href="${target}" target="_blank" rel="noreferrer">📄 Buka</a></td>
+            </tr>`;
+          }).join("")}</tbody></table></div>`;
+        } catch (error) { listEl.innerHTML = `<p class="admin-error">${esc(error.message)}</p>`; }
+      };
+      document.querySelectorAll("[data-tab]").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          document.querySelectorAll("[data-tab]").forEach((t) => t.classList.toggle("active", t === tab));
+          document.querySelectorAll("[data-tab-panel]").forEach((p) => p.hidden = p.dataset.tabPanel !== tab.dataset.tab);
+          if (tab.dataset.tab === "invoices") loadInvoices(currentFilter);
+        });
+      });
+      let currentFilter = "all";
+      document.querySelectorAll("[data-invoice-filter]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("[data-invoice-filter]").forEach((b) => b.classList.toggle("active", b === btn));
+          currentFilter = btn.dataset.invoiceFilter;
+          loadInvoices(currentFilter);
+        });
+      });
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
         try {
@@ -78,15 +191,19 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           await window.adminApi("/api/admin/data?resource=finance", { method:"POST", body:JSON.stringify(payload) });
           form.reset(); form.elements.entry_date.value = new Date().toISOString().slice(0,10);
           if (editorPanel) editorPanel.hidden = true;
-          await load(); window.showAdminToast("Transaksi tersimpan.");
+          await load();
+          if (!document.querySelector('[data-tab="invoices"]').hidden) loadInvoices(currentFilter);
+          window.showAdminToast("Transaksi tersimpan & invoice auto-generated.");
         } catch(error) { window.showAdminToast(error.message,"error"); }
       });
       document.querySelector("[data-add-finance]")?.addEventListener("click", () => { if (editorPanel) editorPanel.hidden = false; form.scrollIntoView({ behavior: "smooth", block: "start" }); });
       list.addEventListener("click", async (event) => {
         const id = event.target.closest("[data-delete]")?.dataset.delete;
-        if (id && confirm("Hapus transaksi ini?")) {
+        if (id && confirm("Hapus transaksi ini? Invoice terkait juga akan terhapus.")) {
           await window.adminApi("/api/admin/data?resource=finance", { method:"DELETE", body:JSON.stringify({id}) });
-          await load(); window.showAdminToast("Transaksi dihapus.");
+          await load();
+          if (!document.querySelector('[data-tab="invoices"]').hidden) loadInvoices(currentFilter);
+          window.showAdminToast("Transaksi dihapus.");
         }
       });
       load().catch((error) => { list.innerHTML = `<p class="admin-error">${esc(error.message)}</p>`; });

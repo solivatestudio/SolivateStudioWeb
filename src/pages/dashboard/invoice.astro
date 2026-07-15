@@ -88,7 +88,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
             <span class="invoice-tagline">${esc(payload.tagline || "")}</span>
           </div>
           <div class="invoice-header-meta">
-            <h1>INVOICE</h1>
+            <h1>${esc(payload.document_title || "INVOICE").toUpperCase()}</h1>
             <div class="invoice-number">No: ${esc(payload.invoice_number)}</div>
             <div style="margin-top:8px">${statusBadge(payload.status)}</div>
           </div>
@@ -96,15 +96,15 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 
         <section class="invoice-parties">
           <div class="invoice-party">
-            <h4>Dari</h4>
+            <h4>${payload.document_kind === "receipt" ? "Dibayarkan oleh" : "Dari"}</h4>
             <div class="invoice-party-name">${esc(payload.provider?.name || "Solivate Studio")}</div>
             <p>${esc(payload.provider?.address || "Indonesia")}</p>
             <p>${esc(payload.provider?.email || "")}</p>
             <p>${esc(payload.provider?.phone || "")}</p>
           </div>
           <div class="invoice-party">
-            <h4>Kepada (Client)</h4>
-            <div class="invoice-party-name">${esc(payload.client?.name || "Client")}</div>
+            <h4>${payload.document_kind === "receipt" ? "Kepada (Vendor / Penerima)" : "Kepada (Client)"}</h4>
+            <div class="invoice-party-name">${esc(payload.client?.name || "—")}</div>
             <p>${esc(payload.client?.address || "—")}</p>
             <p>${esc(payload.client?.contact || "")}</p>
           </div>
@@ -120,13 +120,13 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
             <div class="invoice-date-value">${dateOnly(payload.due_date)}</div>
           </div>
           <div class="invoice-date-block">
-            <div class="invoice-date-label">Project</div>
-            <div class="invoice-date-value">${esc(payload.project?.name || project.name)}</div>
+            <div class="invoice-date-label">${project ? "Project" : (payload.category ? "Kategori" : "Referensi")}</div>
+            <div class="invoice-date-value">${esc(payload.project?.name || (project ? project.name : (payload.category || "—")))}</div>
           </div>
         </section>
 
         <section class="invoice-section">
-          <h3>${showLineItems ? "Item / Fitur" : "Deskripsi Project"}</h3>
+          <h3>${showLineItems ? (project ? "Item / Fitur" : "Item") : (project ? "Deskripsi Project" : "Deskripsi")}</h3>
           ${showLineItems
             ? `<table class="invoice-table">
                 <thead><tr><th>Deskripsi</th><th>Qty</th><th>Harga Satuan</th><th>Subtotal</th></tr></thead>
@@ -151,14 +151,14 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           }
         </section>
 
-        ${milestones.length ? `<section class="invoice-section">
+        ${milestones.length && project ? `<section class="invoice-section">
           <h3>Termin Pembayaran</h3>
           ${milestonesHtml}
         </section>` : ""}
 
         <section class="invoice-section">
-          <h3>Catatan</h3>
-          <div class="invoice-scope">${esc(payload.footer_note || payload.project?.notes || "")}</div>
+          <h3>${project ? "Catatan" : "Catatan"}</h3>
+          <div class="invoice-scope">${esc(payload.footer_note || payload.project?.notes || payload.project?.scope || "")}</div>
         </section>
 
         <footer class="invoice-footer">
@@ -178,26 +178,42 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
       `;
 
       document.querySelector("[data-invoice-number]").textContent = `Invoice ${payload.invoice_number}`;
-      document.querySelector("[data-invoice-subtitle]").textContent = `${payload.client?.name || ""} · ${payload.project?.name || ""} · ${money(payload.total)}`;
+      document.querySelector("[data-invoice-subtitle]").textContent = `${payload.client?.name || ""} · ${payload.project?.name || payload.category || ""} · ${money(payload.total)}`;
       const editLink = document.querySelector("[data-invoice-edit]");
-      if (editLink) editLink.href = `/dashboard/projects?edit=${encodeURIComponent(project.id)}`;
+      if (editLink) {
+        if (project?.id) {
+          editLink.href = `/dashboard/projects?edit=${encodeURIComponent(project.id)}`;
+          editLink.style.display = "";
+        } else {
+          editLink.href = "/dashboard/finance";
+          editLink.textContent = "Lihat finance →";
+        }
+      }
     }
 
     function getProjectId() {
       const params = new URLSearchParams(window.location.search);
       return params.get("project");
     }
+    function getDocId() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("doc");
+    }
 
     async function loadInvoice() {
+      const docId = getDocId();
       const projectId = getProjectId();
-      if (!projectId) {
-        renderEmpty("Pilih project dari daftar untuk membuka invoice.");
+      if (!docId && !projectId) {
+        renderEmpty("Pilih project atau invoice dari daftar untuk membuka invoice.");
         return;
       }
       try {
-        const data = await window.adminApi(`/api/admin/data?resource=invoice&project_id=${encodeURIComponent(projectId)}`);
+        const url = docId
+          ? `/api/admin/data?resource=invoice&doc_id=${encodeURIComponent(docId)}`
+          : `/api/admin/data?resource=invoice&project_id=${encodeURIComponent(projectId)}`;
+        const data = await window.adminApi(url);
         if (!data || !data.payload) {
-          renderEmpty("Invoice belum tersedia untuk project ini.");
+          renderEmpty("Invoice belum tersedia.");
           return;
         }
         renderInvoice(data.payload, data.project);
@@ -209,10 +225,15 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 
     document.querySelector("[data-invoice-print]")?.addEventListener("click", () => window.print());
     document.querySelector("[data-invoice-regenerate]")?.addEventListener("click", async () => {
+      const docId = getDocId();
       const projectId = getProjectId();
-      if (!projectId) return;
       try {
-        await window.adminApi(`/api/admin/data?resource=regenerate_invoice&project_id=${encodeURIComponent(projectId)}`);
+        if (docId) {
+          const financeId = docId.replace("general-invoice-", "");
+          await window.adminApi(`/api/admin/data?resource=regenerate_general_invoice&finance_id=${encodeURIComponent(financeId)}`);
+        } else if (projectId) {
+          await window.adminApi(`/api/admin/data?resource=regenerate_invoice&project_id=${encodeURIComponent(projectId)}`);
+        }
         window.showAdminToast?.("Invoice di-regenerate.");
         await loadInvoice();
       } catch (error) {

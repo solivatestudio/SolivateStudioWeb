@@ -143,6 +143,11 @@ export function ensureSchema() {
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS client_address TEXT NOT NULL DEFAULT ''`,
       sql`ALTER TABLE project_documents ADD COLUMN IF NOT EXISTS notes_data JSONB`,
       sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS project_id TEXT REFERENCES projects(id) ON DELETE SET NULL`,
+      sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS client_name TEXT NOT NULL DEFAULT ''`,
+      sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS client_contact TEXT NOT NULL DEFAULT ''`,
+      sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS client_address TEXT NOT NULL DEFAULT ''`,
+      sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS description_detail TEXT NOT NULL DEFAULT ''`,
+      sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS invoice_doc_id TEXT`,
     ]);
     await Promise.all([
       sql`CREATE INDEX IF NOT EXISTS traffic_events_created_at_idx ON traffic_events (created_at DESC)`,
