@@ -225,7 +225,7 @@ button {
 }
 .admin-content {
   width: 100%;
-  padding: clamp(20px, 3vw, 48px);
+  padding: 12px 20px;
 }
 .admin-menu {
   display: none;
@@ -250,7 +250,7 @@ button {
   align-items: end;
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: 30px;
+  margin-bottom: 22px;
 }
 .admin-intro h2 {
   max-width: 720px;
