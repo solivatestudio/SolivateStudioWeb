@@ -66,10 +66,13 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
     <section class="admin-panel">
       <div class="admin-panel-head">
         <div><h2>Daftar invoice</h2><p data-invoice-count>Memuat...</p></div>
-        <div class="admin-actions" style="gap:6px">
-          <button class="admin-button ghost active" type="button" data-invoice-filter="all">Semua</button>
-          <button class="admin-button ghost" type="button" data-invoice-filter="project">Project</button>
-          <button class="admin-button ghost" type="button" data-invoice-filter="general">General</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="admin-button ghost" type="button" data-backfill-invoices title="Generate invoice untuk transaksi & project yang belum punya invoice">↻ Backfill</button>
+          <div class="admin-actions" style="gap:6px">
+            <button class="admin-button ghost active" type="button" data-invoice-filter="all">Semua</button>
+            <button class="admin-button ghost" type="button" data-invoice-filter="project">Project</button>
+            <button class="admin-button ghost" type="button" data-invoice-filter="general">General</button>
+          </div>
         </div>
       </div>
       <div data-invoice-list><div class="admin-empty">Memuat invoice...</div></div>
@@ -174,6 +177,19 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         });
       });
       let currentFilter = "all";
+      document.querySelector("[data-backfill-invoices]")?.addEventListener("click", async () => {
+        if (!confirm("Generate invoice untuk semua transaksi & project yang belum punya invoice? Ini aman untuk dijalankan kapan saja.")) return;
+        const btn = document.querySelector("[data-backfill-invoices]");
+        if (btn) { btn.textContent = "⏳ Proses..."; btn.disabled = true; }
+        try {
+          const data = await window.adminApi("/api/admin/data?resource=backfill_invoices", { method: "POST" });
+          window.showAdminToast?.(`${data.synced} invoice berhasil di-generate.`);
+          await loadInvoices(currentFilter);
+        } catch (error) {
+          window.showAdminToast?.(error.message || "Gagal backfill.", "error");
+        }
+        if (btn) { btn.textContent = "↻ Backfill"; btn.disabled = false; }
+      });
       document.querySelectorAll("[data-invoice-filter]").forEach((btn) => {
         btn.addEventListener("click", () => {
           document.querySelectorAll("[data-invoice-filter]").forEach((b) => b.classList.toggle("active", b === btn));

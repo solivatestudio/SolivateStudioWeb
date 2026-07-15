@@ -519,6 +519,29 @@ export default async function handler(request, response) {
       if (resource === "invoice_settings") {
         return response.status(200).json({ settings: await getInvoiceSettings(sql), defaults: INVOICE_SETTINGS_DEFAULTS });
       }
+      if (resource === "backfill_invoices") {
+        const fix = request.method === "POST";
+        if (!fix) {
+          const unlinked = await sql`SELECT id, project_id, description FROM finance_entries WHERE invoice_doc_id IS NULL`;
+          const unlinkedProjects = await sql`SELECT id, name FROM projects WHERE id NOT IN (SELECT DISTINCT project_id FROM project_documents WHERE document_type = 'invoice' AND project_id IS NOT NULL)`;
+          return response.status(200).json({ transaction_count: unlinked.length, project_count: unlinkedProjects.length });
+        }
+        const unlinked = await sql`SELECT * FROM finance_entries WHERE invoice_doc_id IS NULL`;
+        let synced = 0;
+        for (const entry of unlinked) {
+          if (entry.project_id) {
+            try { await syncInvoice(sql, entry.project_id); synced += 1; } catch { /* skip */ }
+          } else {
+            try { await syncGeneralInvoice(sql, entry.id); synced += 1; } catch { /* skip */ }
+          }
+        }
+        const unlinkedProjects = await sql`SELECT id FROM projects WHERE id NOT IN (SELECT DISTINCT project_id FROM project_documents WHERE document_type = 'invoice' AND project_id IS NOT NULL)`;
+        for (const proj of unlinkedProjects) {
+          try { await syncInvoice(sql, proj.id); synced += 1; } catch { /* skip */ }
+        }
+        await audit(session.username, "backfill", "invoices", `${synced} synced`);
+        return response.status(200).json({ ok: true, synced });
+      }
       return response.status(400).json({ message: "Unknown resource." });
     }
 
