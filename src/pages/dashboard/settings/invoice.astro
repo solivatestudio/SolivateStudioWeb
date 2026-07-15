@@ -1,0 +1,238 @@
+---
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+---
+<DashboardLayout title="Invoice Settings" active="settings-invoice" eyebrow="Branding & invoice">
+  <section class="admin-intro">
+    <div>
+      <h2>Customize invoice Solivate.</h2>
+      <p>Logo, kontak Solivate, info bank, dan footer text. Setting dipakai semua invoice — sekali atur, langsung live di semua project.</p>
+    </div>
+    <a class="admin-button ghost" href="/dashboard/projects" target="_blank" rel="noreferrer">Lihat project →</a>
+  </section>
+
+  <div class="settings-grid">
+    <form class="settings-form" data-settings-form>
+      <article class="admin-panel">
+        <div class="admin-panel-head"><div><h2>Logo & branding</h2><p>Logo muncul di header setiap invoice.</p></div></div>
+        <div class="admin-form">
+          <label class="admin-field"><span>Logo URL</span>
+            <div style="display:flex;gap:8px">
+              <input name="logo_url" placeholder="/solivate-logo.webp atau https://..." />
+              <button type="button" class="admin-button ghost" data-logo-upload>Upload</button>
+            </div>
+            <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden data-logo-input />
+          </label>
+          <div class="settings-logo-preview" data-logo-preview>
+            <img src="" alt="Logo preview" data-logo-img />
+            <span data-logo-empty>Belum ada logo di-upload.</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="admin-panel">
+        <div class="admin-panel-head"><div><h2>Info kontak Solivate</h2><p>Muncul di section "Dari" di invoice.</p></div></div>
+        <div class="admin-form">
+          <label class="admin-field"><span>Nama bisnis</span><input name="provider.name" placeholder="Solivate Studio" /></label>
+          <label class="admin-field"><span>Email</span><input name="provider.email" type="email" placeholder="hello@solivate.com" /></label>
+          <label class="admin-field"><span>Telepon / WhatsApp</span><input name="provider.phone" placeholder="+62 ..." /></label>
+          <label class="admin-field"><span>Alamat</span><input name="provider.address" placeholder="Kota, provinsi" /></label>
+          <label class="admin-field"><span>Website</span><input name="provider.website" placeholder="https://..." /></label>
+        </div>
+      </article>
+
+      <article class="admin-panel">
+        <div class="admin-panel-head"><div><h2>Informasi bank / rekening</h2><p>Muncul di footer invoice untuk instruksi pembayaran.</p></div></div>
+        <div class="admin-form">
+          <label class="admin-field"><span>Nama bank</span><input name="bank.name" placeholder="BCA" /></label>
+          <label class="admin-field"><span>Nomor rekening</span><input name="bank.account_number" placeholder="123-456-7890" /></label>
+          <label class="admin-field"><span>Atas nama</span><input name="bank.account_name" placeholder="Solivate Studio" /></label>
+        </div>
+      </article>
+
+      <article class="admin-panel">
+        <div class="admin-panel-head"><div><h2>Text customization</h2><p>Tagline & catatan default di invoice.</p></div></div>
+        <div class="admin-form">
+          <label class="admin-field"><span>Tagline (di bawah logo)</span><input name="tagline" placeholder="Web studio untuk UMKM & brand lokal" /></label>
+          <label class="admin-field full"><span>Footer note (catatan pembayaran)</span><textarea name="footer_note" rows="3" placeholder="Pembayaran dapat ditransfer ke rekening di atas. Terima kasih atas kepercayaan Anda."></textarea></label>
+        </div>
+      </article>
+
+      <div class="settings-actions">
+        <button type="button" class="admin-button ghost" data-settings-reset>↺ Reset to default</button>
+        <button type="submit" class="admin-button accent">Simpan settings</button>
+      </div>
+    </form>
+
+    <aside class="settings-preview-panel">
+      <div class="admin-panel">
+        <div class="admin-panel-head"><div><h2>Live preview</h2><p>Tampilan invoice dengan setting saat ini.</p></div></div>
+        <div class="settings-preview" data-preview>
+          <div class="preview-empty">Mengatur preview...</div>
+        </div>
+        <div style="padding:14px 18px;border-top:1px solid #eef0f4">
+          <a class="admin-button ghost" href="/dashboard/invoice" target="_blank" rel="noreferrer" style="width:100%;justify-content:center">Buka halaman invoice →</a>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    // @ts-nocheck -- dashboard settings form
+    const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+    const money = (value) => window.formatRupiah(Number(value || 0));
+
+    function readForm() {
+      const form = document.querySelector("[data-settings-form]");
+      const fd = new FormData(form);
+      const get = (key) => fd.get(key) || "";
+      return {
+        logo_url: get("logo_url"),
+        tagline: get("tagline"),
+        footer_note: get("footer_note"),
+        provider: {
+          name: get("provider.name"),
+          email: get("provider.email"),
+          phone: get("provider.phone"),
+          address: get("provider.address"),
+          website: get("provider.website")
+        },
+        bank: {
+          name: get("bank.name"),
+          account_number: get("bank.account_number"),
+          account_name: get("bank.account_name")
+        }
+      };
+    }
+
+    function fillForm(settings) {
+      const form = document.querySelector("[data-settings-form]");
+      const set = (name, value) => { if (form.elements[name]) form.elements[name].value = value || ""; };
+      set("logo_url", settings.logo_url);
+      set("tagline", settings.tagline);
+      set("footer_note", settings.footer_note);
+      set("provider.name", settings.provider?.name);
+      set("provider.email", settings.provider?.email);
+      set("provider.phone", settings.provider?.phone);
+      set("provider.address", settings.provider?.address);
+      set("provider.website", settings.provider?.website);
+      set("bank.name", settings.bank?.name);
+      set("bank.account_number", settings.bank?.account_number);
+      set("bank.account_name", settings.bank?.account_name);
+      updateLogoPreview();
+    }
+
+    function updateLogoPreview() {
+      const s = readForm();
+      const img = document.querySelector("[data-logo-img]");
+      const empty = document.querySelector("[data-logo-empty]");
+      if (s.logo_url) {
+        img.src = s.logo_url;
+        img.style.display = "block";
+        empty.style.display = "none";
+        img.onerror = () => { img.style.display = "none"; empty.style.display = "block"; empty.textContent = "URL tidak valid."; };
+      } else {
+        img.style.display = "none";
+        empty.style.display = "block";
+        empty.textContent = "Belum ada logo di-upload.";
+      }
+    }
+
+    function renderPreview(settings) {
+      const preview = document.querySelector("[data-preview]");
+      const p = settings.provider || {};
+      const b = settings.bank || {};
+      preview.innerHTML = `
+        <div class="preview-invoice-mini">
+          <div class="preview-header">
+            <div><img src="${esc(settings.logo_url || "/solivate-logo.webp")}" alt="Logo" onerror="this.style.display='none'" /><div class="preview-tagline">${esc(settings.tagline || "")}</div></div>
+            <div class="preview-title">INVOICE<div class="preview-no">No: INV-PREVIEW</div></div>
+          </div>
+          <div class="preview-section">
+            <h5>Dari</h5>
+            <strong>${esc(p.name || "—")}</strong>
+            <p>${esc(p.address || "—")}</p>
+            <p>${esc(p.email || "")} · ${esc(p.phone || "")}</p>
+          </div>
+          <div class="preview-section">
+            <h5>Kepada</h5>
+            <strong>Nama Client</strong>
+            <p>—</p>
+          </div>
+          <div class="preview-section preview-totals">
+            <span>TOTAL</span><strong>${money(0)}</strong>
+          </div>
+          <div class="preview-footer">
+            <h5>Bank</h5>
+            <p>${esc(b.name || "—")} · ${esc(b.account_number || "—")}</p>
+            <p>a.n. ${esc(b.account_name || "—")}</p>
+            <p class="preview-footer-note">${esc(settings.footer_note || "")}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    async function uploadLogo(file) {
+      const response = await fetch(`/api/admin/upload?filename=${encodeURIComponent(file.name)}`, { method: "POST", credentials: "same-origin", headers: { "Content-Type": file.type }, body: file });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || "Upload gagal.");
+      return data.url;
+    }
+
+    async function loadSettings() {
+      try {
+        const data = await window.adminApi("/api/admin/data?resource=invoice_settings");
+        fillForm(data.settings);
+        renderPreview(data.settings);
+      } catch (error) {
+        window.showAdminToast?.(error.message, "error");
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const form = document.querySelector("[data-settings-form]");
+      form.addEventListener("input", () => {
+        renderPreview(readForm());
+        updateLogoPreview();
+      });
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        try {
+          const settings = readForm();
+          await window.adminApi("/api/admin/data?resource=invoice_settings", { method: "POST", body: JSON.stringify({ settings }) });
+          window.showAdminToast?.("Invoice settings tersimpan.");
+          renderPreview(settings);
+        } catch (error) {
+          window.showAdminToast?.(error.message, "error");
+        }
+      });
+      document.querySelector("[data-settings-reset]")?.addEventListener("click", async () => {
+        if (!confirm("Reset semua invoice settings ke default?")) return;
+        try {
+          const data = await window.adminApi("/api/admin/data?resource=invoice_settings");
+          fillForm(data.defaults);
+          renderPreview(data.defaults);
+          await window.adminApi("/api/admin/data?resource=invoice_settings", { method: "POST", body: JSON.stringify({ settings: data.defaults }) });
+          window.showAdminToast?.("Settings di-reset ke default.");
+        } catch (error) {
+          window.showAdminToast?.(error.message, "error");
+        }
+      });
+      document.querySelector("[data-logo-upload]")?.addEventListener("click", () => document.querySelector("[data-logo-input]").click());
+      document.querySelector("[data-logo-input]")?.addEventListener("change", async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        try {
+          window.showAdminToast?.(`Uploading ${file.name}...`);
+          const url = await uploadLogo(file);
+          form.elements.logo_url.value = url;
+          updateLogoPreview();
+          renderPreview(readForm());
+        } catch (error) {
+          window.showAdminToast?.(error.message, "error");
+        }
+        event.target.value = "";
+      });
+      loadSettings();
+    });
+  </script>
+</DashboardLayout>

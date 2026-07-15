@@ -7,6 +7,11 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
     <div><h2>Arus kas per project, bukan cuma angka global.</h2><p>Catat income, biaya operasional, fee, invoice payment, dan status pembayaran yang tersambung ke project.</p></div>
   </section>
 
+  <div class="finance-banner">
+    <span class="finance-banner-icon">⚡</span>
+    <div><strong>Auto-invoice aktif.</strong> Setiap income yang terkait project otomatis meng-update invoice: status berubah dari belum bayar → DP → lunas. <a href="/dashboard/settings/invoice">Atur branding invoice →</a></div>
+  </div>
+
   <section class="admin-grid stats management-summary" style="margin-bottom:16px">
     <article class="admin-stat"><p class="admin-stat-label">Total income</p><div class="admin-stat-value" data-income>Rp0</div><span class="admin-stat-note">Seluruh pemasukan</span></article>
     <article class="admin-stat coral"><p class="admin-stat-label">Total expense</p><div class="admin-stat-value" data-expense>Rp0</div><span class="admin-stat-note">Seluruh pengeluaran</span></article>
@@ -61,7 +66,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         document.querySelector("[data-balance]").textContent = window.formatRupiah(income - expense);
         document.querySelector("[data-project-count]").textContent = String(new Set(data.items.map((item) => item.project_id).filter(Boolean)).size);
         document.querySelector("[data-finance-count]").textContent = `${data.items.length} transaksi`;
-        list.innerHTML = data.items.length ? `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Tanggal</th><th>Project</th><th>Deskripsi</th><th>Kategori</th><th>Tipe</th><th>Status</th><th>Jumlah</th><th></th></tr></thead><tbody>${data.items.map((item) => `<tr><td>${window.formatDate(item.entry_date)}</td><td>${esc(item.project_name || "General")}</td><td><strong>${esc(item.description)}</strong></td><td>${esc(item.category)}</td><td><span class="admin-badge ${item.type}">${item.type}</span></td><td><span class="admin-badge ${item.payment_status}">${item.payment_status}</span></td><td>${window.formatRupiah(item.amount)}</td><td style="display:flex;gap:6px">${item.project_id ? `<a class="admin-button ghost" href="/dashboard/invoice?project=${encodeURIComponent(item.project_id)}" target="_blank" rel="noreferrer" title="Lihat invoice">📄</a>` : ""}<button class="admin-button danger" data-delete="${item.id}">Hapus</button></td></tr>`).join("")}</tbody></table></div>` : '<div class="admin-empty">Belum ada transaksi.</div>';
+        list.innerHTML = data.items.length ? `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Tanggal</th><th>Project</th><th>Deskripsi</th><th>Kategori</th><th>Tipe</th><th>Status</th><th>Jumlah</th><th></th></tr></thead><tbody>${data.items.map((item) => `<tr><td>${window.formatDate(item.entry_date)}</td><td>${esc(item.project_name || "General")}${item.project_id ? `<span class="invoice-link-badge" title="Auto-linked ke invoice project">⚡ Invoice</span>` : ""}</td><td><strong>${esc(item.description)}</strong></td><td>${esc(item.category)}</td><td><span class="admin-badge ${item.type}">${item.type}</span></td><td><span class="admin-badge ${item.payment_status}">${item.payment_status}</span></td><td>${window.formatRupiah(item.amount)}</td><td style="display:flex;gap:6px">${item.project_id ? `<a class="admin-button ghost" href="/dashboard/invoice?project=${encodeURIComponent(item.project_id)}" target="_blank" rel="noreferrer" title="Lihat invoice">📄</a>` : ""}<button class="admin-button danger" data-delete="${item.id}">Hapus</button></td></tr>`).join("")}</tbody></table></div>` : '<div class="admin-empty">Belum ada transaksi.</div>';
       };
       form.addEventListener("submit", async (event) => {
         event.preventDefault();

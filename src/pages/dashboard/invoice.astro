@@ -84,8 +84,8 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
       page.innerHTML = `
         <header class="invoice-header">
           <div class="invoice-header-brand">
-            <img src="/solivate-logo.webp" alt="Solivate Studio" />
-            <span class="invoice-tagline">${esc(payload.provider?.tagline || "Web studio untuk UMKM & brand lokal")}</span>
+            <img src="${esc(payload.logo_url || "/solivate-logo.webp")}" alt="${esc(payload.provider?.name || "Logo")}" onerror="this.onerror=null;this.src='/solivate-logo.webp'" />
+            <span class="invoice-tagline">${esc(payload.tagline || "")}</span>
           </div>
           <div class="invoice-header-meta">
             <h1>INVOICE</h1>
@@ -158,21 +158,21 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 
         <section class="invoice-section">
           <h3>Catatan</h3>
-          <div class="invoice-scope">${esc(payload.project?.notes || "Pembayaran dapat ditransfer ke rekening yang akan diinformasikan terpisah. Terima kasih atas kepercayaan Anda.")}</div>
+          <div class="invoice-scope">${esc(payload.footer_note || payload.project?.notes || "")}</div>
         </section>
 
         <footer class="invoice-footer">
           <div class="invoice-footer-block">
             <h5>Informasi Pembayaran</h5>
-            <p>Bank: BCA</p>
-            <p>No. Rekening: 123-456-7890</p>
-            <p>Atas nama: Solivate Studio</p>
+            <p>Bank: ${esc(payload.bank?.name || "—")}</p>
+            <p>No. Rekening: ${esc(payload.bank?.account_number || "—")}</p>
+            <p>Atas nama: ${esc(payload.bank?.account_name || "—")}</p>
           </div>
           <div class="invoice-footer-block">
             <h5>Kontak</h5>
             <p>${esc(payload.provider?.email || "")}</p>
             <p>${esc(payload.provider?.phone || "")}</p>
-            <p>${esc(payload.provider?.website || "https://solivate.com")}</p>
+            <p>${esc(payload.provider?.website || "")}</p>
           </div>
         </footer>
       `;

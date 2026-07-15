@@ -25,6 +25,52 @@ const invoiceNumber = (project) => {
   const short = String(project.id || "").replace(/-/g, "").slice(0, 6).toUpperCase();
   return `INV-${compact}-${short}`;
 };
+
+const INVOICE_SETTINGS_DEFAULTS = {
+  logo_url: "/solivate-logo.webp",
+  tagline: "Web studio untuk UMKM & brand lokal",
+  footer_note: "Pembayaran dapat ditransfer ke rekening yang akan diinformasikan terpisah. Terima kasih atas kepercayaan Anda.",
+  provider: {
+    name: "Solivate Studio",
+    email: "hello@solivate.com",
+    phone: "+62 812-0000-0000",
+    address: "Indonesia",
+    website: "https://solivate.com"
+  },
+  bank: {
+    name: "BCA",
+    account_number: "123-456-7890",
+    account_name: "Solivate Studio"
+  }
+};
+
+async function getInvoiceSettings(sql) {
+  try {
+    const [row] = await sql`SELECT value FROM cms_entries WHERE key = 'invoice_settings'`;
+    if (!row) return { ...INVOICE_SETTINGS_DEFAULTS };
+    const stored = row.value || {};
+    return {
+      logo_url: typeof stored.logo_url === "string" ? stored.logo_url : INVOICE_SETTINGS_DEFAULTS.logo_url,
+      tagline: typeof stored.tagline === "string" ? stored.tagline : INVOICE_SETTINGS_DEFAULTS.tagline,
+      footer_note: typeof stored.footer_note === "string" ? stored.footer_note : INVOICE_SETTINGS_DEFAULTS.footer_note,
+      provider: {
+        name: stored?.provider?.name || INVOICE_SETTINGS_DEFAULTS.provider.name,
+        email: stored?.provider?.email || INVOICE_SETTINGS_DEFAULTS.provider.email,
+        phone: stored?.provider?.phone || INVOICE_SETTINGS_DEFAULTS.provider.phone,
+        address: stored?.provider?.address || INVOICE_SETTINGS_DEFAULTS.provider.address,
+        website: stored?.provider?.website || INVOICE_SETTINGS_DEFAULTS.provider.website
+      },
+      bank: {
+        name: stored?.bank?.name || INVOICE_SETTINGS_DEFAULTS.bank.name,
+        account_number: stored?.bank?.account_number || INVOICE_SETTINGS_DEFAULTS.bank.account_number,
+        account_name: stored?.bank?.account_name || INVOICE_SETTINGS_DEFAULTS.bank.account_name
+      }
+    };
+  } catch {
+    return { ...INVOICE_SETTINGS_DEFAULTS };
+  }
+}
+
 const buildInvoicePayload = async (sql, project, milestones, lineItems) => {
   const items = (lineItems || []).slice().sort((a, b) => Number(a.sort_order) - Number(b.sort_order));
   const itemRows = items.map((item) => ({
@@ -42,11 +88,15 @@ const buildInvoicePayload = async (sql, project, milestones, lineItems) => {
   const received = Number(incomeRows?.received || 0);
   const status = total > 0 && received >= total ? "paid" : (received > 0 ? "dp" : "pending");
   const dueDate = (milestones || []).map((m) => m.due_date).filter(Boolean).sort().pop() || project.deadline || null;
+  const settings = await getInvoiceSettings(sql);
   return {
     invoice_number: invoiceNumber(project),
     issued_date: new Date().toISOString().slice(0, 10),
     due_date: dueDate,
     currency: "IDR",
+    logo_url: settings.logo_url,
+    tagline: settings.tagline,
+    footer_note: settings.footer_note,
     project: {
       id: project.id,
       name: project.name,
@@ -61,13 +111,8 @@ const buildInvoicePayload = async (sql, project, milestones, lineItems) => {
       contact: project.client_contact || "",
       address: project.client_address || ""
     },
-    provider: {
-      name: "Solivate Studio",
-      email: process.env.CONTACT_EMAIL || "hello@solivate.com",
-      phone: process.env.CONTACT_PHONE || "+62 812-0000-0000",
-      website: "https://solivate.com",
-      address: process.env.CONTACT_ADDRESS || "Indonesia"
-    },
+    provider: settings.provider,
+    bank: settings.bank,
     line_items: itemRows,
     milestones: (milestones || []).map((m) => ({
       title: m.title,
@@ -341,7 +386,38 @@ export default async function handler(request, response) {
         const rows = await sql`SELECT * FROM performance_metrics ORDER BY updated_at DESC`;
         return response.status(200).json({ items: rows });
       }
+      if (resource === "invoice_settings") {
+        return response.status(200).json({ settings: await getInvoiceSettings(sql), defaults: INVOICE_SETTINGS_DEFAULTS });
+      }
       return response.status(400).json({ message: "Unknown resource." });
+    }
+
+    if (resource === "invoice_settings" && (request.method === "POST" || request.method === "PUT")) {
+      const incoming = body.settings && typeof body.settings === "object" ? body.settings : body;
+      const settings = {
+        logo_url: clean(incoming.logo_url, 800) || INVOICE_SETTINGS_DEFAULTS.logo_url,
+        tagline: clean(incoming.tagline, 240) || INVOICE_SETTINGS_DEFAULTS.tagline,
+        footer_note: clean(incoming.footer_note, 1000) || INVOICE_SETTINGS_DEFAULTS.footer_note,
+        provider: {
+          name: clean(incoming?.provider?.name, 120) || INVOICE_SETTINGS_DEFAULTS.provider.name,
+          email: clean(incoming?.provider?.email, 160) || INVOICE_SETTINGS_DEFAULTS.provider.email,
+          phone: clean(incoming?.provider?.phone, 60) || INVOICE_SETTINGS_DEFAULTS.provider.phone,
+          address: clean(incoming?.provider?.address, 240) || INVOICE_SETTINGS_DEFAULTS.provider.address,
+          website: clean(incoming?.provider?.website, 200) || INVOICE_SETTINGS_DEFAULTS.provider.website
+        },
+        bank: {
+          name: clean(incoming?.bank?.name, 80) || INVOICE_SETTINGS_DEFAULTS.bank.name,
+          account_number: clean(incoming?.bank?.account_number, 60) || INVOICE_SETTINGS_DEFAULTS.bank.account_number,
+          account_name: clean(incoming?.bank?.account_name, 120) || INVOICE_SETTINGS_DEFAULTS.bank.account_name
+        }
+      };
+      await sql`
+        INSERT INTO cms_entries (key, value, status, updated_at)
+        VALUES ('invoice_settings', ${JSON.stringify(settings)}, 'published', NOW())
+        ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, status = 'published', updated_at = NOW()
+      `;
+      await audit(session.username, request.method === "POST" ? "create" : "update", "invoice_settings", "global");
+      return response.status(200).json({ ok: true, settings });
     }
 
     if (resource === "cms" && request.method === "PUT") {
