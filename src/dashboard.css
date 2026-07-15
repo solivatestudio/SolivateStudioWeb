@@ -3146,33 +3146,45 @@ button {
   font-size: 14px;
 }
 @media print {
-  .admin-sidebar,
-  .admin-topbar,
-  .invoice-toolbar,
-  .admin-toast,
-  .admin-backdrop,
-  .admin-menu {
-    display: none !important;
-  }
-  .admin-main {
-    margin-left: 0 !important;
-  }
-  .admin-content {
-    padding: 0 !important;
-    max-width: 100% !important;
-  }
-  body {
+  html, body {
     background: #fff !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  body * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  .invoice-page,
+  .invoice-page * {
+    display: revert !important;
+    visibility: visible !important;
   }
   .invoice-page {
-    border: 0;
-    box-shadow: none;
-    padding: 30px 40px;
-    max-width: 100%;
+    display: block !important;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 24px 32px !important;
+    margin: 0 auto !important;
+    max-width: 21cm !important;
+    background: #fff !important;
+    color: #000 !important;
+    page-break-after: avoid !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+  .invoice-page img {
+    display: inline-block !important;
+  }
+  .invoice-status-badge {
+    display: inline-block !important;
   }
   @page {
-    size: A4;
-    margin: 1cm;
+    size: A4 portrait;
+    margin: 1.2cm;
   }
 }
 @media (max-width: 640px) {
