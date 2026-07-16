@@ -1910,6 +1910,10 @@ button {
   margin-top: 22px;
   margin-bottom: 22px;
 }
+.revenue-section + .developer-section {
+  margin-top: 24px;
+  margin-bottom: 22px;
+}
 .project-detail-total {
   color: var(--admin-navy);
   font-size: 20px;
