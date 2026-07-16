@@ -72,7 +72,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
             </label>
             <label class="admin-field"><span>Tanggal mulai *</span><input name="start_date" type="date" required /></label>
             <label class="admin-field"><span>Deadline final *</span><input name="deadline" type="date" required /></label>
-            <label class="admin-field full"><span>Catatan internal</span><textarea name="notes" rows="3" placeholder="Catatan tim, link drive internal, dll."></textarea></label>
+            <label class="admin-field full"><span>Catatan internal</span><textarea name="notes" rows="5" placeholder="- PIC: Hammad&#10;- Link drive: https://...&#10;- Catatan meeting: client minta hero direvisi&#10;- Todo internal: follow up copywriting"></textarea></label>
           </div>
         </div>
 
@@ -178,7 +178,14 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
     window.addEventListener("DOMContentLoaded", () => {
       const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
       const money = (value) => window.formatRupiah(Number(value || 0));
-      const moneyInput = (value) => String(Math.round(Number(value || 0))).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      const moneyNumber = (value) => {
+        if (typeof value === "number") return value;
+        const text = String(value ?? "").trim();
+        if (!text) return 0;
+        if (/^\d+(\.\d+)?$/.test(text)) return Number(text);
+        return Number(text.replace(/[^\d]/g, "")) || 0;
+      };
+      const moneyInput = (value) => String(Math.round(moneyNumber(value))).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
       const cleanMoney = (value) => String(value ?? "").replace(/[^\d]/g, "");
       const iso = (value) => value ? String(value).slice(0, 10) : "";
       const today = () => new Date().toISOString().slice(0, 10);
@@ -209,7 +216,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
       const recalcLineTotal = () => {
         let total = 0;
         document.querySelectorAll("[data-line-items] [data-line-row]").forEach((row) => {
-          const qty = Number(cleanMoney(row.querySelector("[data-line-qty]")?.value) || 0);
+          const qty = Number(row.querySelector("[data-line-qty]")?.value || 0);
           const price = Number(cleanMoney(row.querySelector("[data-line-price]")?.value) || 0);
           const sub = qty * price;
           row.querySelector("[data-line-subtotal]").textContent = money(sub);
@@ -389,7 +396,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           if (!desc) return;
           rows.push({
             description: desc,
-            quantity: Number(cleanMoney(row.querySelector("[data-line-qty]")?.value) || 0) || 1,
+            quantity: Number(row.querySelector("[data-line-qty]")?.value || 0) || 1,
             unit_price: Number(cleanMoney(row.querySelector("[data-line-price]")?.value) || 0)
           });
         });
@@ -440,7 +447,14 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 
       // Event bindings
       document.querySelectorAll("[data-open-wizard]").forEach((b) => b.addEventListener("click", () => openWizard()));
-      document.querySelector("[data-wizard-cancel]").addEventListener("click", () => { if (confirm("Tutup wizard? Data belum disimpan akan hilang.")) closeWizard(); });
+      document.querySelector("[data-wizard-cancel]").addEventListener("click", async () => {
+        const ok = await window.adminConfirm({
+          title: "Tutup wizard?",
+          message: "Data yang belum disimpan akan hilang.",
+          confirmText: "Tutup wizard"
+        });
+        if (ok) closeWizard();
+      });
       document.querySelector("[data-step-prev]").addEventListener("click", () => setStep(state.current - 1));
       document.querySelector("[data-step-next]").addEventListener("click", () => {
         const err = validateStep(state.current);
@@ -521,13 +535,11 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         totals();
         if (!items.length) { list.innerHTML = '<div class="admin-empty">Belum ada project. Tambahkan project pertama di atas.</div>'; return; }
         list.innerHTML = items.map((item) => {
-          const statusOptions = ["planning", "active", "review", "pending", "on-hold", "completed"].map((s) => `<option value="${s}" ${item.status === s ? "selected" : ""}>${esc(statusLabel(s))}</option>`).join("");
-          const features = String(item.features || "").split(/\n+/).map((line) => line.trim()).filter(Boolean).slice(0, 8);
-          const invoiceDoc = (item.documents || []).find((d) => d.document_type === "invoice");
           return `<article class="project-command-card">
           <header>
             <div><span class="admin-badge ${esc(item.status)}">${esc(statusLabel(item.status))}</span><h3>${esc(item.name)}</h3><p>${esc(item.client || "Internal")} · ${window.formatDate(item.start_date)} - ${window.formatDate(item.deadline)}</p></div>
             <div class="admin-actions project-list-actions">
+              <a class="admin-button accent" href="/dashboard/project?id=${encodeURIComponent(item.id)}">Detail</a>
               <a class="admin-button project-list-invoice-link" href="/dashboard/invoice?project=${encodeURIComponent(item.id)}" target="_blank" rel="noreferrer">📄 Invoice</a>
               <button class="admin-button ghost" data-edit-project="${esc(item.id)}">Edit</button>
               <button class="admin-button danger" data-delete-project="${esc(item.id)}">Hapus</button>
@@ -542,16 +554,6 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
             <div><small>Outstanding</small><strong>${money(item.outstanding)}</strong></div>
           </div>
           <div class="project-status-line"><div class="admin-progress"><span style="width:${Number(item.progress || 0)}%"></span></div><span>${Number(item.progress || 0)}%</span><em class="admin-badge ${esc(item.payment_status)}">${esc(statusLabel(item.payment_status))}</em></div>
-          <details class="project-detail" open>
-            <summary>Detail project & progress</summary>
-            <div class="project-detail-grid">
-              <section><h4>Scope</h4><p>${esc(item.scope || "Belum ada scope.")}</p></section>
-              <section><h4>Deliverables</h4>${features.length ? `<ul>${features.map((line) => `<li>${esc(line.replace(/^-\s*/, ""))}</li>`).join("")}</ul>` : `<p>Belum ada deliverables.</p>`}</section>
-              <section><h4>Keuangan</h4><p>Invoice: ${invoiceDoc ? `${money(invoiceDoc.amount)} · ${esc(invoiceDoc.status)}` : "Belum ada invoice"}</p><p>Payment: ${money(item.payment_received)} / ${money(item.effective_budget || item.budget)}</p><p>Expense total: ${money(item.actual_expense)}</p></section>
-              <section><h4>Update progress</h4><form class="project-progress-form" data-progress-form="${esc(item.id)}"><input type="range" name="progress" min="0" max="100" value="${Number(item.progress || 0)}" /><input type="number" name="progress_number" min="0" max="100" value="${Number(item.progress || 0)}" /><select name="status">${statusOptions}</select><button class="admin-button accent" type="submit">Update</button></form></section>
-              <section class="project-detail-wide"><h4>Catatan internal</h4><p>${esc(item.notes || "Belum ada catatan.")}</p></section>
-            </div>
-          </details>
           <div class="project-subgrid"><section><h4>Timeline termin</h4>${milestoneRows(item)}</section><section><h4>Dokumen</h4>${documentRows(item)}</section></div>
         </article>`;
         }).join("");
@@ -565,7 +567,12 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         const projectId = event.target.closest("[data-edit-project]")?.dataset.editProject;
         const deleteProject = event.target.closest("[data-delete-project]")?.dataset.deleteProject;
         if (projectId) { const item = items.find((i) => i.id === projectId); if (item) openWizard(item); }
-        if (deleteProject && confirm("Hapus project ini?")) {
+        if (deleteProject && await window.adminConfirm({
+          title: "Hapus project?",
+          message: "Project, termin, dokumen, dan invoice terkait akan ikut terhapus.",
+          confirmText: "Hapus project",
+          danger: true
+        })) {
           await window.adminApi("/api/admin/data?resource=projects", { method: "DELETE", body: JSON.stringify({ id: deleteProject }) });
           await load();
         }

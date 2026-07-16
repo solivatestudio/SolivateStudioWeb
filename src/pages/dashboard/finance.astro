@@ -179,7 +179,12 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
       });
       let currentFilter = "all";
       document.querySelector("[data-backfill-invoices]")?.addEventListener("click", async () => {
-        if (!confirm("Generate invoice untuk semua transaksi & project yang belum punya invoice? Ini aman untuk dijalankan kapan saja.")) return;
+        const ok = await window.adminConfirm({
+          title: "Backfill invoice?",
+          message: "Generate invoice untuk semua transaksi dan project yang belum punya invoice. Ini aman dijalankan kapan saja.",
+          confirmText: "Generate invoice"
+        });
+        if (!ok) return;
         const btn = document.querySelector("[data-backfill-invoices]");
         if (btn) { btn.textContent = "⏳ Proses..."; btn.disabled = true; }
         try {
@@ -216,7 +221,12 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
       document.querySelector("[data-add-finance]")?.addEventListener("click", () => { if (editorPanel) editorPanel.hidden = false; form.scrollIntoView({ behavior: "smooth", block: "start" }); });
       list.addEventListener("click", async (event) => {
         const id = event.target.closest("[data-delete]")?.dataset.delete;
-        if (id && confirm("Hapus transaksi ini? Invoice terkait juga akan terhapus.")) {
+        if (id && await window.adminConfirm({
+          title: "Hapus transaksi?",
+          message: "Transaksi ini akan dihapus dan invoice terkait juga ikut terhapus.",
+          confirmText: "Hapus transaksi",
+          danger: true
+        })) {
           await window.adminApi("/api/admin/data?resource=finance", { method:"DELETE", body:JSON.stringify({id}) });
           await load();
           if (!document.querySelector('[data-tab="invoices"]').hidden) loadInvoices(currentFilter);

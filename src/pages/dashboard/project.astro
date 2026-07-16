@@ -1,0 +1,185 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+---
+
+<DashboardLayout title="Project Detail" active="projects" eyebrow="Project command center">
+  <section class="admin-intro">
+    <div>
+      <h2 data-project-title>Memuat detail project...</h2>
+      <p data-project-subtitle>Scope, finance, progress, dokumen, invoice, dan pembagian hasil dalam satu halaman.</p>
+    </div>
+    <div class="admin-actions">
+      <a class="admin-button ghost" href="/dashboard/projects">← Project list</a>
+      <a class="admin-button accent" data-edit-link href="/dashboard/projects">Edit project</a>
+    </div>
+  </section>
+
+  <div data-project-detail>
+    <div class="admin-empty">Memuat project...</div>
+  </div>
+
+  <script is:inline>
+    window.addEventListener("DOMContentLoaded", () => {
+      const root = document.querySelector("[data-project-detail]");
+      const title = document.querySelector("[data-project-title]");
+      const subtitle = document.querySelector("[data-project-subtitle]");
+      const editLink = document.querySelector("[data-edit-link]");
+      const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+      const money = (value) => window.formatRupiah(Number(value || 0));
+      const statusLabel = (s) => ({ active: "on progress", "on-hold": "on hold", unpaid: "belum bayar", paid: "lunas", dp: "DP" }[s] || s || "-");
+      const projectId = new URLSearchParams(window.location.search).get("id");
+
+      const flexibleText = (text) => {
+        const lines = String(text || "").split(/\n/).map((line) => line.trim()).filter(Boolean);
+        if (!lines.length) return '<div class="admin-empty">Belum ada catatan.</div>';
+        return `<div class="project-notes-box">${lines.map((line) => `<div>${esc(line)}</div>`).join("")}</div>`;
+      };
+
+      const percentRows = (base, rows) => rows.map((row) => `<div class="revenue-row">
+        <span>${esc(row.label)}</span>
+        <span>${row.pool ? `${row.pool}% pool` : ""}</span>
+        <strong>${row.total}%</strong>
+        <strong>${money(base * row.total / 100)}</strong>
+      </div>`).join("");
+
+      const renderDistribution = (project) => {
+        const paidBase = Math.max(0, Number(project.payment_received || 0) - Number(project.operational_cost || 0));
+        const estimatedBase = Math.max(0, Number(project.effective_budget || project.budget || 0) - Number(project.operational_cost || 0));
+        const base = paidBase > 0 ? paidBase : estimatedBase;
+        const baseLabel = paidBase > 0 ? "Basis aktual: pembayaran masuk - biaya operasional" : "Basis estimasi: harga project - biaya operasional";
+        const devRows = [
+          { label: "Tech Lead", pool: 35, total: 14 },
+          { label: "Backend Developer", pool: 30, total: 12 },
+          { label: "Frontend Developer", pool: 25, total: 10 },
+          { label: "DevOps Engineer", pool: 10, total: 4 }
+        ];
+        const marketingRows = [
+          { label: "Marketing Lead", pool: 50, total: 15 },
+          { label: "Content Lead", pool: 30, total: 9 },
+          { label: "Content Creator", pool: 20, total: 6 }
+        ];
+        const cashRows = [
+          { label: "Operasional", pool: 44.44, total: 13.33 },
+          { label: "Cadangan (Emergency)", pool: 27.78, total: 8.33 },
+          { label: "Growth Fund", pool: 22.22, total: 6.67 },
+          { label: "Misc / Bonus Pool", pool: 5.56, total: 1.67 }
+        ];
+        return `<section class="admin-panel project-detail-panel">
+          <div class="admin-panel-head">
+            <div><h2>Auto pembagian hasil</h2><p>${baseLabel}</p></div>
+            <strong class="project-detail-total">${money(base)}</strong>
+          </div>
+          <div class="revenue-pool-grid">
+            <article><span>Developer Pool</span><strong>${money(base * 0.4)}</strong><small>40% revenue bersih</small></article>
+            <article><span>Marketing Pool</span><strong>${money(base * 0.3)}</strong><small>30% revenue bersih</small></article>
+            <article><span>Kas Perusahaan</span><strong>${money(base * 0.3)}</strong><small>30% revenue bersih</small></article>
+          </div>
+          <div class="revenue-breakdown-grid">
+            <section><h3>Developer Pool</h3>${percentRows(base, devRows)}</section>
+            <section><h3>Marketing Pool</h3>${percentRows(base, marketingRows)}</section>
+            <section><h3>Kas Perusahaan</h3>${percentRows(base, cashRows)}</section>
+          </div>
+        </section>`;
+      };
+
+      const renderRows = (items, empty, rowFn) => items?.length ? items.map(rowFn).join("") : `<div class="admin-empty">${empty}</div>`;
+
+      const render = (project) => {
+        title.textContent = project.name || "Project Detail";
+        subtitle.textContent = `${project.client || "Internal"} · ${window.formatDate(project.start_date)} - ${window.formatDate(project.deadline)}`;
+        editLink.href = `/dashboard/projects?edit=${encodeURIComponent(project.id)}`;
+        const statusOptions = ["planning", "active", "review", "pending", "on-hold", "completed"].map((s) => `<option value="${s}" ${project.status === s ? "selected" : ""}>${esc(statusLabel(s))}</option>`).join("");
+        const features = String(project.features || "").split(/\n+/).map((line) => line.trim()).filter(Boolean);
+        const invoiceDoc = (project.documents || []).find((doc) => doc.document_type === "invoice");
+        root.innerHTML = `
+          <section class="admin-grid stats project-detail-stats">
+            <article class="admin-stat"><p class="admin-stat-label">Harga project</p><div class="admin-stat-value">${money(project.effective_budget || project.budget)}</div><span class="admin-stat-note">${project.pricing_model === "line_items" ? "Total item fitur" : "Fixed price"}</span></article>
+            <article class="admin-stat blue"><p class="admin-stat-label">Pembayaran masuk</p><div class="admin-stat-value">${money(project.payment_received)}</div><span class="admin-stat-note">${esc(statusLabel(project.payment_status))}</span></article>
+            <article class="admin-stat coral"><p class="admin-stat-label">Total expense</p><div class="admin-stat-value">${money(project.actual_expense)}</div><span class="admin-stat-note">Ops + fee + pengeluaran lain</span></article>
+            <article class="admin-stat"><p class="admin-stat-label">Profit aktual</p><div class="admin-stat-value">${money(project.profit_actual)}</div><span class="admin-stat-note">Pembayaran - expense</span></article>
+          </section>
+
+          <section class="project-detail-layout">
+            <article class="admin-panel project-detail-panel">
+              <div class="admin-panel-head"><div><h2>Progress project</h2><p>Update status project dari detail page.</p></div><span class="admin-badge ${esc(project.status)}">${esc(statusLabel(project.status))}</span></div>
+              <div class="project-status-line"><div class="admin-progress"><span style="width:${Number(project.progress || 0)}%"></span></div><span>${Number(project.progress || 0)}%</span><em class="admin-badge ${esc(project.payment_status)}">${esc(statusLabel(project.payment_status))}</em></div>
+              <form class="project-progress-form detail" data-progress-form="${esc(project.id)}">
+                <input type="range" name="progress" min="0" max="100" value="${Number(project.progress || 0)}" />
+                <input type="number" name="progress_number" min="0" max="100" value="${Number(project.progress || 0)}" />
+                <select name="status">${statusOptions}</select>
+                <button class="admin-button accent" type="submit">Update progress</button>
+              </form>
+            </article>
+
+            <article class="admin-panel project-detail-panel">
+              <div class="admin-panel-head"><div><h2>Invoice & dokumen</h2><p>Dokumen yang terhubung ke project.</p></div>${invoiceDoc ? `<a class="admin-button ghost" href="/dashboard/invoice?project=${encodeURIComponent(project.id)}" target="_blank" rel="noreferrer">Buka invoice</a>` : ""}</div>
+              <div class="ops-list">
+                ${renderRows(project.documents || [], "Belum ada dokumen.", (doc) => `<div class="ops-row document-row"><div><strong>${esc(doc.title)}</strong><span>${esc(doc.document_type)} · ${window.formatDate(doc.issued_date)} · ${money(doc.amount)}</span></div>${doc.file_url ? `<a class="admin-button ghost" href="${esc(doc.file_url)}" target="_blank" rel="noreferrer">Buka</a>` : ""}</div>`)}
+              </div>
+            </article>
+          </section>
+
+          <section class="project-detail-layout">
+            <article class="admin-panel project-detail-panel">
+              <div class="admin-panel-head"><div><h2>Scope</h2><p>Ruang kerja dan catatan client.</p></div></div>
+              ${flexibleText(project.scope)}
+            </article>
+            <article class="admin-panel project-detail-panel">
+              <div class="admin-panel-head"><div><h2>Deliverables</h2><p>Checklist fitur yang dijanjikan.</p></div></div>
+              ${features.length ? `<ul class="project-checklist">${features.map((line) => `<li>${esc(line.replace(/^-\s*/, ""))}</li>`).join("")}</ul>` : '<div class="admin-empty">Belum ada deliverables.</div>'}
+            </article>
+          </section>
+
+          <section class="admin-panel project-detail-panel">
+            <div class="admin-panel-head"><div><h2>Catatan internal</h2><p>Bisa dipakai untuk checklist, link, memo meeting, atau catatan PIC.</p></div></div>
+            ${flexibleText(project.notes)}
+          </section>
+
+          ${renderDistribution(project)}
+
+          <section class="project-detail-layout">
+            <article class="admin-panel project-detail-panel">
+              <div class="admin-panel-head"><div><h2>Timeline termin</h2><p>Jatuh tempo dan status milestone.</p></div></div>
+              ${renderRows(project.milestones || [], "Belum ada termin.", (m) => `<div class="ops-row"><div><strong>${esc(m.title)}</strong><span>${window.formatDate(m.due_date)} · ${money(m.amount)}</span></div><em>${esc(m.status)}</em></div>`)}
+            </article>
+            <article class="admin-panel project-detail-panel">
+              <div class="admin-panel-head"><div><h2>Transaksi finance</h2><p>Pemasukan, biaya operasional, fee PIC, dan pengeluaran lain.</p></div><a class="admin-button ghost" href="/dashboard/finance">Tambah transaksi</a></div>
+              ${renderRows(project.finance || [], "Belum ada transaksi finance.", (entry) => `<div class="ops-row finance-detail-row"><div><strong>${esc(entry.description)}</strong><span>${window.formatDate(entry.entry_date)} · ${esc(entry.category)} · ${esc(entry.notes || entry.description_detail || "")}</span></div><em class="${entry.type === "income" ? "income" : "expense"}">${entry.type === "income" ? "+" : "-"} ${money(entry.amount)}</em></div>`)}
+            </article>
+          </section>
+        `;
+      };
+
+      const load = async () => {
+        if (!projectId) {
+          root.innerHTML = '<div class="admin-empty">Project ID tidak ditemukan.</div>';
+          return;
+        }
+        const data = await window.adminApi(`/api/admin/data?resource=project&id=${encodeURIComponent(projectId)}`);
+        render(data.project);
+      };
+
+      root.addEventListener("input", (event) => {
+        const form = event.target.closest("[data-progress-form]");
+        if (!form) return;
+        if (event.target.name === "progress") form.elements.progress_number.value = event.target.value;
+        if (event.target.name === "progress_number") form.elements.progress.value = event.target.value;
+      });
+      root.addEventListener("submit", async (event) => {
+        const form = event.target.closest("[data-progress-form]");
+        if (!form) return;
+        event.preventDefault();
+        await window.adminApi("/api/admin/data?resource=project_progress", {
+          method: "PUT",
+          body: JSON.stringify({ id: form.dataset.progressForm, progress: form.elements.progress_number.value, status: form.elements.status.value })
+        });
+        window.showAdminToast("Progress project diperbarui.");
+        await load();
+      });
+
+      load().catch((error) => {
+        root.innerHTML = `<p class="admin-error">${esc(error.message)}</p>`;
+      });
+    });
+  </script>
+</DashboardLayout>

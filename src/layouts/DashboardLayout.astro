@@ -96,6 +96,19 @@ const currentLabel = navigation.find(([key]) => key === active)?.[1] || title;
     </div>
 
     <div class="admin-toast" data-toast role="status" aria-live="polite"></div>
+    <div class="admin-modal-backdrop" data-admin-modal hidden>
+      <section class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+        <div class="admin-modal-icon" data-admin-modal-icon>?</div>
+        <div>
+          <h2 id="admin-modal-title" data-admin-modal-title>Konfirmasi</h2>
+          <p data-admin-modal-message>Apakah Anda yakin?</p>
+        </div>
+        <div class="admin-modal-actions">
+          <button class="admin-button ghost" type="button" data-admin-modal-cancel>Batal</button>
+          <button class="admin-button accent" type="button" data-admin-modal-confirm>Ya, lanjut</button>
+        </div>
+      </section>
+    </div>
     <script is:inline>
       const setSidebar = (open) => document.body.classList.toggle("sidebar-open", open);
       document.querySelector("[data-sidebar-open]")?.addEventListener("click", () => setSidebar(true));
@@ -110,6 +123,41 @@ const currentLabel = navigation.find(([key]) => key === active)?.[1] || title;
         toast.dataset.type = type;
         toast.classList.add("show");
         window.setTimeout(() => toast.classList.remove("show"), 3000);
+      };
+      window.adminConfirm = ({ title = "Konfirmasi", message = "Apakah Anda yakin?", confirmText = "Ya, lanjut", danger = false } = {}) => {
+        const backdrop = document.querySelector("[data-admin-modal]");
+        const titleEl = document.querySelector("[data-admin-modal-title]");
+        const messageEl = document.querySelector("[data-admin-modal-message]");
+        const confirmBtn = document.querySelector("[data-admin-modal-confirm]");
+        const cancelBtn = document.querySelector("[data-admin-modal-cancel]");
+        const icon = document.querySelector("[data-admin-modal-icon]");
+        if (!backdrop || !confirmBtn || !cancelBtn) return Promise.resolve(false);
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+        confirmBtn.textContent = confirmText;
+        confirmBtn.classList.toggle("danger", danger);
+        icon.textContent = danger ? "!" : "?";
+        icon.classList.toggle("danger", danger);
+        backdrop.hidden = false;
+        confirmBtn.focus();
+        return new Promise((resolve) => {
+          const cleanup = (value) => {
+            backdrop.hidden = true;
+            confirmBtn.removeEventListener("click", onConfirm);
+            cancelBtn.removeEventListener("click", onCancel);
+            backdrop.removeEventListener("click", onBackdrop);
+            document.removeEventListener("keydown", onKey);
+            resolve(value);
+          };
+          const onConfirm = () => cleanup(true);
+          const onCancel = () => cleanup(false);
+          const onBackdrop = (event) => { if (event.target === backdrop) cleanup(false); };
+          const onKey = (event) => { if (event.key === "Escape") cleanup(false); };
+          confirmBtn.addEventListener("click", onConfirm);
+          cancelBtn.addEventListener("click", onCancel);
+          backdrop.addEventListener("click", onBackdrop);
+          document.addEventListener("keydown", onKey);
+        });
       };
       window.adminApi("/api/admin/me")
         .then(() => document.body.classList.remove("auth-pending"))

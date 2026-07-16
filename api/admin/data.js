@@ -413,6 +413,17 @@ async function getProjects(sql) {
   });
 }
 
+async function getProjectDetail(sql, projectId) {
+  const projects = await getProjects(sql);
+  const project = projects.find((item) => item.id === projectId);
+  if (!project) return null;
+  const finance = await sql`SELECT *
+    FROM finance_entries
+    WHERE project_id = ${projectId}
+    ORDER BY entry_date DESC, created_at DESC`;
+  return { ...project, finance };
+}
+
 export default async function handler(request, response) {
   const session = requireAdmin(request, response);
   if (!session) return;
@@ -436,14 +447,15 @@ export default async function handler(request, response) {
       if (resource === "project") {
         const projectId = clean(request.query?.id, 80);
         if (!projectId) return response.status(400).json({ message: "id wajib diisi." });
-        const [project] = await sql`SELECT * FROM projects WHERE id = ${projectId}`;
+        const project = await getProjectDetail(sql, projectId);
         if (!project) return response.status(404).json({ message: "Project tidak ditemukan." });
-        const [milestones, lineItems, documents] = await Promise.all([
-          sql`SELECT * FROM project_milestones WHERE project_id = ${projectId} ORDER BY due_date NULLS LAST, created_at ASC`,
-          sql`SELECT * FROM project_invoice_items WHERE project_id = ${projectId} ORDER BY sort_order ASC, created_at ASC`,
-          sql`SELECT * FROM project_documents WHERE project_id = ${projectId} ORDER BY issued_date DESC NULLS LAST, created_at DESC`
-        ]);
-        return response.status(200).json({ project: { ...project, milestones, line_items: lineItems, documents }, milestones, line_items: lineItems, documents });
+        return response.status(200).json({
+          project,
+          milestones: project.milestones,
+          line_items: project.line_items,
+          documents: project.documents,
+          finance: project.finance
+        });
       }
       if (resource === "regenerate_invoice") {
         const projectId = clean(request.query?.project_id, 80);

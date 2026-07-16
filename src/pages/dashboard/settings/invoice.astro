@@ -206,7 +206,13 @@ import DashboardLayout from "../../../layouts/DashboardLayout.astro";
         }
       });
       document.querySelector("[data-settings-reset]")?.addEventListener("click", async () => {
-        if (!confirm("Reset semua invoice settings ke default?")) return;
+        const ok = await window.adminConfirm({
+          title: "Reset invoice settings?",
+          message: "Semua setting invoice akan dikembalikan ke default.",
+          confirmText: "Reset settings",
+          danger: true
+        });
+        if (!ok) return;
         try {
           const data = await window.adminApi("/api/admin/data?resource=invoice_settings");
           fillForm(data.defaults);
