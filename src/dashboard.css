@@ -1954,56 +1954,70 @@ button {
   border: 1px solid var(--admin-ink);
 }
 .revenue-section {
-  padding-bottom: 20px;
+  display: grid;
+  gap: 18px;
+  padding-bottom: 24px;
 }
 .revenue-section .admin-panel-head {
-  margin-bottom: 18px;
-}
-.revenue-formula {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 18px;
-}
-.revenue-formula span {
-  padding: 7px 10px;
-  border: 1px solid var(--admin-line);
-  background: #f8fafb;
-  color: var(--admin-navy);
-  font-size: 10px;
-  font-weight: 900;
-  text-transform: uppercase;
+  margin-bottom: 0;
 }
 .revenue-pool-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin-bottom: 22px;
+  gap: 16px;
 }
-.revenue-pool-grid article {
+.revenue-pool-card {
+  position: relative;
   min-width: 0;
-  padding: 18px;
+  overflow: hidden;
+  padding: 20px;
   border: 1px solid var(--admin-line);
+  border-radius: 18px;
   background: #fbfcfd;
 }
-.revenue-pool-grid span,
-.revenue-pool-grid small {
+.revenue-pool-card::after {
+  content: "";
+  position: absolute;
+  right: -26px;
+  bottom: -36px;
+  width: 94px;
+  height: 94px;
+  border: 16px solid rgba(2, 62, 138, 0.12);
+  border-radius: 50%;
+}
+.revenue-pool-card.dev::after {
+  border-color: rgba(2, 62, 138, 0.16);
+}
+.revenue-pool-card.marketing::after {
+  border-color: rgba(0, 180, 216, 0.16);
+}
+.revenue-pool-card.cash::after {
+  border-color: rgba(215, 255, 63, 0.55);
+}
+.revenue-pool-card span,
+.revenue-pool-card small {
+  position: relative;
+  z-index: 1;
   display: block;
   color: var(--admin-muted);
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 850;
   text-transform: uppercase;
 }
-.revenue-pool-grid strong {
+.revenue-pool-card strong {
+  position: relative;
+  z-index: 1;
   display: block;
-  margin: 10px 0 5px;
+  margin: 12px 0 6px;
   color: var(--admin-ink);
-  font-size: 20px;
+  font-size: clamp(20px, 2.2vw, 28px);
+  line-height: 1;
 }
 .revenue-breakdown-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+  align-items: start;
 }
 .developer-section {
   display: grid;
@@ -2155,18 +2169,21 @@ button {
   font-size: 11px;
   line-height: 1.6;
 }
-.revenue-breakdown-grid section {
+.revenue-breakdown-panel {
   min-width: 0;
   border: 1px solid var(--admin-line);
+  border-radius: 18px;
+  overflow: hidden;
   background: #fff;
 }
-.revenue-breakdown-grid h3 {
+.revenue-breakdown-panel h3 {
   margin: 0;
-  padding: 14px;
+  padding: 16px 18px;
   border-bottom: 1px solid var(--admin-line);
-  font-size: 12px;
+  background: #fbfcfd;
+  font-size: 13px;
 }
-.revenue-breakdown-grid h3 small {
+.revenue-breakdown-panel h3 small {
   display: block;
   margin-top: 4px;
   color: var(--admin-muted);
@@ -2174,69 +2191,63 @@ button {
   font-weight: 800;
   text-transform: uppercase;
 }
-.revenue-row {
+.revenue-split-list {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 70px 54px 96px;
-  align-items: center;
-  gap: 10px;
-  min-height: 48px;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--admin-line);
-  font-size: 10px;
 }
-.revenue-row:last-child {
+.revenue-split-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 62px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--admin-line);
+}
+.revenue-split-row:last-child {
   border-bottom: 0;
 }
-.revenue-row span:first-child {
+.revenue-split-row > div {
   min-width: 0;
+}
+.revenue-split-row > div:first-child strong {
+  display: block;
   overflow: hidden;
   color: var(--admin-ink);
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 850;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.revenue-row span:nth-child(2) {
+.revenue-split-row span {
+  display: block;
+  margin-top: 3px;
   color: var(--admin-muted);
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
 }
-.revenue-row strong {
+.revenue-split-row > div:last-child {
   text-align: right;
 }
-.cash-pool-card {
-  display: grid;
-  gap: 12px;
-  padding: 14px;
-  border-bottom: 1px solid var(--admin-line);
-}
-.cash-pool-card:last-child {
-  border-bottom: 0;
-}
-.cash-pool-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-.cash-pool-head strong {
-  min-width: 0;
+.revenue-split-row > div:last-child strong {
+  display: block;
+  margin-top: 3px;
   color: var(--admin-ink);
   font-size: 12px;
 }
-.cash-pool-head span {
-  flex: 0 0 auto;
-  color: var(--admin-navy);
-  font-size: 9px;
-  font-weight: 900;
-  text-transform: uppercase;
-  white-space: nowrap;
+.cash-pool-row {
+  align-items: stretch;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 .cash-pool-metrics {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 10px;
 }
 .cash-pool-metrics div {
   min-width: 0;
-  padding: 10px;
+  padding: 11px;
   border: 1px solid var(--admin-line);
   border-radius: 10px;
   background: #f8fafb;
@@ -2768,15 +2779,12 @@ button {
   .project-progress-form.detail button {
     grid-column: 1 / -1;
   }
-  .revenue-row {
-    grid-template-columns: minmax(0, 1fr) 62px 48px 88px;
+  .revenue-split-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
-  .cash-pool-head {
-    display: grid;
-    gap: 6px;
-  }
-  .cash-pool-head span {
-    white-space: normal;
+  .revenue-split-row > div:last-child {
+    text-align: left;
   }
   .cash-pool-metrics {
     grid-template-columns: 1fr;

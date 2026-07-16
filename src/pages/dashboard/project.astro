@@ -35,11 +35,15 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         return `<div class="project-notes-box">${lines.map((line) => `<div>${esc(line)}</div>`).join("")}</div>`;
       };
 
-      const percentRows = (base, rows) => rows.map((row) => `<div class="revenue-row">
-        <span>${esc(row.label)}</span>
-        <span>${row.pool ? `${row.pool}% pool` : ""}</span>
-        <strong>${row.total}%</strong>
-        <strong>${money(base * row.total / 100)}</strong>
+      const percentRows = (base, rows) => rows.map((row) => `<div class="revenue-split-row">
+        <div>
+          <strong>${esc(row.label)}</strong>
+          <span>${row.pool ? `${row.pool}% dari pool` : "Alokasi"}</span>
+        </div>
+        <div>
+          <span>${row.total}% revenue</span>
+          <strong>${money(base * row.total / 100)}</strong>
+        </div>
       </div>`).join("");
 
       const cashRowsHtml = (base, project) => {
@@ -64,10 +68,10 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           const remaining = budget - row.spent;
           const remainingPercent = budget > 0 ? Math.max(0, remaining / budget * 100) : 0;
           const over = remaining < 0;
-          return `<div class="cash-pool-card ${over ? "over" : ""}">
-            <div class="cash-pool-head">
+          return `<div class="revenue-split-row cash-pool-row ${over ? "over" : ""}">
+            <div>
               <strong>${esc(row.label)}</strong>
-              <span>${row.pool}% pool · ${row.total}% revenue</span>
+              <span>${row.pool}% dari Kas · ${row.total}% revenue</span>
             </div>
             <div class="cash-pool-metrics">
               <div><span>Budget</span><strong>${money(budget)}</strong></div>
@@ -193,20 +197,15 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
             <div><h2>Auto pembagian hasil</h2><p>${baseLabel}</p></div>
             <strong class="project-detail-total">${money(base)}</strong>
           </div>
-          <div class="revenue-formula">
-            <span>Developer 40%</span>
-            <span>Marketing 30%</span>
-            <span>Kas Perusahaan 30%</span>
-          </div>
           <div class="revenue-pool-grid">
-            <article><span>Developer Pool</span><strong>${money(base * 0.4)}</strong><small>40% dari harga project</small></article>
-            <article><span>Marketing Pool</span><strong>${money(base * 0.3)}</strong><small>30% dari harga project</small></article>
-            <article><span>Kas Perusahaan</span><strong>${money(base * 0.3)}</strong><small>30% dari harga project</small></article>
+            <article class="revenue-pool-card dev"><span>Developer Pool</span><strong>${money(base * 0.4)}</strong><small>40% dari harga project</small></article>
+            <article class="revenue-pool-card marketing"><span>Marketing Pool</span><strong>${money(base * 0.3)}</strong><small>30% dari harga project</small></article>
+            <article class="revenue-pool-card cash"><span>Kas Perusahaan</span><strong>${money(base * 0.3)}</strong><small>30% dari harga project</small></article>
           </div>
           <div class="revenue-breakdown-grid">
-            <section><h3>Developer Pool</h3>${percentRows(base, devRows)}</section>
-            <section><h3>Marketing Pool</h3>${percentRows(base, marketingRows)}</section>
-            <section class="cash-breakdown"><h3>Kas Perusahaan <small>Budget · Terpakai · Sisa</small></h3>${cashRowsHtml(base, project)}</section>
+            <section class="revenue-breakdown-panel"><h3>Developer Pool <small>Role split</small></h3><div class="revenue-split-list">${percentRows(base, devRows)}</div></section>
+            <section class="revenue-breakdown-panel"><h3>Marketing Pool <small>Role split</small></h3><div class="revenue-split-list">${percentRows(base, marketingRows)}</div></section>
+            <section class="revenue-breakdown-panel cash-breakdown"><h3>Kas Perusahaan <small>Budget · Terpakai · Sisa</small></h3><div class="revenue-split-list">${cashRowsHtml(base, project)}</div></section>
           </div>
         </section>`;
       };
