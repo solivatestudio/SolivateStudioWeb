@@ -42,58 +42,111 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         <strong>${money(base * row.total / 100)}</strong>
       </div>`).join("");
 
-      const developerRoles = [
-        { label: "Tech Lead", pool: 35, total: 14, defaultTask: "Arsitektur, review teknis, keputusan stack, quality control." },
-        { label: "Backend Developer", pool: 30, total: 12, defaultTask: "API, database, auth, invoice, integrasi server-side." },
-        { label: "Frontend Developer", pool: 25, total: 10, defaultTask: "UI implementation, responsive layout, interaksi, dashboard client-side." },
-        { label: "DevOps Engineer", pool: 10, total: 4, defaultTask: "Deploy, environment, domain, monitoring, production checks." }
+      const developerRows = [
+        { label: "Tech Lead", pool: 35, total: 14 },
+        { label: "Backend Developer", pool: 30, total: 12 },
+        { label: "Frontend Developer", pool: 25, total: 10 },
+        { label: "DevOps Engineer", pool: 10, total: 4 }
       ];
-      const normalizeRole = (value) => String(value || "").toLowerCase().replace(/[^a-z]/g, "");
+      const parsePercentages = (text) => (String(text || "").match(/\d+(?:[.,]\d+)?\s*%/g) || []).map((value) => Number(value.replace("%", "").replace(",", "."))).filter(Number.isFinite);
+      const cleanTitle = (text) => String(text || "").replace(/\([^)]*\)/g, "").replace(/[:：]\s*$/, "").trim();
       const parseDeveloperAssignments = (text) => {
-        const map = {};
-        String(text || "").split(/\n+/).map((line) => line.trim()).filter(Boolean).forEach((line) => {
-          const parts = line.split("|").map((part) => part.trim());
-          const role = parts[0] || "";
-          const name = parts[1] || "";
-          const task = parts.slice(2).join(" | ");
-          if (!role) return;
-          map[normalizeRole(role)] = { name, task };
+        const lines = String(text || "").split(/\n+/).map((line) => line.trim()).filter(Boolean);
+        const result = { leads: [], sections: [], notes: [] };
+        let section = null;
+        let person = null;
+        lines.forEach((rawLine) => {
+          const line = rawLine.replace(/^[-•]\s*/, "").trim();
+          if (!line) return;
+          if (/^pembagian\s+jobdesk/i.test(line)) return;
+          const noteMatch = line.match(/^note(?:\s+projek)?\s*[:：]\s*(.+)$/i);
+          if (noteMatch) {
+            result.notes.push(noteMatch[1]);
+            return;
+          }
+          const leadMatch = line.match(/^tech\s*lead\s*[:：]\s*(.+)$/i);
+          if (leadMatch) {
+            result.leads.push({ role: "Tech Lead", name: leadMatch[1], jobs: ["Arah teknis, keputusan stack, review, dan quality control."], percent: 14, source: "14% dari harga project" });
+            section = null;
+            person = null;
+            return;
+          }
+          if (/[:：]$/.test(line)) {
+            section = { title: cleanTitle(line), split: parsePercentages(line), people: [] };
+            result.sections.push(section);
+            person = null;
+            return;
+          }
+          if (rawLine.trim().startsWith("-") || rawLine.trim().startsWith("•")) {
+            if (person) person.jobs.push(line);
+            else result.notes.push(line);
+            return;
+          }
+          if (section) {
+            person = { name: line, jobs: [], split: section.split[section.people.length] || null };
+            section.people.push(person);
+            return;
+          }
+          result.notes.push(line);
         });
-        return map;
+        return result;
       };
       const renderDeveloperAssignments = (project) => {
         const base = Math.max(0, Number(project.effective_budget || project.budget || 0));
-        const assigned = parseDeveloperAssignments(project.team_assignments);
+        const assignment = parseDeveloperAssignments(project.team_assignments);
+        const executionTotalPercent = 26;
+        const leadHtml = assignment.leads.map((lead) => `<article class="developer-lead-card">
+          <span>${esc(lead.role)}</span>
+          <strong>${esc(lead.name)}</strong>
+          <p>${esc(lead.jobs.join(" "))}</p>
+          <em>${esc(lead.source)} · ${money(base * lead.percent / 100)}</em>
+        </article>`).join("");
+        const sectionHtml = assignment.sections.filter((group) => group.people.length).map((group) => {
+          const peopleCount = Math.max(1, group.people.length);
+          return `<section class="developer-work-section">
+            <div class="developer-work-section-head">
+              <h3>${esc(group.title || "Jobdesk project")}</h3>
+              <span>${group.split.length ? esc(group.split.map((value) => `${value}%`).join(" + ")) : "Split fleksibel"}</span>
+            </div>
+            <div class="developer-work-grid">
+              ${group.people.map((person) => {
+                const split = Number(person.split || (100 / peopleCount));
+                const amount = base * executionTotalPercent / 100 * split / 100;
+                return `<article class="developer-assignment-card">
+                  <div class="developer-assignment-head">
+                    <span>${esc(person.name)}</span>
+                    <strong>${Number.isInteger(split) ? split : split.toFixed(1)}%</strong>
+                  </div>
+                  ${person.jobs.length ? `<ul>${person.jobs.map((job) => `<li>${esc(job)}</li>`).join("")}</ul>` : `<p>Belum ada rincian jobdesk.</p>`}
+                  <div class="developer-assignment-meta">
+                    <span>Estimasi dari execution pool</span>
+                    <strong>${money(amount)}</strong>
+                  </div>
+                </article>`;
+              }).join("")}
+            </div>
+          </section>`;
+        }).join("");
+        const emptyState = !assignment.leads.length && !assignment.sections.length
+          ? '<div class="admin-empty">Belum ada pembagian jobdesk. Isi di edit project pakai format bebas seperti contoh: Tech Lead, section kerja, nama orang, lalu bullet jobdesk.</div>'
+          : "";
         return `<section class="admin-panel project-detail-panel developer-section">
           <div class="admin-panel-head">
-            <div><h2>Developer assignment</h2><p>Siapa pegang role apa, dan estimasi bagiannya dari harga project.</p></div>
+            <div><h2>Pembagian jobdesk developer</h2><p>Fleksibel sesuai kondisi lapangan: role, nama, split, jobdesk, dan note project.</p></div>
             <strong class="project-detail-total">Dev Pool ${money(base * 0.4)}</strong>
           </div>
-          <div class="developer-assignment-grid">
-            ${developerRoles.map((role) => {
-              const item = assigned[normalizeRole(role.label)] || {};
-              return `<article class="developer-assignment-card">
-                <div class="developer-assignment-head">
-                  <span>${esc(role.label)}</span>
-                  <strong>${role.total}%</strong>
-                </div>
-                <h3>${esc(item.name || "Belum ditentukan")}</h3>
-                <p>${esc(item.task || role.defaultTask)}</p>
-                <div class="developer-assignment-meta">
-                  <span>${role.pool}% dari Developer Pool</span>
-                  <strong>${money(base * role.total / 100)}</strong>
-                </div>
-              </article>`;
-            }).join("")}
-          </div>
-          <p class="developer-assignment-note">Format input di edit project: <strong>Role | Nama | Tanggung jawab</strong>. Nominal dihitung dari harga project, bukan dari profit setelah expense.</p>
+          ${leadHtml ? `<div class="developer-lead-grid">${leadHtml}</div>` : ""}
+          ${sectionHtml}
+          ${assignment.notes.length ? `<div class="developer-project-note"><strong>Note project</strong>${assignment.notes.map((note) => `<p>${esc(note)}</p>`).join("")}</div>` : ""}
+          ${emptyState}
+          <p class="developer-assignment-note">Contoh format: <strong>Tech Lead: Hammad</strong>, lalu section seperti <strong>Frontend, Backend, & DevOps (50% + 50%):</strong>, nama tim, dan bullet jobdesk. Estimasi nominal dihitung dari harga project.</p>
         </section>`;
       };
 
       const renderDistribution = (project) => {
         const base = Math.max(0, Number(project.effective_budget || project.budget || 0));
         const baseLabel = "Basis pembagian: harga project/invoice. Operasional sudah termasuk di pool Kas Perusahaan.";
-        const devRows = developerRoles;
+        const devRows = developerRows;
         const marketingRows = [
           { label: "Marketing Lead", pool: 50, total: 15 },
           { label: "Content Lead", pool: 30, total: 9 },

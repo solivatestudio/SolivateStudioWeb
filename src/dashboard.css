@@ -2004,6 +2004,75 @@ button {
 .developer-section {
   padding-bottom: 20px;
 }
+.developer-lead-grid,
+.developer-work-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.developer-lead-card,
+.developer-work-section,
+.developer-project-note {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--admin-line);
+  border-radius: 16px;
+  background: #fbfcfd;
+}
+.developer-lead-card span,
+.developer-work-section-head span,
+.developer-project-note strong {
+  display: block;
+  color: var(--admin-muted);
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.developer-lead-card strong {
+  display: block;
+  margin: 8px 0;
+  color: var(--admin-ink);
+  font-size: 18px;
+}
+.developer-lead-card p,
+.developer-lead-card em,
+.developer-project-note p {
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+.developer-lead-card em {
+  display: block;
+  margin-top: 10px;
+  color: var(--admin-navy);
+  font-style: normal;
+  font-weight: 800;
+}
+.developer-work-section {
+  margin-bottom: 16px;
+  background: #fff;
+}
+.developer-work-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.developer-work-section-head h3 {
+  margin: 0;
+  color: var(--admin-ink);
+  font-size: 15px;
+}
+.developer-project-note {
+  margin-top: 16px;
+  background: #f8fafb;
+}
+.developer-project-note p {
+  margin-top: 8px;
+}
 .developer-assignment-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2039,12 +2108,20 @@ button {
   color: var(--admin-ink);
   font-size: 15px;
 }
-.developer-assignment-card p {
-  min-height: 54px;
-  margin: 0 0 16px;
+.developer-assignment-card p,
+.developer-assignment-card li {
+  margin: 0 0 8px;
   color: var(--admin-muted);
   font-size: 11px;
   line-height: 1.55;
+}
+.developer-assignment-card ul {
+  min-height: 92px;
+  margin: 14px 0 16px;
+  padding-left: 18px;
+}
+.developer-assignment-card li:last-child {
+  margin-bottom: 0;
 }
 .developer-assignment-meta {
   padding-top: 12px;
@@ -2590,6 +2667,8 @@ button {
   .revenue-pool-grid,
   .revenue-breakdown-grid,
   .developer-assignment-grid,
+  .developer-lead-grid,
+  .developer-work-grid,
   .project-flow-help {
     grid-template-columns: 1fr;
   }
