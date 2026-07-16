@@ -2201,17 +2201,68 @@ button {
 .revenue-row strong {
   text-align: right;
 }
-.revenue-row.cash-row {
-  grid-template-columns: minmax(0, 1fr) 58px 48px 88px 88px 124px;
+.cash-pool-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-bottom: 1px solid var(--admin-line);
+}
+.cash-pool-card:last-child {
+  border-bottom: 0;
+}
+.cash-pool-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cash-pool-head strong {
+  min-width: 0;
+  color: var(--admin-ink);
+  font-size: 12px;
+}
+.cash-pool-head span {
+  flex: 0 0 auto;
+  color: var(--admin-navy);
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.cash-pool-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
-.revenue-row.cash-row strong:nth-last-child(2) {
+.cash-pool-metrics div {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  background: #f8fafb;
+}
+.cash-pool-metrics span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--admin-muted);
+  font-size: 8px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.cash-pool-metrics strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--admin-ink);
+  font-size: 11px;
+  line-height: 1.35;
+}
+.cash-pool-metrics div:nth-child(2) strong {
   color: #b42318;
 }
-.revenue-row.cash-row strong:last-child {
+.cash-pool-metrics div:nth-child(3) strong {
   color: #067647;
 }
-.revenue-row.cash-row.over strong:last-child {
+.cash-pool-card.over .cash-pool-metrics div:nth-child(3) strong {
   color: #b42318;
 }
 .finance-detail-row em.income {
@@ -2720,14 +2771,15 @@ button {
   .revenue-row {
     grid-template-columns: minmax(0, 1fr) 62px 48px 88px;
   }
-  .revenue-row.cash-row {
-    grid-template-columns: minmax(0, 1fr) 54px 44px;
+  .cash-pool-head {
+    display: grid;
+    gap: 6px;
   }
-  .revenue-row.cash-row strong:nth-last-child(3),
-  .revenue-row.cash-row strong:nth-last-child(2),
-  .revenue-row.cash-row strong:last-child {
-    grid-column: 1 / -1;
-    text-align: left;
+  .cash-pool-head span {
+    white-space: normal;
+  }
+  .cash-pool-metrics {
+    grid-template-columns: 1fr;
   }
   .project-money-grid div:last-child {
     border-bottom: 0;

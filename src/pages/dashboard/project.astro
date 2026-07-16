@@ -64,13 +64,16 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           const remaining = budget - row.spent;
           const remainingPercent = budget > 0 ? Math.max(0, remaining / budget * 100) : 0;
           const over = remaining < 0;
-          return `<div class="revenue-row cash-row ${over ? "over" : ""}">
-            <span>${esc(row.label)}</span>
-            <span>${row.pool}% pool</span>
-            <strong>${row.total}%</strong>
-            <strong>${money(budget)}</strong>
-            <strong>${money(row.spent)}</strong>
-            <strong>${over ? `${money(Math.abs(remaining))} over` : `${money(remaining)} · ${remainingPercent.toFixed(1)}%`}</strong>
+          return `<div class="cash-pool-card ${over ? "over" : ""}">
+            <div class="cash-pool-head">
+              <strong>${esc(row.label)}</strong>
+              <span>${row.pool}% pool · ${row.total}% revenue</span>
+            </div>
+            <div class="cash-pool-metrics">
+              <div><span>Budget</span><strong>${money(budget)}</strong></div>
+              <div><span>Terpakai</span><strong>${money(row.spent)}</strong></div>
+              <div><span>${over ? "Over" : "Sisa"}</span><strong>${over ? `${money(Math.abs(remaining))} over` : `${money(remaining)} · ${remainingPercent.toFixed(1)}%`}</strong></div>
+            </div>
           </div>`;
         }).join("");
       };
