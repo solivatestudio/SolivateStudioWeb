@@ -50,6 +50,7 @@ export function ensureSchema() {
       description TEXT NOT NULL,
       amount NUMERIC(14, 2) NOT NULL DEFAULT 0,
       payment_status TEXT NOT NULL DEFAULT 'paid',
+      proof_url TEXT NOT NULL DEFAULT '',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )`,
@@ -148,6 +149,7 @@ export function ensureSchema() {
       sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS client_address TEXT NOT NULL DEFAULT ''`,
       sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS description_detail TEXT NOT NULL DEFAULT ''`,
       sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS notes TEXT NOT NULL DEFAULT ''`,
+      sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS proof_url TEXT NOT NULL DEFAULT ''`,
       sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS invoice_doc_id TEXT`,
     ]);
     await Promise.all([

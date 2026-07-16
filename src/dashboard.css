@@ -1928,6 +1928,45 @@ button {
   color: #b42318;
   background: #fff1f0;
 }
+.finance-proof-field input[type="file"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px dashed #c4cdd8;
+  background: #fbfcfd;
+}
+.finance-proof-field small {
+  display: block;
+  margin-top: 8px;
+  color: var(--admin-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+.project-flow-help {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 14px;
+}
+.project-flow-help div {
+  padding: 10px;
+  border: 1px solid var(--admin-line);
+  background: #fbfcfd;
+}
+.project-flow-help strong,
+.project-flow-help span {
+  display: block;
+}
+.project-flow-help strong {
+  margin-bottom: 5px;
+  color: var(--admin-navy);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+.project-flow-help span {
+  color: var(--admin-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
 .transaction-detail summary {
   color: var(--admin-ink);
   cursor: pointer;
@@ -2311,7 +2350,8 @@ button {
   }
   .project-detail-layout,
   .revenue-pool-grid,
-  .revenue-breakdown-grid {
+  .revenue-breakdown-grid,
+  .project-flow-help {
     grid-template-columns: 1fr;
   }
   .project-progress-form.detail {

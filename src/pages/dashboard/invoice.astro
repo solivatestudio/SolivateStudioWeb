@@ -161,6 +161,11 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           <div class="invoice-scope">${esc(payload.footer_note || payload.project?.notes || payload.project?.scope || "")}</div>
         </section>
 
+        ${payload.proof_url ? `<section class="invoice-section">
+          <h3>Bukti Transfer</h3>
+          <div class="invoice-scope"><a href="${esc(payload.proof_url)}" target="_blank" rel="noreferrer">Buka file bukti transfer / pembayaran</a></div>
+        </section>` : ""}
+
         <footer class="invoice-footer">
           <div class="invoice-footer-block">
             <h5>Informasi Pembayaran</h5>

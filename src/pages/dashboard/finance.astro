@@ -9,7 +9,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 
   <div class="finance-banner">
     <span class="finance-banner-icon">⚡</span>
-    <div><strong>Auto-invoice aktif.</strong> Income terkait project → invoice project ter-update. Transaksi general (tanpa project) → invoice / receipt otomatis di-generate. <a href="/dashboard/settings/invoice">Atur branding invoice →</a></div>
+    <div><strong>Auto-document aktif.</strong> Income project → invoice project ter-update. Expense project → receipt sendiri. Semua transaksi wajib upload bukti transfer. <a href="/dashboard/settings/invoice">Atur branding invoice →</a></div>
   </div>
 
   <section class="admin-grid stats management-summary" style="margin-bottom:16px">
@@ -49,6 +49,12 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         <label class="admin-field full"><span>Deskripsi</span><input name="description" required placeholder="Misal: DP project company profile, fee PIC desain, hosting 1 tahun, dll." /></label>
         <label class="admin-field full"><span>Catatan transaksi</span><textarea name="notes" rows="3" placeholder="Detail pembayaran, metode transfer, nomor invoice, catatan client/vendor, atau alasan biaya."></textarea></label>
         <label class="admin-field"><span>Jumlah</span><input name="amount" inputmode="numeric" data-money placeholder="0" required /></label>
+        <label class="admin-field full finance-proof-field">
+          <span>Bukti transfer / pembayaran *</span>
+          <input name="proof_url" type="hidden" required />
+          <input type="file" accept="image/png,image/jpeg,image/webp,application/pdf" data-proof-input required />
+          <small data-proof-status>Upload gambar atau PDF bukti transaksi. Wajib untuk pemasukan dan pengeluaran.</small>
+        </label>
         <fieldset class="admin-field full finance-general-fields" data-general-fields>
           <legend>Detail untuk invoice / receipt (general)</legend>
           <div class="admin-form" style="gap:10px">
@@ -96,10 +102,40 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
       const list = document.querySelector("[data-finance-list]");
       const editorPanel = document.querySelector("[data-management-editor]");
       const generalFields = document.querySelector("[data-general-fields]");
+      const proofInput = document.querySelector("[data-proof-input]");
+      const proofStatus = document.querySelector("[data-proof-status]");
       form.elements.entry_date.value = new Date().toISOString().slice(0,10);
       const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
       const moneyInput = (value) => String(Math.round(Number(value || 0))).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
       const cleanMoney = (value) => String(value ?? "").replace(/[^\d]/g, "");
+      const uploadFile = async (file) => {
+        const response = await fetch(`/api/admin/upload?filename=${encodeURIComponent(file.name)}`, {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": file.type },
+          body: file
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.message || "Upload bukti gagal.");
+        return data.url;
+      };
+      proofInput?.addEventListener("change", async (event) => {
+        const file = event.target.files?.[0];
+        form.elements.proof_url.value = "";
+        if (!file) {
+          proofStatus.textContent = "Upload gambar atau PDF bukti transaksi. Wajib untuk pemasukan dan pengeluaran.";
+          return;
+        }
+        try {
+          proofStatus.textContent = `Uploading ${file.name}...`;
+          form.elements.proof_url.value = await uploadFile(file);
+          proofStatus.innerHTML = `Bukti tersimpan: <a href="${esc(form.elements.proof_url.value)}" target="_blank" rel="noreferrer">buka file</a>`;
+        } catch (error) {
+          event.target.value = "";
+          proofStatus.textContent = error.message;
+          window.showAdminToast(error.message, "error");
+        }
+      });
       form.querySelectorAll("[data-money]").forEach((input) => {
         input.addEventListener("input", () => {
           const raw = cleanMoney(input.value);
@@ -129,13 +165,15 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         syncGeneralVisibility();
         list.innerHTML = data.items.length ? `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Tanggal</th><th>Project / Client</th><th>Deskripsi</th><th>Kategori</th><th>Tipe</th><th>Status</th><th>Jumlah</th><th></th></tr></thead><tbody>${data.items.map((item) => {
           const isGeneral = !item.project_id;
-          const target = isGeneral
+          const target = item.invoice_doc_id
             ? `<a class="admin-button ghost" href="/dashboard/invoice?doc=${encodeURIComponent(item.invoice_doc_id || ("general-invoice-" + item.id))}" target="_blank" rel="noreferrer" title="Lihat invoice">📄</a>`
-            : `<a class="admin-button ghost" href="/dashboard/invoice?project=${encodeURIComponent(item.project_id)}" target="_blank" rel="noreferrer" title="Lihat invoice">📄</a>`;
+            : (item.project_id
+              ? `<a class="admin-button ghost" href="/dashboard/invoice?project=${encodeURIComponent(item.project_id)}" target="_blank" rel="noreferrer" title="Lihat invoice project">📄</a>`
+              : `<a class="admin-button ghost" href="/dashboard/invoice?doc=${encodeURIComponent("general-invoice-" + item.id)}" target="_blank" rel="noreferrer" title="Lihat invoice">📄</a>`);
           return `<tr>
             <td>${window.formatDate(item.entry_date)}</td>
-            <td>${item.project_id ? esc(item.project_name || "Project") : esc(item.client_name || "General")}${isGeneral ? `<span class="invoice-link-badge" title="Auto-generated invoice">⚡ Auto</span>` : `<span class="invoice-link-badge" title="Auto-linked ke invoice project">⚡ Invoice</span>`}</td>
-            <td><details class="transaction-detail"><summary><strong>${esc(item.description)}</strong></summary><p>${esc(item.notes || item.description_detail || "Belum ada catatan detail.")}</p></details></td>
+            <td>${item.project_id ? esc(item.project_name || "Project") : esc(item.client_name || "General")}${item.invoice_doc_id ? `<span class="invoice-link-badge" title="Receipt/invoice transaksi">⚡ Receipt</span>` : (isGeneral ? `<span class="invoice-link-badge" title="Auto-generated invoice">⚡ Auto</span>` : `<span class="invoice-link-badge" title="Auto-linked ke invoice project">⚡ Invoice</span>`)}</td>
+            <td><details class="transaction-detail"><summary><strong>${esc(item.description)}</strong></summary><p>${esc(item.notes || item.description_detail || "Belum ada catatan detail.")}</p>${item.proof_url ? `<p><a href="${esc(item.proof_url)}" target="_blank" rel="noreferrer">Buka bukti transfer</a></p>` : `<p>Belum ada bukti transfer.</p>`}</details></td>
             <td>${esc(item.category)}</td>
             <td><span class="admin-badge ${item.type}">${item.type}</span></td>
             <td><span class="admin-badge ${item.payment_status}">${item.payment_status}</span></td>
@@ -210,8 +248,11 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           form.querySelectorAll("[data-money]").forEach((input) => {
             payload[input.name] = cleanMoney(input.value);
           });
+          if (!payload.proof_url) throw new Error("Bukti transfer wajib diupload.");
           await window.adminApi("/api/admin/data?resource=finance", { method:"POST", body:JSON.stringify(payload) });
           form.reset(); form.elements.entry_date.value = new Date().toISOString().slice(0,10);
+          if (proofInput) proofInput.value = "";
+          if (proofStatus) proofStatus.textContent = "Upload gambar atau PDF bukti transaksi. Wajib untuk pemasukan dan pengeluaran.";
           if (editorPanel) editorPanel.hidden = true;
           await load();
           if (!document.querySelector('[data-tab="invoices"]').hidden) loadInvoices(currentFilter);

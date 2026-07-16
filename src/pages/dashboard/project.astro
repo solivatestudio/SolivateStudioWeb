@@ -105,6 +105,11 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           <section class="project-detail-layout">
             <article class="admin-panel project-detail-panel">
               <div class="admin-panel-head"><div><h2>Progress project</h2><p>Update status project dari detail page.</p></div><span class="admin-badge ${esc(project.status)}">${esc(statusLabel(project.status))}</span></div>
+              <div class="project-flow-help">
+                <div><strong>Progress</strong><span>Persentase pengerjaan internal, diupdate manual oleh tim.</span></div>
+                <div><strong>Status</strong><span>Fase kerja: planning, on progress, review, pending, on hold, completed.</span></div>
+                <div><strong>Termin</strong><span>Milestone pembayaran/deadline invoice. Termin tidak otomatis mengubah progress.</span></div>
+              </div>
               <div class="project-status-line"><div class="admin-progress"><span style="width:${Number(project.progress || 0)}%"></span></div><span>${Number(project.progress || 0)}%</span><em class="admin-badge ${esc(project.payment_status)}">${esc(statusLabel(project.payment_status))}</em></div>
               <form class="project-progress-form detail" data-progress-form="${esc(project.id)}">
                 <input type="range" name="progress" min="0" max="100" value="${Number(project.progress || 0)}" />

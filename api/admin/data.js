@@ -113,6 +113,7 @@ const buildInvoicePayload = async (sql, project, milestones, lineItems) => {
     },
     provider: settings.provider,
     bank: settings.bank,
+    proof_url: finance.proof_url || "",
     line_items: itemRows,
     milestones: (milestones || []).map((m) => ({
       title: m.title,
@@ -257,10 +258,13 @@ async function syncGeneralInvoice(sql, financeId) {
   const titlePrefix = finance.type === "income" ? "Invoice" : "Receipt";
   const title = `${titlePrefix} - ${clean(finance.description, 80) || clean(finance.category, 80) || finance.id.slice(0, 6)}`;
   const docId = generalInvoiceId(financeId);
+  const documentProjectId = clean(finance.project_id, 80) || GENERAL_PROJECT_ID;
   await sql`INSERT INTO project_documents (id, project_id, title, document_type, file_url, amount, status, issued_date, notes, notes_data)
-    VALUES (${docId}, ${GENERAL_PROJECT_ID}, ${title}, ${finance.type === "income" ? "general_invoice" : "receipt"}, '', ${payload.total}, ${payload.status === "paid" ? "paid" : (payload.status === "pending" ? "pending" : "draft")}, ${payload.issued_date}, ${title}, ${JSON.stringify(payload)})
+    VALUES (${docId}, ${documentProjectId}, ${title}, ${finance.type === "income" ? "general_invoice" : "receipt"}, ${finance.proof_url || ""}, ${payload.total}, ${payload.status === "paid" ? "paid" : (payload.status === "pending" ? "pending" : "draft")}, ${payload.issued_date}, ${title}, ${JSON.stringify(payload)})
     ON CONFLICT (id) DO UPDATE SET
+      project_id = EXCLUDED.project_id,
       title = EXCLUDED.title,
+      file_url = EXCLUDED.file_url,
       amount = EXCLUDED.amount,
       notes = EXCLUDED.notes,
       notes_data = EXCLUDED.notes_data,
@@ -568,7 +572,7 @@ export default async function handler(request, response) {
         const unlinked = await sql`SELECT * FROM finance_entries WHERE invoice_doc_id IS NULL`;
         let synced = 0;
         for (const entry of unlinked) {
-          if (entry.project_id) {
+          if (entry.project_id && entry.type !== "expense") {
             try { await syncInvoice(sql, entry.project_id); synced += 1; } catch { /* skip */ }
           } else {
             try { await syncGeneralInvoice(sql, entry.id); synced += 1; } catch { /* skip */ }
@@ -869,17 +873,25 @@ export default async function handler(request, response) {
       const clientAddress = clean(body.client_address, 500);
       const descriptionDetail = clean(body.description_detail, 1000);
       const notes = clean(body.notes, 2000);
-      const [existing] = await sql`SELECT project_id FROM finance_entries WHERE id = ${id}`;
-      await sql`INSERT INTO finance_entries (id, project_id, entry_date, type, category, description, amount, payment_status, client_name, client_contact, client_address, description_detail, notes)
-        VALUES (${id}, ${projectId}, ${dateOrNull(body.entry_date) || new Date().toISOString().slice(0, 10)}, ${type}, ${clean(body.category, 100) || "General"}, ${description}, ${Math.max(0, number(body.amount))}, ${paymentStatus}, ${clientName}, ${clientContact}, ${clientAddress}, ${descriptionDetail}, ${notes})
+      const proofUrl = clean(body.proof_url, 800);
+      if (!proofUrl) return response.status(400).json({ message: "Bukti transfer wajib diupload." });
+      const [existing] = await sql`SELECT project_id, invoice_doc_id, type FROM finance_entries WHERE id = ${id}`;
+      await sql`INSERT INTO finance_entries (id, project_id, entry_date, type, category, description, amount, payment_status, client_name, client_contact, client_address, description_detail, notes, proof_url)
+        VALUES (${id}, ${projectId}, ${dateOrNull(body.entry_date) || new Date().toISOString().slice(0, 10)}, ${type}, ${clean(body.category, 100) || "General"}, ${description}, ${Math.max(0, number(body.amount))}, ${paymentStatus}, ${clientName}, ${clientContact}, ${clientAddress}, ${descriptionDetail}, ${notes}, ${proofUrl})
         ON CONFLICT (id) DO UPDATE SET project_id = EXCLUDED.project_id, entry_date = EXCLUDED.entry_date,
           type = EXCLUDED.type, category = EXCLUDED.category, description = EXCLUDED.description,
           amount = EXCLUDED.amount, payment_status = EXCLUDED.payment_status,
           client_name = EXCLUDED.client_name, client_contact = EXCLUDED.client_contact,
           client_address = EXCLUDED.client_address, description_detail = EXCLUDED.description_detail,
-          notes = EXCLUDED.notes, updated_at = NOW()`;
+          notes = EXCLUDED.notes, proof_url = EXCLUDED.proof_url, updated_at = NOW()`;
       if (existing?.project_id && existing.project_id !== projectId) await syncProjectPayment(sql, existing.project_id);
       if (projectId) {
+        if (type === "expense") {
+          await syncGeneralInvoice(sql, id);
+        } else if (existing?.invoice_doc_id) {
+          await sql`DELETE FROM project_documents WHERE id = ${existing.invoice_doc_id} AND document_type != 'invoice'`;
+          await sql`UPDATE finance_entries SET invoice_doc_id = NULL WHERE id = ${id}`;
+        }
         await syncProjectPayment(sql, projectId);
       } else {
         await syncGeneralInvoice(sql, id);
