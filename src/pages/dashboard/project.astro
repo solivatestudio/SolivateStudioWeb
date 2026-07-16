@@ -42,6 +42,39 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         <strong>${money(base * row.total / 100)}</strong>
       </div>`).join("");
 
+      const cashRowsHtml = (base, project) => {
+        const expenses = (project.finance || []).filter((entry) => entry.type === "expense");
+        const usedIds = new Set();
+        const matchExpense = (keywords) => expenses.reduce((sum, entry) => {
+          if (usedIds.has(entry.id)) return sum;
+          const haystack = `${entry.category || ""} ${entry.description || ""} ${entry.notes || ""} ${entry.description_detail || ""}`.toLowerCase();
+          if (!keywords.some((keyword) => haystack.includes(keyword))) return sum;
+          usedIds.add(entry.id);
+          return sum + Number(entry.amount || 0);
+        }, 0);
+        const cashRows = [
+          { label: "Operasional", pool: 35, total: 10.5, spent: matchExpense(["operational", "operasional", "subscription", "server", "hosting", "tools", "software"]) },
+          { label: "Cadangan (Emergency)", pool: 40, total: 12, spent: matchExpense(["cadangan", "emergency", "darurat"]) },
+          { label: "Growth Fund", pool: 20, total: 6, spent: matchExpense(["growth", "marketing", "ads", "iklan", "campaign", "r&d", "riset"]) }
+        ];
+        const miscSpent = expenses.reduce((sum, entry) => usedIds.has(entry.id) ? sum : sum + Number(entry.amount || 0), 0);
+        cashRows.push({ label: "Misc / Bonus Pool", pool: 5, total: 1.5, spent: miscSpent });
+        return cashRows.map((row) => {
+          const budget = base * row.total / 100;
+          const remaining = budget - row.spent;
+          const remainingPercent = budget > 0 ? Math.max(0, remaining / budget * 100) : 0;
+          const over = remaining < 0;
+          return `<div class="revenue-row cash-row ${over ? "over" : ""}">
+            <span>${esc(row.label)}</span>
+            <span>${row.pool}% pool</span>
+            <strong>${row.total}%</strong>
+            <strong>${money(budget)}</strong>
+            <strong>${money(row.spent)}</strong>
+            <strong>${over ? `${money(Math.abs(remaining))} over` : `${money(remaining)} · ${remainingPercent.toFixed(1)}%`}</strong>
+          </div>`;
+        }).join("");
+      };
+
       const developerRows = [
         { label: "Tech Lead", pool: 35, total: 14 },
         { label: "Backend Developer", pool: 30, total: 12 },
@@ -152,12 +185,6 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           { label: "Content Lead", pool: 30, total: 9 },
           { label: "Content Creator", pool: 20, total: 6 }
         ];
-        const cashRows = [
-          { label: "Operasional", pool: 44.44, total: 13.33 },
-          { label: "Cadangan (Emergency)", pool: 27.78, total: 8.33 },
-          { label: "Growth Fund", pool: 22.22, total: 6.67 },
-          { label: "Misc / Bonus Pool", pool: 5.56, total: 1.67 }
-        ];
         return `<section class="admin-panel project-detail-panel revenue-section">
           <div class="admin-panel-head">
             <div><h2>Auto pembagian hasil</h2><p>${baseLabel}</p></div>
@@ -176,7 +203,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           <div class="revenue-breakdown-grid">
             <section><h3>Developer Pool</h3>${percentRows(base, devRows)}</section>
             <section><h3>Marketing Pool</h3>${percentRows(base, marketingRows)}</section>
-            <section><h3>Kas Perusahaan</h3>${percentRows(base, cashRows)}</section>
+            <section class="cash-breakdown"><h3>Kas Perusahaan <small>Budget · Terpakai · Sisa</small></h3>${cashRowsHtml(base, project)}</section>
           </div>
         </section>`;
       };
