@@ -165,14 +165,19 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         syncGeneralVisibility();
         list.innerHTML = data.items.length ? `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Tanggal</th><th>Project / Client</th><th>Deskripsi</th><th>Kategori</th><th>Tipe</th><th>Status</th><th>Jumlah</th><th></th></tr></thead><tbody>${data.items.map((item) => {
           const isGeneral = !item.project_id;
-          const target = item.invoice_doc_id
-            ? `<a class="admin-button ghost" href="/dashboard/invoice?doc=${encodeURIComponent(item.invoice_doc_id || ("general-invoice-" + item.id))}" target="_blank" rel="noreferrer" title="Lihat invoice">📄</a>`
-            : (item.project_id
-              ? `<a class="admin-button ghost" href="/dashboard/invoice?project=${encodeURIComponent(item.project_id)}" target="_blank" rel="noreferrer" title="Lihat invoice project">📄</a>`
-              : `<a class="admin-button ghost" href="/dashboard/invoice?doc=${encodeURIComponent("general-invoice-" + item.id)}" target="_blank" rel="noreferrer" title="Lihat invoice">📄</a>`);
+          const isExpense = item.type === "expense";
+          const transactionDocId = item.invoice_doc_id || ("general-invoice-" + item.id);
+          const target = (isExpense || isGeneral)
+            ? `<a class="admin-button ghost" href="/dashboard/invoice?doc=${encodeURIComponent(transactionDocId)}" target="_blank" rel="noreferrer" title="${isExpense ? "Lihat receipt transaksi" : "Lihat invoice transaksi"}">📄</a>`
+            : `<a class="admin-button ghost" href="/dashboard/invoice?project=${encodeURIComponent(item.project_id)}" target="_blank" rel="noreferrer" title="Lihat invoice project">📄</a>`;
+          const docBadge = isExpense
+            ? `<span class="invoice-link-badge" title="Receipt pengeluaran transaksi">⚡ Receipt</span>`
+            : (isGeneral
+              ? `<span class="invoice-link-badge" title="Auto-generated invoice">⚡ Auto</span>`
+              : `<span class="invoice-link-badge" title="Auto-linked ke invoice project">⚡ Invoice</span>`);
           return `<tr>
             <td>${window.formatDate(item.entry_date)}</td>
-            <td>${item.project_id ? esc(item.project_name || "Project") : esc(item.client_name || "General")}${item.invoice_doc_id ? `<span class="invoice-link-badge" title="Receipt/invoice transaksi">⚡ Receipt</span>` : (isGeneral ? `<span class="invoice-link-badge" title="Auto-generated invoice">⚡ Auto</span>` : `<span class="invoice-link-badge" title="Auto-linked ke invoice project">⚡ Invoice</span>`)}</td>
+            <td>${item.project_id ? esc(item.project_name || "Project") : esc(item.client_name || "General")}${docBadge}</td>
             <td><details class="transaction-detail"><summary><strong>${esc(item.description)}</strong></summary><p>${esc(item.notes || item.description_detail || "Belum ada catatan detail.")}</p>${item.proof_url ? `<p><a href="${esc(item.proof_url)}" target="_blank" rel="noreferrer">Buka bukti transfer</a></p>` : `<p>Belum ada bukti transfer.</p>`}</details></td>
             <td>${esc(item.category)}</td>
             <td><span class="admin-badge ${item.type}">${item.type}</span></td>

@@ -505,7 +505,12 @@ export default async function handler(request, response) {
       if (resource === "invoice") {
         const docId = clean(request.query?.doc_id, 200);
         if (docId) {
-          const [doc] = await sql`SELECT * FROM project_documents WHERE id = ${docId}`;
+          let [doc] = await sql`SELECT * FROM project_documents WHERE id = ${docId}`;
+          if (!doc && docId.startsWith("general-invoice-")) {
+            const financeId = docId.replace("general-invoice-", "");
+            await syncGeneralInvoice(sql, financeId);
+            [doc] = await sql`SELECT * FROM project_documents WHERE id = ${docId}`;
+          }
           if (!doc) return response.status(404).json({ message: "Invoice tidak ditemukan." });
           if (doc.document_type === "general_invoice" || doc.document_type === "receipt") {
             const [finance] = await sql`SELECT * FROM finance_entries WHERE id = ${doc.id.replace("general-invoice-", "")}`;
