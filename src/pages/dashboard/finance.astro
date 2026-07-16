@@ -178,12 +178,12 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           return `<tr>
             <td>${window.formatDate(item.entry_date)}</td>
             <td>${item.project_id ? esc(item.project_name || "Project") : esc(item.client_name || "General")}${docBadge}</td>
-            <td><details class="transaction-detail"><summary><strong>${esc(item.description)}</strong></summary><p>${esc(item.notes || item.description_detail || "Belum ada catatan detail.")}</p>${item.proof_url ? `<p><a href="${esc(item.proof_url)}" target="_blank" rel="noreferrer">Buka bukti transfer</a></p>` : `<p>Belum ada bukti transfer.</p>`}</details></td>
+            <td class="finance-description-cell"><details class="transaction-detail"><summary><span>${esc(item.description)}</span></summary><div class="transaction-detail-body"><p>${esc(item.notes || item.description_detail || "Belum ada catatan detail.")}</p>${item.proof_url ? `<a href="${esc(item.proof_url)}" target="_blank" rel="noreferrer">Buka bukti transfer</a>` : `<span>Belum ada bukti transfer.</span>`}</div></details></td>
             <td>${esc(item.category)}</td>
             <td><span class="admin-badge ${item.type}">${item.type}</span></td>
             <td><span class="admin-badge ${item.payment_status}">${item.payment_status}</span></td>
             <td>${window.formatRupiah(item.amount)}</td>
-            <td style="display:flex;gap:6px">${target}<button class="admin-button danger" data-delete="${item.id}">Hapus</button></td>
+            <td class="finance-action-cell">${target}<button class="admin-button danger" data-delete="${item.id}">Hapus</button></td>
           </tr>`;
         }).join("")}</tbody></table></div>` : '<div class="admin-empty">Belum ada transaksi.</div>';
       };

@@ -37,6 +37,7 @@ export function ensureSchema() {
       payment_received NUMERIC(14, 2) NOT NULL DEFAULT 0,
       scope TEXT NOT NULL DEFAULT '',
       features TEXT NOT NULL DEFAULT '',
+      team_assignments TEXT NOT NULL DEFAULT '',
       notes TEXT NOT NULL DEFAULT '',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -138,6 +139,7 @@ export function ensureSchema() {
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS payment_received NUMERIC(14, 2) NOT NULL DEFAULT 0`,
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS scope TEXT NOT NULL DEFAULT ''`,
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS features TEXT NOT NULL DEFAULT ''`,
+      sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS team_assignments TEXT NOT NULL DEFAULT ''`,
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS pricing_model TEXT NOT NULL DEFAULT 'fixed'`,
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS project_type TEXT NOT NULL DEFAULT 'other'`,
       sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS client_contact TEXT NOT NULL DEFAULT ''`,

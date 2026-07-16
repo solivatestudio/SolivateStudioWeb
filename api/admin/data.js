@@ -660,7 +660,7 @@ export default async function handler(request, response) {
         : Math.min(100, Math.max(0, number(body.progress)));
       await sql`INSERT INTO projects (
           id, name, client, status, progress, start_date, deadline, budget,
-          operational_cost, pic_fee, payment_status, payment_received, scope, features, notes,
+          operational_cost, pic_fee, payment_status, payment_received, scope, features, team_assignments, notes,
           pricing_model, project_type, client_contact, client_address
         )
         VALUES (
@@ -669,7 +669,7 @@ export default async function handler(request, response) {
           ${dateOrNull(body.deadline)}, ${Math.max(0, number(body.budget))},
           ${Math.max(0, number(body.operational_cost))}, ${Math.max(0, number(body.pic_fee))},
           ${paymentStatus}, ${Math.max(0, number(body.payment_received))}, ${clean(body.scope, 3000)},
-          ${clean(body.features, 3000)}, ${clean(body.notes, 2000)},
+          ${clean(body.features, 3000)}, ${clean(body.team_assignments, 3000)}, ${clean(body.notes, 2000)},
           ${pricingModel}, ${projectType},
           ${clean(body.client_contact, 200)}, ${clean(body.client_address, 500)}
         )
@@ -678,7 +678,7 @@ export default async function handler(request, response) {
           progress = EXCLUDED.progress, start_date = EXCLUDED.start_date, deadline = EXCLUDED.deadline,
           budget = EXCLUDED.budget, operational_cost = EXCLUDED.operational_cost, pic_fee = EXCLUDED.pic_fee,
           payment_status = EXCLUDED.payment_status, payment_received = EXCLUDED.payment_received,
-          scope = EXCLUDED.scope, features = EXCLUDED.features, notes = EXCLUDED.notes,
+          scope = EXCLUDED.scope, features = EXCLUDED.features, team_assignments = EXCLUDED.team_assignments, notes = EXCLUDED.notes,
           pricing_model = EXCLUDED.pricing_model, project_type = EXCLUDED.project_type,
           client_contact = EXCLUDED.client_contact, client_address = EXCLUDED.client_address,
           updated_at = NOW()`;
