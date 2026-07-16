@@ -2002,20 +2002,25 @@ button {
   gap: 16px;
 }
 .developer-section {
-  padding-bottom: 20px;
+  display: grid;
+  gap: 18px;
+  padding-bottom: 24px;
+}
+.developer-section .admin-panel-head {
+  margin-bottom: 2px;
 }
 .developer-lead-grid,
 .developer-work-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin-bottom: 16px;
+  gap: 16px;
+  margin: 0;
 }
 .developer-lead-card,
 .developer-work-section,
 .developer-project-note {
   min-width: 0;
-  padding: 16px;
+  padding: 18px;
   border: 1px solid var(--admin-line);
   border-radius: 16px;
   background: #fbfcfd;
@@ -2031,7 +2036,7 @@ button {
 }
 .developer-lead-card strong {
   display: block;
-  margin: 8px 0;
+  margin: 10px 0 8px;
   color: var(--admin-ink);
   font-size: 18px;
 }
@@ -2045,13 +2050,15 @@ button {
 }
 .developer-lead-card em {
   display: block;
-  margin-top: 10px;
+  margin-top: 12px;
   color: var(--admin-navy);
   font-style: normal;
   font-weight: 800;
 }
 .developer-work-section {
-  margin-bottom: 16px;
+  display: grid;
+  gap: 16px;
+  margin: 0;
   background: #fff;
 }
 .developer-work-section-head {
@@ -2059,7 +2066,7 @@ button {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 14px;
+  margin: 0;
 }
 .developer-work-section-head h3 {
   margin: 0;
@@ -2067,7 +2074,7 @@ button {
   font-size: 15px;
 }
 .developer-project-note {
-  margin-top: 16px;
+  margin: 0;
   background: #f8fafb;
 }
 .developer-project-note p {
@@ -2079,8 +2086,11 @@ button {
   gap: 14px;
 }
 .developer-assignment-card {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
-  padding: 16px;
+  min-height: 100%;
+  padding: 18px;
   border: 1px solid var(--admin-line);
   border-radius: 16px;
   background: linear-gradient(180deg, #fff 0%, #f8fafb 100%);
@@ -2110,20 +2120,22 @@ button {
 }
 .developer-assignment-card p,
 .developer-assignment-card li {
-  margin: 0 0 8px;
+  margin: 0 0 9px;
   color: var(--admin-muted);
   font-size: 11px;
   line-height: 1.55;
 }
 .developer-assignment-card ul {
+  flex: 1;
   min-height: 92px;
-  margin: 14px 0 16px;
+  margin: 16px 0 18px;
   padding-left: 18px;
 }
 .developer-assignment-card li:last-child {
   margin-bottom: 0;
 }
 .developer-assignment-meta {
+  margin-top: auto;
   padding-top: 12px;
   border-top: 1px solid var(--admin-line);
 }
@@ -2133,7 +2145,8 @@ button {
   white-space: nowrap;
 }
 .developer-assignment-note {
-  margin: 14px 0 0;
+  margin: 0;
+  padding-top: 2px;
   color: var(--admin-muted);
   font-size: 11px;
   line-height: 1.6;
