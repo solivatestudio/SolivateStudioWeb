@@ -272,16 +272,26 @@ async function syncGeneralInvoice(sql, financeId) {
 }
 async function syncProjectPayment(sql, projectId) {
   if (!projectId) return;
-  const [project] = await sql`SELECT budget FROM projects WHERE id = ${projectId}`;
+  const [project] = await sql`SELECT budget, pricing_model FROM projects WHERE id = ${projectId}`;
   if (!project) return;
-  const [income] = await sql`SELECT COALESCE(SUM(amount), 0) AS received
+  const [ledger] = await sql`SELECT
+      COALESCE(SUM(amount) FILTER (WHERE type = 'income'), 0) AS received,
+      COALESCE(SUM(amount) FILTER (WHERE type = 'expense'), 0) AS expense_total,
+      COALESCE(SUM(amount) FILTER (WHERE type = 'expense' AND LOWER(category) = 'operational cost'), 0) AS operational_cost,
+      COALESCE(SUM(amount) FILTER (WHERE type = 'expense' AND LOWER(category) = 'fee pic'), 0) AS pic_fee
     FROM finance_entries
-    WHERE project_id = ${projectId} AND type = 'income'`;
-  const received = Number(income?.received || 0);
-  const target = Number(project.budget || 0);
+    WHERE project_id = ${projectId}`;
+  const [lineItem] = await sql`SELECT COALESCE(SUM(quantity * unit_price), 0) AS total FROM project_invoice_items WHERE project_id = ${projectId}`;
+  const received = Number(ledger?.received || 0);
+  const lineTotal = Number(lineItem?.total || 0);
+  const target = project.pricing_model === "line_items" && lineTotal > 0 ? lineTotal : Number(project.budget || 0);
   const paymentStatus = received <= 0 ? "unpaid" : (target > 0 && received >= target ? "paid" : "dp");
   await sql`UPDATE projects
-    SET payment_received = ${received}, payment_status = ${paymentStatus}, updated_at = NOW()
+    SET payment_received = ${received},
+      operational_cost = ${Number(ledger?.operational_cost || 0)},
+      pic_fee = ${Number(ledger?.pic_fee || 0)},
+      payment_status = ${paymentStatus},
+      updated_at = NOW()
     WHERE id = ${projectId}`;
   await syncInvoice(sql, projectId);
 }
@@ -349,7 +359,9 @@ async function getProjects(sql) {
   const rows = await sql`
     SELECT project.*,
       COALESCE(SUM(finance.amount) FILTER (WHERE finance.type = 'income'), 0) AS income_total,
-      COALESCE(SUM(finance.amount) FILTER (WHERE finance.type = 'expense'), 0) AS expense_total
+      COALESCE(SUM(finance.amount) FILTER (WHERE finance.type = 'expense'), 0) AS expense_total,
+      COALESCE(SUM(finance.amount) FILTER (WHERE finance.type = 'expense' AND LOWER(finance.category) = 'operational cost'), 0) AS operational_total,
+      COALESCE(SUM(finance.amount) FILTER (WHERE finance.type = 'expense' AND LOWER(finance.category) = 'fee pic'), 0) AS pic_fee_total
     FROM projects project
     LEFT JOIN finance_entries finance ON finance.project_id = project.id
     WHERE project.id != ${GENERAL_PROJECT_ID}
@@ -373,9 +385,11 @@ async function getProjects(sql) {
   const documentMap = byProject(documents);
   const lineItemMap = byProject(lineItems);
   return rows.map((project) => {
-    const plannedCost = Number(project.operational_cost || 0) + Number(project.pic_fee || 0);
+    const operationalCost = Number(project.operational_total || 0);
+    const picFee = Number(project.pic_fee_total || 0);
+    const plannedCost = operationalCost + picFee;
     const actualExpense = Number(project.expense_total || 0);
-    const received = Number(project.payment_received || 0) || Number(project.income_total || 0);
+    const received = Number(project.income_total || 0);
     const items = lineItemMap[project.id] || [];
     const lineItemsTotal = items.reduce((total, item) => total + Number(item.quantity || 1) * Number(item.unit_price || 0), 0);
     const pricingModel = project.pricing_model === "line_items" ? "line_items" : "fixed";
@@ -387,6 +401,9 @@ async function getProjects(sql) {
       line_items: items,
       line_items_total: lineItemsTotal,
       effective_budget: effectiveBudget,
+      payment_received: received,
+      operational_cost: operationalCost,
+      pic_fee: picFee,
       planned_cost: plannedCost,
       actual_expense: actualExpense,
       profit_plan: effectiveBudget - plannedCost,
@@ -426,7 +443,7 @@ export default async function handler(request, response) {
           sql`SELECT * FROM project_invoice_items WHERE project_id = ${projectId} ORDER BY sort_order ASC, created_at ASC`,
           sql`SELECT * FROM project_documents WHERE project_id = ${projectId} ORDER BY issued_date DESC NULLS LAST, created_at DESC`
         ]);
-        return response.status(200).json({ project, milestones, line_items: lineItems, documents });
+        return response.status(200).json({ project: { ...project, milestones, line_items: lineItems, documents }, milestones, line_items: lineItems, documents });
       }
       if (resource === "regenerate_invoice") {
         const projectId = clean(request.query?.project_id, 80);
@@ -616,6 +633,10 @@ export default async function handler(request, response) {
       const paymentStatus = PAYMENT_STATUSES.has(body.payment_status) ? body.payment_status : "unpaid";
       const pricingModel = PRICING_MODELS.has(body.pricing_model) ? body.pricing_model : "fixed";
       const projectType = PROJECT_TYPES.has(body.project_type) ? body.project_type : "other";
+      const [existingProject] = await sql`SELECT progress FROM projects WHERE id = ${id}`;
+      const progressValue = body.progress === undefined || body.progress === null || body.progress === ""
+        ? Math.min(100, Math.max(0, number(existingProject?.progress)))
+        : Math.min(100, Math.max(0, number(body.progress)));
       await sql`INSERT INTO projects (
           id, name, client, status, progress, start_date, deadline, budget,
           operational_cost, pic_fee, payment_status, payment_received, scope, features, notes,
@@ -623,7 +644,7 @@ export default async function handler(request, response) {
         )
         VALUES (
           ${id}, ${name}, ${clean(body.client, 160)}, ${status},
-          ${Math.min(100, Math.max(0, number(body.progress)))}, ${dateOrNull(body.start_date)},
+          ${progressValue}, ${dateOrNull(body.start_date)},
           ${dateOrNull(body.deadline)}, ${Math.max(0, number(body.budget))},
           ${Math.max(0, number(body.operational_cost))}, ${Math.max(0, number(body.pic_fee))},
           ${paymentStatus}, ${Math.max(0, number(body.payment_received))}, ${clean(body.scope, 3000)},
@@ -654,8 +675,23 @@ export default async function handler(request, response) {
               ${index})`;
         }
       }
-      await syncInvoice(sql, id);
+      await syncProjectPayment(sql, id);
       await audit(session.username, request.method === "POST" ? "create" : "update", "project", id);
+      return response.status(200).json({ ok: true, id });
+    }
+
+
+    if (resource === "project_progress" && request.method === "PUT") {
+      const id = clean(body.id, 80);
+      if (!id) return response.status(400).json({ message: "Project wajib dipilih." });
+      const status = PROJECT_STATUSES.has(body.status) ? body.status : null;
+      const progress = Math.min(100, Math.max(0, number(body.progress)));
+      if (status) {
+        await sql`UPDATE projects SET progress = ${progress}, status = ${status}, updated_at = NOW() WHERE id = ${id}`;
+      } else {
+        await sql`UPDATE projects SET progress = ${progress}, updated_at = NOW() WHERE id = ${id}`;
+      }
+      await audit(session.username, "update", "project_progress", id);
       return response.status(200).json({ ok: true, id });
     }
 
@@ -671,7 +707,7 @@ export default async function handler(request, response) {
         if (!id) return response.status(400).json({ message: "id wajib diisi." });
         const [existing] = await sql`SELECT project_id FROM project_invoice_items WHERE id = ${id}`;
         await sql`DELETE FROM project_invoice_items WHERE id = ${id}`;
-        if (existing?.project_id) await syncInvoice(sql, existing.project_id);
+        if (existing?.project_id) await syncProjectPayment(sql, existing.project_id);
         await audit(session.username, "delete", "invoice_item", id);
         return response.status(200).json({ ok: true });
       }
@@ -689,7 +725,7 @@ export default async function handler(request, response) {
         ON CONFLICT (id) DO UPDATE SET description = EXCLUDED.description,
           quantity = EXCLUDED.quantity, unit_price = EXCLUDED.unit_price,
           sort_order = EXCLUDED.sort_order, updated_at = NOW()`;
-      await syncInvoice(sql, projectId);
+      await syncProjectPayment(sql, projectId);
       await audit(session.username, request.method === "POST" ? "create" : "update", "invoice_item", id);
       return response.status(200).json({ ok: true, id });
     }
@@ -699,7 +735,7 @@ export default async function handler(request, response) {
       if (request.method === "DELETE") {
         const [existing] = await sql`SELECT project_id FROM project_milestones WHERE id = ${id}`;
         await sql`DELETE FROM project_milestones WHERE id = ${id}`;
-        if (existing?.project_id) await syncInvoice(sql, existing.project_id);
+        if (existing?.project_id) await syncProjectPayment(sql, existing.project_id);
         await audit(session.username, "delete", "milestone", id);
         return response.status(200).json({ ok: true });
       }
@@ -712,7 +748,7 @@ export default async function handler(request, response) {
         ON CONFLICT (id) DO UPDATE SET project_id = EXCLUDED.project_id, title = EXCLUDED.title,
           due_date = EXCLUDED.due_date, status = EXCLUDED.status, amount = EXCLUDED.amount,
           notes = EXCLUDED.notes, updated_at = NOW()`;
-      await syncInvoice(sql, projectId);
+      await syncProjectPayment(sql, projectId);
       await audit(session.username, request.method === "POST" ? "create" : "update", "milestone", id);
       return response.status(200).json({ ok: true, id });
     }
@@ -758,15 +794,16 @@ export default async function handler(request, response) {
       const clientContact = clean(body.client_contact, 200);
       const clientAddress = clean(body.client_address, 500);
       const descriptionDetail = clean(body.description_detail, 1000);
+      const notes = clean(body.notes, 2000);
       const [existing] = await sql`SELECT project_id FROM finance_entries WHERE id = ${id}`;
-      await sql`INSERT INTO finance_entries (id, project_id, entry_date, type, category, description, amount, payment_status, client_name, client_contact, client_address, description_detail)
-        VALUES (${id}, ${projectId}, ${dateOrNull(body.entry_date) || new Date().toISOString().slice(0, 10)}, ${type}, ${clean(body.category, 100) || "General"}, ${description}, ${Math.max(0, number(body.amount))}, ${paymentStatus}, ${clientName}, ${clientContact}, ${clientAddress}, ${descriptionDetail})
+      await sql`INSERT INTO finance_entries (id, project_id, entry_date, type, category, description, amount, payment_status, client_name, client_contact, client_address, description_detail, notes)
+        VALUES (${id}, ${projectId}, ${dateOrNull(body.entry_date) || new Date().toISOString().slice(0, 10)}, ${type}, ${clean(body.category, 100) || "General"}, ${description}, ${Math.max(0, number(body.amount))}, ${paymentStatus}, ${clientName}, ${clientContact}, ${clientAddress}, ${descriptionDetail}, ${notes})
         ON CONFLICT (id) DO UPDATE SET project_id = EXCLUDED.project_id, entry_date = EXCLUDED.entry_date,
           type = EXCLUDED.type, category = EXCLUDED.category, description = EXCLUDED.description,
           amount = EXCLUDED.amount, payment_status = EXCLUDED.payment_status,
           client_name = EXCLUDED.client_name, client_contact = EXCLUDED.client_contact,
           client_address = EXCLUDED.client_address, description_detail = EXCLUDED.description_detail,
-          updated_at = NOW()`;
+          notes = EXCLUDED.notes, updated_at = NOW()`;
       if (existing?.project_id && existing.project_id !== projectId) await syncProjectPayment(sql, existing.project_id);
       if (projectId) {
         await syncProjectPayment(sql, projectId);

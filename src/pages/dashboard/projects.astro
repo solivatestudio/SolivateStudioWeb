@@ -72,19 +72,6 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
             </label>
             <label class="admin-field"><span>Tanggal mulai *</span><input name="start_date" type="date" required /></label>
             <label class="admin-field"><span>Deadline final *</span><input name="deadline" type="date" required /></label>
-            <label class="admin-field"><span>Progress (%)</span><input name="progress" type="number" min="0" max="100" value="0" /></label>
-            <label class="admin-field"><span>Status pembayaran</span>
-              <select name="payment_status">
-                <option value="unpaid">Belum bayar</option>
-                <option value="dp">DP</option>
-                <option value="pending">Pending</option>
-                <option value="overdue">Overdue</option>
-                <option value="paid">Lunas</option>
-              </select>
-            </label>
-            <label class="admin-field"><span>Pembayaran diterima</span><input name="payment_received" inputmode="numeric" data-money placeholder="0" /></label>
-            <label class="admin-field"><span>Biaya operasional (internal)</span><input name="operational_cost" inputmode="numeric" data-money placeholder="0" /></label>
-            <label class="admin-field"><span>Fee PIC (internal)</span><input name="pic_fee" inputmode="numeric" data-money placeholder="0" /></label>
             <label class="admin-field full"><span>Catatan internal</span><textarea name="notes" rows="3" placeholder="Catatan tim, link drive internal, dll."></textarea></label>
           </div>
         </div>
@@ -440,13 +427,8 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           client_address: data.client_address,
           project_type: data.project_type,
           status: data.status,
-          payment_status: data.payment_status,
           start_date: data.start_date,
           deadline: data.deadline,
-          progress: data.progress,
-          payment_received: data.payment_received,
-          operational_cost: data.operational_cost,
-          pic_fee: data.pic_fee,
           notes: data.notes,
           scope: data.scope,
           features: data.features,
@@ -523,7 +505,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         document.querySelector("[data-project-booked]").textContent = money(sum("effective_budget"));
         document.querySelector("[data-project-received]").textContent = money(sum("payment_received"));
         document.querySelector("[data-project-outstanding]").textContent = money(sum("outstanding"));
-        document.querySelector("[data-project-profit]").textContent = money(items.reduce((t, i) => t + Number(i.profit_plan || 0), 0));
+        document.querySelector("[data-project-profit]").textContent = money(items.reduce((t, i) => t + Number(i.profit_actual || 0), 0));
       };
       const milestoneRows = (project) => project.milestones?.length ? project.milestones.map((m) => {
         const late = m.status !== "completed" && m.due_date && new Date(m.due_date) < new Date(today());
@@ -538,7 +520,11 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         document.querySelector("[data-project-count]").textContent = `${items.length} project tercatat`;
         totals();
         if (!items.length) { list.innerHTML = '<div class="admin-empty">Belum ada project. Tambahkan project pertama di atas.</div>'; return; }
-        list.innerHTML = items.map((item) => `<article class="project-command-card">
+        list.innerHTML = items.map((item) => {
+          const statusOptions = ["planning", "active", "review", "pending", "on-hold", "completed"].map((s) => `<option value="${s}" ${item.status === s ? "selected" : ""}>${esc(statusLabel(s))}</option>`).join("");
+          const features = String(item.features || "").split(/\n+/).map((line) => line.trim()).filter(Boolean).slice(0, 8);
+          const invoiceDoc = (item.documents || []).find((d) => d.document_type === "invoice");
+          return `<article class="project-command-card">
           <header>
             <div><span class="admin-badge ${esc(item.status)}">${esc(statusLabel(item.status))}</span><h3>${esc(item.name)}</h3><p>${esc(item.client || "Internal")} · ${window.formatDate(item.start_date)} - ${window.formatDate(item.deadline)}</p></div>
             <div class="admin-actions project-list-actions">
@@ -548,16 +534,27 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
             </div>
           </header>
           <div class="project-money-grid">
-            <div><small>${item.pricing_model === "line_items" ? "Total items" : "Budget"}</small><strong>${money(item.effective_budget || item.budget)}</strong></div>
-            <div><small>Ops cost</small><strong>${money(item.operational_cost)}</strong></div>
+            <div><small>${item.pricing_model === "line_items" ? "Total items" : "Harga project"}</small><strong>${money(item.effective_budget || item.budget)}</strong></div>
+            <div><small>Pembayaran masuk</small><strong>${money(item.payment_received)}</strong></div>
+            <div><small>Biaya operasional</small><strong>${money(item.operational_cost)}</strong></div>
             <div><small>Fee PIC</small><strong>${money(item.pic_fee)}</strong></div>
-            <div><small>Profit plan</small><strong>${money(item.profit_plan)}</strong></div>
-            <div><small>Received</small><strong>${money(item.payment_received || item.income_total)}</strong></div>
+            <div><small>Profit aktual</small><strong>${money(item.profit_actual)}</strong></div>
             <div><small>Outstanding</small><strong>${money(item.outstanding)}</strong></div>
           </div>
           <div class="project-status-line"><div class="admin-progress"><span style="width:${Number(item.progress || 0)}%"></span></div><span>${Number(item.progress || 0)}%</span><em class="admin-badge ${esc(item.payment_status)}">${esc(statusLabel(item.payment_status))}</em></div>
+          <details class="project-detail" open>
+            <summary>Detail project & progress</summary>
+            <div class="project-detail-grid">
+              <section><h4>Scope</h4><p>${esc(item.scope || "Belum ada scope.")}</p></section>
+              <section><h4>Deliverables</h4>${features.length ? `<ul>${features.map((line) => `<li>${esc(line.replace(/^-\s*/, ""))}</li>`).join("")}</ul>` : `<p>Belum ada deliverables.</p>`}</section>
+              <section><h4>Keuangan</h4><p>Invoice: ${invoiceDoc ? `${money(invoiceDoc.amount)} · ${esc(invoiceDoc.status)}` : "Belum ada invoice"}</p><p>Payment: ${money(item.payment_received)} / ${money(item.effective_budget || item.budget)}</p><p>Expense total: ${money(item.actual_expense)}</p></section>
+              <section><h4>Update progress</h4><form class="project-progress-form" data-progress-form="${esc(item.id)}"><input type="range" name="progress" min="0" max="100" value="${Number(item.progress || 0)}" /><input type="number" name="progress_number" min="0" max="100" value="${Number(item.progress || 0)}" /><select name="status">${statusOptions}</select><button class="admin-button accent" type="submit">Update</button></form></section>
+              <section class="project-detail-wide"><h4>Catatan internal</h4><p>${esc(item.notes || "Belum ada catatan.")}</p></section>
+            </div>
+          </details>
           <div class="project-subgrid"><section><h4>Timeline termin</h4>${milestoneRows(item)}</section><section><h4>Dokumen</h4>${documentRows(item)}</section></div>
-        </article>`).join("");
+        </article>`;
+        }).join("");
       };
       const load = async () => {
         const data = await window.adminApi("/api/admin/data?resource=projects");
@@ -572,6 +569,21 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           await window.adminApi("/api/admin/data?resource=projects", { method: "DELETE", body: JSON.stringify({ id: deleteProject }) });
           await load();
         }
+      });
+      list.addEventListener("input", (event) => {
+        const form = event.target.closest("[data-progress-form]");
+        if (!form) return;
+        if (event.target.name === "progress") form.elements.progress_number.value = event.target.value;
+        if (event.target.name === "progress_number") form.elements.progress.value = event.target.value;
+      });
+      list.addEventListener("submit", async (event) => {
+        const form = event.target.closest("[data-progress-form]");
+        if (!form) return;
+        event.preventDefault();
+        const payload = { id: form.dataset.progressForm, progress: form.elements.progress_number.value, status: form.elements.status.value };
+        await window.adminApi("/api/admin/data?resource=project_progress", { method: "PUT", body: JSON.stringify(payload) });
+        window.showAdminToast("Progress project diperbarui.");
+        await load();
       });
 
       // Pre-fill from query string ?edit=...

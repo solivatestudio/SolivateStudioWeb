@@ -46,7 +46,8 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         </label>
         <label class="admin-field"><span>Kategori</span><select name="category"><option>Project payment</option><option>DP payment</option><option>Final payment</option><option>Operational cost</option><option>Fee PIC</option><option>Subscription</option><option>Marketing</option><option>General</option></select></label>
         <label class="admin-field"><span>Status</span><select name="payment_status"><option value="paid">Paid</option><option value="dp">DP</option><option value="pending">Pending</option><option value="overdue">Overdue</option></select></label>
-        <label class="admin-field full"><span>Deskripsi</span><input name="description" required placeholder="Misal: Hosting 1 tahun, Jasa konsultasi, Iklan FB, dll." /></label>
+        <label class="admin-field full"><span>Deskripsi</span><input name="description" required placeholder="Misal: DP project company profile, fee PIC desain, hosting 1 tahun, dll." /></label>
+        <label class="admin-field full"><span>Catatan transaksi</span><textarea name="notes" rows="3" placeholder="Detail pembayaran, metode transfer, nomor invoice, catatan client/vendor, atau alasan biaya."></textarea></label>
         <label class="admin-field"><span>Jumlah</span><input name="amount" inputmode="numeric" data-money placeholder="0" required /></label>
         <fieldset class="admin-field full finance-general-fields" data-general-fields>
           <legend>Detail untuk invoice / receipt (general)</legend>
@@ -134,7 +135,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           return `<tr>
             <td>${window.formatDate(item.entry_date)}</td>
             <td>${item.project_id ? esc(item.project_name || "Project") : esc(item.client_name || "General")}${isGeneral ? `<span class="invoice-link-badge" title="Auto-generated invoice">⚡ Auto</span>` : `<span class="invoice-link-badge" title="Auto-linked ke invoice project">⚡ Invoice</span>`}</td>
-            <td><strong>${esc(item.description)}</strong></td>
+            <td><details class="transaction-detail"><summary><strong>${esc(item.description)}</strong></summary><p>${esc(item.notes || item.description_detail || "Belum ada catatan detail.")}</p></details></td>
             <td>${esc(item.category)}</td>
             <td><span class="admin-badge ${item.type}">${item.type}</span></td>
             <td><span class="admin-badge ${item.payment_status}">${item.payment_status}</span></td>

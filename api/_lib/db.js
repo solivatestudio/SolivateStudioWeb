@@ -147,6 +147,7 @@ export function ensureSchema() {
       sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS client_contact TEXT NOT NULL DEFAULT ''`,
       sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS client_address TEXT NOT NULL DEFAULT ''`,
       sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS description_detail TEXT NOT NULL DEFAULT ''`,
+      sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS notes TEXT NOT NULL DEFAULT ''`,
       sql`ALTER TABLE finance_entries ADD COLUMN IF NOT EXISTS invoice_doc_id TEXT`,
     ]);
     await Promise.all([
