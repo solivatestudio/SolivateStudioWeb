@@ -113,7 +113,6 @@ const buildInvoicePayload = async (sql, project, milestones, lineItems) => {
     },
     provider: settings.provider,
     bank: settings.bank,
-    proof_url: finance.proof_url || "",
     line_items: itemRows,
     milestones: (milestones || []).map((m) => ({
       title: m.title,
@@ -170,6 +169,7 @@ const buildGeneralInvoicePayload = async (sql, finance) => {
     },
     provider: settings.provider,
     bank: settings.bank,
+    proof_url: finance.proof_url || "",
     line_items: itemRows,
     milestones: [],
     subtotal: total,
@@ -827,8 +827,9 @@ export default async function handler(request, response) {
         if (!title) continue;
         let id = clean(item.id, 80);
         if (id) {
-          const [existing] = await sql`SELECT project_id FROM project_documents WHERE id = ${id}`;
+          const [existing] = await sql`SELECT project_id, document_type FROM project_documents WHERE id = ${id}`;
           if (existing && existing.project_id !== projectId) id = "";
+          if (existing && ["invoice", "receipt", "general_invoice"].includes(existing.document_type)) id = "";
         }
         id ||= crypto.randomUUID();
         const type = DOCUMENT_TYPES.has(item.document_type) ? item.document_type : "other";
@@ -843,9 +844,9 @@ export default async function handler(request, response) {
         keptDocumentIds.push(id);
       }
       if (keptDocumentIds.length) {
-        await sql`DELETE FROM project_documents WHERE project_id = ${projectId} AND document_type != 'invoice' AND NOT (id = ANY(${keptDocumentIds}))`;
+        await sql`DELETE FROM project_documents WHERE project_id = ${projectId} AND document_type NOT IN ('invoice', 'receipt', 'general_invoice') AND NOT (id = ANY(${keptDocumentIds}))`;
       } else {
-        await sql`DELETE FROM project_documents WHERE project_id = ${projectId} AND document_type != 'invoice'`;
+        await sql`DELETE FROM project_documents WHERE project_id = ${projectId} AND document_type NOT IN ('invoice', 'receipt', 'general_invoice')`;
       }
 
       await syncProjectPayment(sql, projectId);

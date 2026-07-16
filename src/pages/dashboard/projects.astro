@@ -328,7 +328,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           document.querySelector("[data-milestones]").innerHTML = "";
           if (project.milestones?.length) project.milestones.forEach((m) => addMilestone(m));
           else addMilestone();
-          const docs = (project.documents || []).filter((d) => d.document_type !== "invoice");
+          const docs = (project.documents || []).filter((d) => !["invoice", "receipt", "general_invoice"].includes(d.document_type));
           state.uploads = docs.map((d) => ({ title: d.title, file_url: d.file_url, document_type: d.document_type, status: d.status, id: d.id }));
           renderUploadList();
         } else {
@@ -540,7 +540,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         return `<div class="ops-row ${late ? "late" : ""}"><div><strong>${esc(m.title)}</strong><span>${window.formatDate(m.due_date)} · ${money(m.amount)}</span></div><em>${late ? "late" : esc(m.status)}</em></div>`;
       }).join("") : '<div class="admin-empty">Belum ada termin.</div>';
       const documentRows = (project) => {
-        const nonInvoice = (project.documents || []).filter((d) => d.document_type !== "invoice");
+        const nonInvoice = (project.documents || []).filter((d) => !["invoice", "receipt", "general_invoice"].includes(d.document_type));
         const rows = nonInvoice.map((d) => `<div class="ops-row document-row"><div><strong>${esc(d.title)}</strong><span>${esc(d.document_type)} · ${window.formatDate(d.issued_date)}</span></div>${d.file_url ? `<a class="admin-button ghost" href="${esc(d.file_url)}" target="_blank" rel="noreferrer">Buka</a>` : ""}</div>`).join("");
         return rows || '<div class="admin-empty">Belum ada dokumen.</div>';
       };

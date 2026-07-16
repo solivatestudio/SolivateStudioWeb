@@ -52,7 +52,7 @@ const currentLabel = navigation.find(([key]) => key === active)?.[1] || title;
       }).format(new Date(value)) : "-";
     </script>
   </head>
-  <body class="admin-body auth-pending">
+  <body class="admin-body auth-pending" data-help-key={active} data-help-mode={mode}>
     <div class="admin-app">
       <aside class="admin-sidebar" data-sidebar>
         <div class="admin-brand">
@@ -89,13 +89,28 @@ const currentLabel = navigation.find(([key]) => key === active)?.[1] || title;
             <h1>{title}</h1>
             <span class="admin-current">{mode === "cms" ? "CMS" : "Management"} / {currentLabel}</span>
           </div>
-          <div class="admin-status"><span></span> System online</div>
+          <div class="admin-topbar-actions">
+            <button class="admin-help-button" type="button" data-help-open aria-label="Buka bantuan">?</button>
+            <div class="admin-status"><span></span> System online</div>
+          </div>
         </header>
         <div class="admin-content"><slot /></div>
       </main>
     </div>
 
     <div class="admin-toast" data-toast role="status" aria-live="polite"></div>
+    <div class="admin-help-backdrop" data-help-modal hidden>
+      <section class="admin-help-modal" role="dialog" aria-modal="true" aria-labelledby="admin-help-title">
+        <header>
+          <div>
+            <span data-help-eyebrow>Help Center</span>
+            <h2 id="admin-help-title" data-help-title>Panduan Dashboard</h2>
+          </div>
+          <button class="admin-help-close" type="button" data-help-close aria-label="Tutup bantuan">×</button>
+        </header>
+        <div class="admin-help-content" data-help-content></div>
+      </section>
+    </div>
     <div class="admin-modal-backdrop" data-admin-modal hidden>
       <section class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
         <div class="admin-modal-icon" data-admin-modal-icon>?</div>
@@ -159,6 +174,67 @@ const currentLabel = navigation.find(([key]) => key === active)?.[1] || title;
           document.addEventListener("keydown", onKey);
         });
       };
+      const helpGuides = {
+        overview: {
+          title: "Panduan Ringkasan",
+          html: `<h3>Cara pakai</h3><ol><li>Pantau total project aktif, pemasukan, pengeluaran, dan trafik dari satu layar.</li><li>Gunakan outstanding list untuk follow up pembayaran.</li><li>Cek grafik untuk bahan review rapat mingguan.</li></ol><h3>FAQ</h3><p><strong>Kenapa angka profit berubah?</strong><br/>Profit mengikuti transaksi finance yang sudah dicatat.</p>`
+        },
+        projects: {
+          title: "Panduan Project",
+          html: `<h3>Alur kerja</h3><ol><li>Buat project dari tombol Tambah project.</li><li>Isi scope, fitur, harga, termin, dan dokumen MOU/kontrak.</li><li>Buka Detail untuk update progress, cek finance, invoice, dan pembagian hasil.</li></ol><h3>Progress vs Status vs Termin</h3><p><strong>Progress</strong> adalah persen pengerjaan internal dan diupdate manual.</p><p><strong>Status</strong> adalah fase kerja: planning, on progress, review, pending, on hold, completed.</p><p><strong>Termin</strong> adalah milestone pembayaran/deadline invoice, bukan indikator progress otomatis.</p><h3>FAQ</h3><p><strong>Kalau client DP?</strong><br/>Catat DP di Finance sebagai income project kategori DP payment.</p>`
+        },
+        finance: {
+          title: "Panduan Keuangan",
+          html: `<h3>Cara input transaksi</h3><ol><li>Pilih project terkait atau General/internal.</li><li>Pilih tipe income/expense dan kategori yang sesuai.</li><li>Upload bukti transfer PDF/gambar, lalu simpan.</li></ol><h3>Invoice & receipt</h3><p>Income project mengupdate invoice project. Expense project membuat receipt transaksi sendiri. Transaksi general membuat invoice/receipt general.</p><h3>FAQ</h3><p><strong>Biaya operasional masuk ke mana?</strong><br/>Catat sebagai expense kategori Operational cost pada project terkait.</p>`
+        },
+        performance: {
+          title: "Panduan Kinerja",
+          html: `<h3>Cara pakai</h3><ol><li>Tambah KPI tim atau operasional.</li><li>Isi target, value, unit, dan periodenya.</li><li>Review progress KPI saat evaluasi internal.</li></ol>`
+        },
+        traffic: {
+          title: "Panduan Trafik",
+          html: `<h3>Cara baca</h3><ol><li>Active visitors memakai window 5 menit terakhir.</li><li>Chart realtime memakai polling berkala agar hemat resource.</li><li>Gunakan halaman/referrer untuk evaluasi landing page.</li></ol>`
+        },
+        "settings-invoice": {
+          title: "Panduan Invoice Settings",
+          html: `<h3>Cara pakai</h3><ol><li>Atur logo, provider, kontak, dan rekening.</li><li>Preview invoice di kanan akan ikut berubah.</li><li>Simpan agar invoice berikutnya memakai branding terbaru.</li></ol>`
+        },
+        cms: {
+          title: "Panduan CMS Website",
+          html: `<h3>Cara pakai</h3><ol><li>Pilih bagian CMS yang ingin diedit.</li><li>Ubah konten yang memang tampil di website publik.</li><li>Simpan lalu cek halaman publik setelah deploy.</li></ol>`
+        },
+        pricing: {
+          title: "Panduan CMS Pricing",
+          html: `<h3>Cara pakai</h3><ol><li>Kelola paket pricing dari list.</li><li>Isi nama, harga, highlight, dan fitur paket.</li><li>Pastikan paket populer ditandai agar tampil jelas.</li></ol>`
+        },
+        faq: {
+          title: "Panduan CMS FAQ",
+          html: `<h3>Cara pakai</h3><ol><li>Tambah pertanyaan yang sering ditanyakan client.</li><li>Jawab ringkas dan jelas.</li><li>Urutkan FAQ dari yang paling sering muncul.</li></ol>`
+        },
+        contact: {
+          title: "Panduan CMS Kontak",
+          html: `<h3>Cara pakai</h3><ol><li>Update email, WhatsApp, Instagram, dan alamat layanan.</li><li>Pastikan nomor WhatsApp memakai format internasional.</li><li>Cek tombol floating WhatsApp setelah deploy.</li></ol>`
+        }
+      };
+      window.openAdminHelp = () => {
+        const key = document.body.dataset.helpKey || "overview";
+        const mode = document.body.dataset.helpMode || "management";
+        const guide = helpGuides[key] || helpGuides[mode === "cms" ? "cms" : "overview"];
+        const modal = document.querySelector("[data-help-modal]");
+        if (!modal) return;
+        document.querySelector("[data-help-title]").textContent = guide.title;
+        document.querySelector("[data-help-eyebrow]").textContent = mode === "cms" ? "Website CMS" : "Internal Ops";
+        document.querySelector("[data-help-content]").innerHTML = guide.html;
+        modal.hidden = false;
+      };
+      document.querySelector("[data-help-open]")?.addEventListener("click", () => window.openAdminHelp());
+      document.querySelector("[data-help-close]")?.addEventListener("click", () => {
+        const modal = document.querySelector("[data-help-modal]");
+        if (modal) modal.hidden = true;
+      });
+      document.querySelector("[data-help-modal]")?.addEventListener("click", (event) => {
+        if (event.target.matches("[data-help-modal]")) event.currentTarget.hidden = true;
+      });
       window.adminApi("/api/admin/me")
         .then(() => document.body.classList.remove("auth-pending"))
         .catch(() => {});
