@@ -251,6 +251,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         row.className = "wizard-milestone";
         row.dataset.milestoneRow = "";
         row.innerHTML = `
+          <input name="milestone_id[]" type="hidden" value="${esc(prefill.id || "")}" />
           <input name="milestone_title[]" placeholder="Termin ${container.children.length + 1}" value="${esc(prefill.title || "")}" />
           <input name="milestone_due[]" type="date" value="${esc(prefill.due_date || "")}" />
           <input name="milestone_amount[]" inputmode="numeric" data-money placeholder="Nominal" value="${prefill.amount ? moneyInput(prefill.amount) : ""}" />
@@ -309,6 +310,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
         wizardHost.hidden = false;
         wizardForm.reset();
         state.uploads = [];
+        renderUploadList();
         state.projectId = project?.id || null;
         wizardForm.elements.id.value = project?.id || "";
         if (project) {
@@ -410,6 +412,7 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           if (!input.value?.trim()) return;
           const row = input.closest("[data-milestone-row]");
           rows.push({
+            id: row.querySelector("[name='milestone_id[]']")?.value || undefined,
             title: input.value.trim(),
             due_date: row.querySelector("[name='milestone_due[]']").value || null,
             amount: Number(cleanMoney(row.querySelector("[name='milestone_amount[]']").value) || 0),
@@ -499,12 +502,23 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
           const projectId = res.id || payload.id;
           if (!projectId) throw new Error("Project ID tidak diterima.");
           const milestones = collectMilestones();
-          for (const m of milestones) {
-            await window.adminApi("/api/admin/data?resource=milestones", { method: "POST", body: JSON.stringify({ ...m, project_id: projectId }) });
-          }
-          for (const u of state.uploads) {
-            await window.adminApi("/api/admin/data?resource=documents", { method: "POST", body: JSON.stringify({ project_id: projectId, title: u.title, document_type: u.document_type, file_url: u.file_url, status: u.status }) });
-          }
+          await window.adminApi("/api/admin/data?resource=project_children_sync", {
+            method: "POST",
+            body: JSON.stringify({
+              project_id: projectId,
+              milestones,
+              documents: state.uploads.map((u) => ({
+                id: u.id || undefined,
+                title: u.title,
+                document_type: u.document_type,
+                file_url: u.file_url,
+                status: u.status,
+                amount: u.amount,
+                issued_date: u.issued_date,
+                notes: u.notes
+              }))
+            })
+          });
           await window.adminApi(`/api/admin/data?resource=regenerate_invoice&project_id=${encodeURIComponent(projectId)}`, { method: "GET" }).catch(() => {});
           window.showAdminToast("Project tersimpan. Membuka invoice...");
           closeWizard();

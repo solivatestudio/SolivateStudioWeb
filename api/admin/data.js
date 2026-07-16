@@ -787,6 +787,68 @@ export default async function handler(request, response) {
       return response.status(200).json({ ok: true, id });
     }
 
+    if (resource === "project_children_sync" && (request.method === "POST" || request.method === "PUT")) {
+      const projectId = clean(body.project_id, 80);
+      if (!projectId) return response.status(400).json({ message: "Project wajib dipilih." });
+      const milestones = Array.isArray(body.milestones) ? body.milestones : [];
+      const documents = Array.isArray(body.documents) ? body.documents : [];
+
+      const keptMilestoneIds = [];
+      for (const item of milestones) {
+        const title = clean(item.title, 180);
+        if (!title) continue;
+        let id = clean(item.id, 80);
+        if (id) {
+          const [existing] = await sql`SELECT project_id FROM project_milestones WHERE id = ${id}`;
+          if (existing && existing.project_id !== projectId) id = "";
+        }
+        id ||= crypto.randomUUID();
+        const status = MILESTONE_STATUSES.has(item.status) ? item.status : "pending";
+        await sql`INSERT INTO project_milestones (id, project_id, title, due_date, status, amount, notes)
+          VALUES (${id}, ${projectId}, ${title}, ${dateOrNull(item.due_date)}, ${status}, ${Math.max(0, number(item.amount))}, ${clean(item.notes, 1000)})
+          ON CONFLICT (id) DO UPDATE SET project_id = EXCLUDED.project_id, title = EXCLUDED.title,
+            due_date = EXCLUDED.due_date, status = EXCLUDED.status, amount = EXCLUDED.amount,
+            notes = EXCLUDED.notes, updated_at = NOW()`;
+        keptMilestoneIds.push(id);
+      }
+      if (keptMilestoneIds.length) {
+        await sql`DELETE FROM project_milestones WHERE project_id = ${projectId} AND NOT (id = ANY(${keptMilestoneIds}))`;
+      } else {
+        await sql`DELETE FROM project_milestones WHERE project_id = ${projectId}`;
+      }
+
+      const keptDocumentIds = [];
+      for (const item of documents) {
+        const title = clean(item.title, 180);
+        if (!title) continue;
+        let id = clean(item.id, 80);
+        if (id) {
+          const [existing] = await sql`SELECT project_id FROM project_documents WHERE id = ${id}`;
+          if (existing && existing.project_id !== projectId) id = "";
+        }
+        id ||= crypto.randomUUID();
+        const type = DOCUMENT_TYPES.has(item.document_type) ? item.document_type : "other";
+        if (type === "invoice") continue;
+        const status = DOCUMENT_STATUSES.has(item.status) ? item.status : "draft";
+        await sql`INSERT INTO project_documents (id, project_id, title, document_type, file_url, amount, status, issued_date, notes)
+          VALUES (${id}, ${projectId}, ${title}, ${type}, ${clean(item.file_url, 800)}, ${Math.max(0, number(item.amount))}, ${status}, ${dateOrNull(item.issued_date)}, ${clean(item.notes, 1000)})
+          ON CONFLICT (id) DO UPDATE SET project_id = EXCLUDED.project_id, title = EXCLUDED.title,
+            document_type = EXCLUDED.document_type, file_url = EXCLUDED.file_url, amount = EXCLUDED.amount,
+            status = EXCLUDED.status, issued_date = EXCLUDED.issued_date, notes = EXCLUDED.notes,
+            updated_at = NOW()`;
+        keptDocumentIds.push(id);
+      }
+      if (keptDocumentIds.length) {
+        await sql`DELETE FROM project_documents WHERE project_id = ${projectId} AND document_type != 'invoice' AND NOT (id = ANY(${keptDocumentIds}))`;
+      } else {
+        await sql`DELETE FROM project_documents WHERE project_id = ${projectId} AND document_type != 'invoice'`;
+      }
+
+      await syncProjectPayment(sql, projectId);
+      await audit(session.username, "sync", "project_children", projectId);
+      return response.status(200).json({ ok: true, project_id: projectId });
+    }
+
     if (resource === "finance") {
       const id = clean(body.id, 80) || crypto.randomUUID();
       if (request.method === "DELETE") {
