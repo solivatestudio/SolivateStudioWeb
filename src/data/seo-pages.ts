@@ -581,7 +581,339 @@ export const portfolioPages: PortfolioPage[] = [
       },
     ],
   },
-];
+  {
+    slug: "hammaddanfulanah",
+    title: "Website Undangan Pernikahan Hammad & Fulanah",
+    description:
+      "Showcase website undangan pernikahan sederhana dengan nama tamu custom, nuansa personal, dan alur akses yang ringan untuk dibagikan ke keluarga dan teman.",
+    image: "/images/hammaddanfulanah.png",
+    width: 1440,
+    height: 880,
+    url: "https://hammaddanfulanah.solivate.com/",
+    keywords: [
+      "website undangan pernikahan simple",
+      "undangan nikah nama custom",
+      "jasa undangan digital pernikahan",
+      "website wedding invitation",
+      "undangan digital sederhana",
+    ],
+    highlights: [
+      "Undangan pernikahan simple",
+      "Nama tamu custom",
+      "Tampilan mobile friendly",
+      "Mudah dibagikan via link",
+    ],
+    sections: [
+      {
+        title: "Tantangan",
+        body: "Undangan digital perlu tetap terasa personal tanpa membuat pengalaman buka link menjadi berat atau rumit untuk tamu dari berbagai perangkat.",
+      },
+      {
+        title: "Solusi",
+        body: "Solivate Studio membuat website undangan yang ringan, fokus pada momen utama pasangan, mendukung nama tamu custom, dan tetap enak diakses dari mobile.",
+      },
+      {
+        title: "Dampak",
+        body: "Hasilnya adalah undangan digital yang simpel, elegan, mudah dibagikan, dan lebih nyaman dipakai untuk kebutuhan pernikahan skala personal.",
+      },
+    ],
+  },
+  {
+    slug: "weddingpro",
+    title: "Website WeddingPro Invitation & Dashboard",
+    description:
+      "Showcase website undangan pernikahan dengan barcode dan dashboard, dirancang untuk alur tamu, validasi kehadiran, dan pengelolaan acara yang lebih terstruktur.",
+    image: "/images/weddingpro.png",
+    width: 1440,
+    height: 880,
+    url: "https://weddingpro.solivate.com/",
+    keywords: [
+      "website undangan pernikahan barcode",
+      "dashboard undangan digital",
+      "wedding invitation dashboard",
+      "website RSVP pernikahan",
+      "jasa undangan digital premium",
+    ],
+    highlights: [
+      "Undangan digital dengan barcode",
+      "Dashboard pengelolaan tamu",
+      "Alur RSVP lebih rapi",
+      "Event experience lebih modern",
+    ],
+    sections: [
+      {
+        title: "Tantangan",
+        body: "Kebutuhan undangan digital yang lebih advanced memerlukan pengalaman tamu yang tetap elegan, sekaligus dashboard yang memudahkan pengelolaan data kehadiran.",
+      },
+      {
+        title: "Solusi",
+        body: "Solivate Studio menggabungkan landing invitation yang berkesan dengan barcode access dan dashboard internal untuk membantu pemantauan RSVP dan validasi tamu.",
+      },
+      {
+        title: "Dampak",
+        body: "Website memberi pengalaman pernikahan yang lebih premium, membantu pengelolaan tamu lebih tertata, dan menambah nilai digital pada keseluruhan acara.",
+      },
+    ],
+  },
+  {
+    slug: "hbd-matt",
+    title: "Website Ucapan Ulang Tahun Matt",
+    description:
+      "Showcase website ucapan ulang tahun simple dengan hero personal, visual ringan, dan pengalaman yang dibuat untuk memberi kesan spesial secara digital.",
+    image: "/images/hbd-matt.png",
+    width: 1440,
+    height: 880,
+    url: "https://hbd-matt.solivate.com/",
+    keywords: [
+      "website ucapan ulang tahun",
+      "birthday website simple",
+      "ucapan ulang tahun digital",
+      "website birthday personal",
+      "jasa website birthday",
+    ],
+    highlights: [
+      "Ucapan ulang tahun personal",
+      "Landing page ringan",
+      "Hero emosional dan fokus",
+      "Cocok untuk hadiah digital",
+    ],
+    sections: [
+      {
+        title: "Tantangan",
+        body: "Website ucapan ulang tahun harus singkat, personal, dan tetap punya kesan emosional tanpa terlalu banyak elemen yang mengganggu fokus.",
+      },
+      {
+        title: "Solusi",
+        body: "Solivate Studio membangun landing birthday yang fokus pada sapaan utama, visual manis, dan alur sederhana agar pesan utamanya langsung terasa.",
+      },
+      {
+        title: "Dampak",
+        body: "Website menjadi media ucapan digital yang lebih berkesan, mudah dibagikan, dan cocok dipakai untuk momen personal dengan waktu pengerjaan cepat.",
+      },
+    ],
+  },
+  {
+    slug: "smk01-school-profile",
+    title: "Website Profile Sekolah SMK Solivate 01",
+    description:
+      "Showcase website profile sekolah dengan landing page dan multi-page, dirancang untuk menampilkan identitas sekolah, program unggulan, dan informasi penting secara lebih modern.",
+    image: "/images/smk01.png",
+    width: 1440,
+    height: 880,
+    url: "https://smk01.solivate.com/",
+    keywords: [
+      "website profile sekolah",
+      "website sekolah multi page",
+      "jasa pembuatan website sekolah",
+      "landing page sekolah",
+      "school profile website",
+    ],
+    highlights: [
+      "Landing page sekolah modern",
+      "Struktur multi-page",
+      "Informasi program dan profil",
+      "Tampilan lebih profesional",
+    ],
+    sections: [
+      {
+        title: "Tantangan",
+        body: "Website sekolah perlu menjelaskan identitas, program, dan informasi institusi dengan struktur yang mudah dipahami calon siswa, orang tua, dan publik.",
+      },
+      {
+        title: "Solusi",
+        body: "Solivate Studio menyusun website profile sekolah dengan hero kuat, halaman pendukung, dan alur navigasi yang membantu pengunjung menemukan informasi lebih cepat.",
+      },
+      {
+        title: "Dampak",
+        body: "Sekolah tampil lebih kredibel secara digital, informasi inti lebih terstruktur, dan pengalaman kunjungan terasa lebih modern dari sisi visual maupun konten.",
+      },
+    ],
+  },
+  {
+    slug: "smk01-spmb-custom",
+    title: "Website SPMB Custom SMK Solivate 01",
+    description:
+      "Showcase landing page sekolah dengan SPMB custom, difokuskan untuk kebutuhan promosi pendaftaran siswa baru dan jalur konversi yang lebih jelas.",
+    image: "/images/smk01.png",
+    width: 1440,
+    height: 880,
+    url: "https://smk01.solivate.com/",
+    keywords: [
+      "website SPMB custom",
+      "landing page pendaftaran sekolah",
+      "website PPDB sekolah",
+      "jasa website sekolah custom",
+      "website admissions sekolah",
+    ],
+    highlights: [
+      "Landing SPMB custom",
+      "Fokus akuisisi calon siswa",
+      "Alur CTA pendaftaran lebih jelas",
+      "Cocok untuk kampanye penerimaan",
+    ],
+    sections: [
+      {
+        title: "Tantangan",
+        body: "Halaman penerimaan siswa baru harus mampu menjelaskan value sekolah sekaligus mendorong pengunjung masuk ke alur pendaftaran tanpa kebingungan.",
+      },
+      {
+        title: "Solusi",
+        body: "Solivate Studio menyiapkan landing SPMB yang lebih fokus pada headline, program unggulan, CTA, dan struktur informasi yang mendukung funnel pendaftaran.",
+      },
+      {
+        title: "Dampak",
+        body: "Website membantu sekolah mengemas promosi penerimaan siswa baru dengan lebih rapi, terarah, dan siap dipakai untuk kampanye digital.",
+      },
+    ],
+  },
+  {
+    slug: "pedulisesama",
+    title: "Website Peduli Sesama",
+    description:
+      "Showcase website profile komunitas sosial dengan data keuangan real time, artikel, galeri, dan dashboard untuk pengelolaan konten serta transparansi informasi.",
+    image: "/images/pedulisesama.png",
+    width: 1440,
+    height: 880,
+    url: "https://pedulisesama.solivate.com/",
+    keywords: [
+      "website komunitas sosial",
+      "website data keuangan real time",
+      "jasa website yayasan",
+      "website artikel dan galeri",
+      "dashboard komunitas sosial",
+    ],
+    highlights: [
+      "Profile komunitas sosial",
+      "Data keuangan real time",
+      "Artikel dan galeri kegiatan",
+      "Dashboard pengelolaan",
+    ],
+    sections: [
+      {
+        title: "Tantangan",
+        body: "Komunitas sosial butuh website yang bisa menjelaskan gerakan mereka sekaligus menjaga transparansi dan publikasi aktivitas secara konsisten.",
+      },
+      {
+        title: "Solusi",
+        body: "Solivate Studio membangun website komsos dengan struktur profile, artikel, galeri, data keuangan real time, dan dashboard untuk pengelolaan informasi.",
+      },
+      {
+        title: "Dampak",
+        body: "Website memperkuat kepercayaan publik, memudahkan penyampaian aktivitas komunitas, dan memberi kanal transparansi yang lebih terbuka serta profesional.",
+      },
+    ],
+  },
+  {
+    slug: "cpxindo",
+    title: "Website CPX Indo",
+    description:
+      "Showcase website company profile dengan ecommerce dan dashboard CMS untuk brand apparel, dirancang agar promosi brand dan katalog penjualan berjalan dalam satu ekosistem.",
+    image: "/images/cpxindo.png",
+    width: 1440,
+    height: 880,
+    url: "https://cpxindo.id",
+    keywords: [
+      "website company profile ecommerce",
+      "dashboard cms ecommerce",
+      "website brand apparel",
+      "jasa website company profile custom",
+      "website katalog dan penjualan",
+    ],
+    highlights: [
+      "Company profile dan ecommerce",
+      "Dashboard CMS",
+      "Brand presentation lebih kuat",
+      "Katalog penjualan terintegrasi",
+    ],
+    sections: [
+      {
+        title: "Tantangan",
+        body: "Brand apparel membutuhkan website yang bukan hanya menjelaskan identitas bisnis, tetapi juga mampu mendukung alur katalog dan penjualan secara lebih rapi.",
+      },
+      {
+        title: "Solusi",
+        body: "Solivate Studio menggabungkan company profile, ecommerce, dan dashboard CMS agar brand dapat mengelola tampilan, produk, dan konten dari satu sistem.",
+      },
+      {
+        title: "Dampak",
+        body: "Website membantu brand tampil lebih serius, memudahkan pengelolaan konten dan katalog, serta memberi fondasi digital yang lebih siap dikembangkan.",
+      },
+    ],
+  },
+  {
+    slug: "shofifrozen",
+    title: "Website Shofi Frozen",
+    description:
+      "Showcase website ecommerce frozen food dengan payment gateway, dibuat untuk mempermudah eksplorasi produk, pemesanan, dan alur transaksi pelanggan.",
+    image: "/images/shofifrozen.png",
+    width: 1440,
+    height: 880,
+    url: "https://shofifrozen.com",
+    keywords: [
+      "website ecommerce frozen food",
+      "website payment gateway",
+      "jasa website toko online",
+      "website katalog frozen food",
+      "ecommerce UMKM",
+    ],
+    highlights: [
+      "Ecommerce frozen food",
+      "Integrasi payment gateway",
+      "Kategori dan katalog produk",
+      "Alur checkout lebih praktis",
+    ],
+    sections: [
+      {
+        title: "Tantangan",
+        body: "Toko frozen food membutuhkan website yang memudahkan pelanggan melihat kategori produk dan masuk ke proses transaksi tanpa hambatan.",
+      },
+      {
+        title: "Solusi",
+        body: "Solivate Studio menyiapkan ecommerce yang fokus pada katalog, kategori, checkout, dan dukungan payment gateway agar pengalaman belanja lebih lancar.",
+      },
+      {
+        title: "Dampak",
+        body: "Website membantu bisnis menjual produk dengan tampilan yang lebih terstruktur, meningkatkan kenyamanan pembeli, dan memperkuat kanal penjualan digital.",
+      },
+    ],
+  },
+  {
+    slug: "spectrasec",
+    title: "Website SpectraSec",
+    description:
+      "Showcase website profile komunitas keamanan siber, dirancang untuk memperjelas positioning, identitas komunitas, dan penyampaian inisiatif secara lebih modern.",
+    image: "/images/spectrasec.png",
+    width: 1440,
+    height: 880,
+    url: "https://spectrasec.xyz",
+    keywords: [
+      "website komunitas cyber security",
+      "website profile komunitas",
+      "website ethical hacking indonesia",
+      "jasa website komunitas teknologi",
+      "community profile website",
+    ],
+    highlights: [
+      "Profile komunitas cyber security",
+      "Positioning brand lebih jelas",
+      "Visual modern dan fokus",
+      "Cocok untuk komunitas teknologi",
+    ],
+    sections: [
+      {
+        title: "Tantangan",
+        body: "Komunitas teknologi memerlukan website yang mampu menjelaskan identitas dan arah gerakan mereka secara singkat, jelas, dan tetap relevan secara visual.",
+      },
+      {
+        title: "Solusi",
+        body: "Solivate Studio merancang website profile yang menonjolkan positioning komunitas, visual hero yang kuat, dan struktur konten yang ringkas namun informatif.",
+      },
+      {
+        title: "Dampak",
+        body: "Website membantu komunitas tampil lebih solid, lebih mudah dikenali, dan memiliki rumah digital yang lebih tepat untuk membangun kredibilitas.",
+      },
+    ],
+  },];
 
 export const servicePageEnglish: Record<string, ServicePageTranslation> = {
   "website-development": {
@@ -1012,7 +1344,231 @@ export const portfolioPageEnglish: Record<string, PortfolioPageTranslation> = {
       },
     ],
   },
-};
+  "hammaddanfulanah": {
+    title: "Hammad & Fulanah Wedding Invitation Website",
+    description:
+      "Showcase of a simple wedding invitation website with custom guest names, a personal tone, and a lightweight access flow that is easy to share with family and friends.",
+    highlights: [
+      "Simple wedding invitation",
+      "Custom guest name",
+      "Mobile-friendly experience",
+      "Easy-to-share link",
+    ],
+    sections: [
+      {
+        title: "Challenge",
+        body: "A digital invitation needs to feel personal without making the link heavy or difficult to open across different devices.",
+      },
+      {
+        title: "Solution",
+        body: "Solivate Studio created a lightweight invitation website focused on the couple's main moment, custom guest names, and a comfortable mobile experience.",
+      },
+      {
+        title: "Impact",
+        body: "The result is a simple, elegant digital invitation that is easy to share and more practical for personal wedding needs.",
+      },
+    ],
+  },
+  "weddingpro": {
+    title: "WeddingPro Invitation & Dashboard Website",
+    description:
+      "Showcase of a wedding invitation website with barcode access and dashboard support, designed for guest flow, attendance validation, and more structured event management.",
+    highlights: [
+      "Digital invitation with barcode",
+      "Guest management dashboard",
+      "Cleaner RSVP flow",
+      "More modern event experience",
+    ],
+    sections: [
+      {
+        title: "Challenge",
+        body: "A more advanced digital invitation requires an elegant guest experience and a dashboard that simplifies attendance management.",
+      },
+      {
+        title: "Solution",
+        body: "Solivate Studio combined a memorable invitation landing page with barcode access and an internal dashboard to support RSVP monitoring and guest validation.",
+      },
+      {
+        title: "Impact",
+        body: "The website delivers a more premium wedding experience, better guest management, and stronger digital value for the event.",
+      },
+    ],
+  },
+  "hbd-matt": {
+    title: "Matt Birthday Greeting Website",
+    description:
+      "Showcase of a simple birthday greeting website with a personal hero, light visuals, and an experience designed to make a digital celebration feel special.",
+    highlights: [
+      "Personal birthday greeting",
+      "Lightweight landing page",
+      "Focused emotional hero",
+      "Great for a digital gift",
+    ],
+    sections: [
+      {
+        title: "Challenge",
+        body: "A birthday greeting website needs to stay short and personal while still carrying emotional impact without too many distracting elements.",
+      },
+      {
+        title: "Solution",
+        body: "Solivate Studio built a birthday landing page centered on the main greeting, soft visuals, and a simple flow so the message lands immediately.",
+      },
+      {
+        title: "Impact",
+        body: "The website becomes a more memorable digital greeting, easy to share, and suitable for personal moments with fast turnaround.",
+      },
+    ],
+  },
+  "smk01-school-profile": {
+    title: "SMK Solivate 01 School Profile Website",
+    description:
+      "Showcase of a school profile website with a landing page and multi-page structure, designed to present the school's identity, key programs, and important information in a more modern way.",
+    highlights: [
+      "Modern school landing page",
+      "Multi-page structure",
+      "Program and profile information",
+      "More professional presentation",
+    ],
+    sections: [
+      {
+        title: "Challenge",
+        body: "A school website needs to explain identity, programs, and institutional information clearly for prospective students, parents, and the public.",
+      },
+      {
+        title: "Solution",
+        body: "Solivate Studio structured the school profile website with a strong hero, supporting pages, and navigation that helps visitors find information faster.",
+      },
+      {
+        title: "Impact",
+        body: "The school gains a more credible digital presence, better-structured core information, and a more modern visitor experience across content and visuals.",
+      },
+    ],
+  },
+  "smk01-spmb-custom": {
+    title: "SMK Solivate 01 Custom Admissions Website",
+    description:
+      "Showcase of a school landing page with custom admissions flow, focused on promoting new student enrollment and guiding visitors through a clearer conversion path.",
+    highlights: [
+      "Custom admissions landing page",
+      "Focused on student acquisition",
+      "Clearer registration CTA flow",
+      "Built for enrollment campaigns",
+    ],
+    sections: [
+      {
+        title: "Challenge",
+        body: "A new student admission page must communicate the school's value while guiding visitors into the registration flow without confusion.",
+      },
+      {
+        title: "Solution",
+        body: "Solivate Studio prepared a more focused admissions landing page with stronger headlines, featured programs, calls to action, and supporting funnel structure.",
+      },
+      {
+        title: "Impact",
+        body: "The website helps the school package admissions promotion in a cleaner, more directed format that is ready for digital campaigns.",
+      },
+    ],
+  },
+  "pedulisesama": {
+    title: "Peduli Sesama Website",
+    description:
+      "Showcase of a social community profile website with real-time financial data, articles, gallery, and a dashboard for content management and transparent communication.",
+    highlights: [
+      "Social community profile",
+      "Real-time financial data",
+      "Articles and activity gallery",
+      "Management dashboard",
+    ],
+    sections: [
+      {
+        title: "Challenge",
+        body: "A social community needs a website that explains its mission while maintaining transparency and consistently publishing activities.",
+      },
+      {
+        title: "Solution",
+        body: "Solivate Studio built a community website with profile pages, articles, gallery, real-time financial data, and a dashboard for managing information.",
+      },
+      {
+        title: "Impact",
+        body: "The website strengthens public trust, makes community activities easier to communicate, and provides a more open and professional transparency channel.",
+      },
+    ],
+  },
+  "cpxindo": {
+    title: "CPX Indo Website",
+    description:
+      "Showcase of a company profile website with ecommerce and CMS dashboard for an apparel brand, designed so brand promotion and sales catalog operations live in one ecosystem.",
+    highlights: [
+      "Company profile and ecommerce",
+      "CMS dashboard",
+      "Stronger brand presentation",
+      "Integrated sales catalog",
+    ],
+    sections: [
+      {
+        title: "Challenge",
+        body: "An apparel brand needs a website that not only explains the business identity but also supports a cleaner catalog and sales flow.",
+      },
+      {
+        title: "Solution",
+        body: "Solivate Studio combined company profile, ecommerce, and a CMS dashboard so the brand can manage appearance, products, and content from one system.",
+      },
+      {
+        title: "Impact",
+        body: "The website helps the brand look more serious, simplifies content and catalog management, and provides a stronger digital foundation for future growth.",
+      },
+    ],
+  },
+  "shofifrozen": {
+    title: "Shofi Frozen Website",
+    description:
+      "Showcase of a frozen food ecommerce website with payment gateway support, built to simplify product exploration, ordering, and customer transaction flow.",
+    highlights: [
+      "Frozen food ecommerce",
+      "Payment gateway integration",
+      "Product categories and catalog",
+      "More practical checkout flow",
+    ],
+    sections: [
+      {
+        title: "Challenge",
+        body: "A frozen food store needs a website that helps customers browse product categories and move into checkout without friction.",
+      },
+      {
+        title: "Solution",
+        body: "Solivate Studio prepared an ecommerce experience focused on catalog, categories, checkout, and payment gateway support for smoother shopping.",
+      },
+      {
+        title: "Impact",
+        body: "The website helps the business sell products in a more structured way, improves buyer comfort, and strengthens its digital sales channel.",
+      },
+    ],
+  },
+  "spectrasec": {
+    title: "SpectraSec Website",
+    description:
+      "Showcase of a cybersecurity community profile website, designed to clarify positioning, community identity, and initiative communication in a more modern format.",
+    highlights: [
+      "Cybersecurity community profile",
+      "Clearer brand positioning",
+      "Modern and focused visuals",
+      "Suitable for tech communities",
+    ],
+    sections: [
+      {
+        title: "Challenge",
+        body: "A technology community needs a website that can explain its identity and direction clearly, briefly, and with relevant visual treatment.",
+      },
+      {
+        title: "Solution",
+        body: "Solivate Studio designed a profile website that emphasizes community positioning, a strong hero visual, and concise but informative content structure.",
+      },
+      {
+        title: "Impact",
+        body: "The website helps the community appear more solid, easier to recognize, and better equipped with a digital home that supports credibility.",
+      },
+    ],
+  },};
 
 export type CityPage = {
   slug: string;
