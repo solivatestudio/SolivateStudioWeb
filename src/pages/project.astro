@@ -2,7 +2,6 @@
 import "../index.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import { getPublicCmsResources } from "../lib/public-cms";
 import { siteUrl } from "../data/seo-pages";
 
 type LocaleCopy = {
@@ -42,6 +41,10 @@ const projectI18n: Record<string, LocaleCopy> = {
   },
   "project.case": { id: "Lihat Project", en: "View Project" },
   "project.live": { id: "Kunjungi Website", en: "Visit Website" },
+  "project.empty": {
+    id: "Belum ada project yang dipublikasikan dari dashboard CMS.",
+    en: "No published projects yet from the CMS dashboard."
+  },
   "project.cta.eyebrow": { id: "Mau project seperti ini?", en: "Want a project like this?" },
   "project.cta.title": {
     id: "Konsultasi sekarang, gratis. Kita susun scope yang paling masuk akal untuk brand Anda.",
@@ -65,71 +68,17 @@ const projectI18n: Record<string, LocaleCopy> = {
   "floating.wa": { id: "Konsultasi sekarang, gratis!", en: "Free consultation now!" }
 };
 
-const cmsResources = await getPublicCmsResources(["projects"]);
-const projectItems = (cmsResources.projects || []).map((item) => {
-  const data = item.data || {};
-  const url = String(data.url || "").trim() || "#";
-  const image = String(data.image_url || "").trim() || "/solivate-logo.webp";
-  const title = String(data.title || "Solivate Studio Project").trim();
-  const labelId = String(data.type_id || "Project Showcase").trim();
-  const labelEn = String(data.type_en || labelId || "Project Showcase").trim();
-  const isInternalPortfolio = url.startsWith("/portfolio/");
-  const isExternal = /^https?:\/\//.test(url);
-  return {
-    id: item.id,
-    sort_order: item.sort_order,
-    title,
-    labelId,
-    labelEn,
-    descriptionId: labelId,
-    descriptionEn: labelEn,
-    image,
-    width: 1440,
-    height: 900,
-    url,
-    primaryHref: url,
-    secondaryHref: isInternalPortfolio ? undefined : url,
-    primaryTextId: isInternalPortfolio ? "Lihat Project" : "Kunjungi Website",
-    primaryTextEn: isInternalPortfolio ? "View Project" : "Visit Website",
-    secondaryTextId: isExternal ? "Kunjungi Website" : "",
-    secondaryTextEn: isExternal ? "Visit Website" : "",
-    external: isExternal,
-  };
-});
-
-const portfolioI18n = Object.fromEntries(
-  projectItems.flatMap((project, index) => [
-    [`project.${index}.title`, { id: project.title, en: project.title }],
-    [`project.${index}.description`, { id: project.descriptionId, en: project.descriptionEn }],
-    [`project.${index}.highlight.0`, { id: project.labelId, en: project.labelEn }],
-  ])
-);
-
-const i18nJson = JSON.stringify({ ...projectI18n, ...portfolioI18n });
+const i18nJson = JSON.stringify(projectI18n);
 const pageTitle = "Project Showcase Solivate Studio | Website UMKM, Komunitas & Digital solution agency Indonesia";
 const pageDescription = projectI18n["meta.description"].id;
 const canonical = `${siteUrl}/project`;
-const heroImage = projectItems[0]?.image || "/solivate-logo.webp";
+const heroImage = "/solivate-logo.webp";
 const collectionSchema = JSON.stringify({
   "@context": "https://schema.org",
   "@type": "CollectionPage",
   name: "Project Showcase Solivate Studio",
   url: canonical,
-  description: pageDescription,
-  mainEntity: {
-    "@type": "ItemList",
-    itemListElement: projectItems.map((project, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      item: {
-        "@type": "CreativeWork",
-        name: project.title,
-        url: project.url.startsWith("http") ? project.url : `${siteUrl}${project.url}`,
-        image: project.image.startsWith("http") ? project.image : `${siteUrl}${project.image}`,
-        description: project.descriptionId
-      }
-    }))
-  }
+  description: pageDescription
 });
 const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
 ---
@@ -149,7 +98,7 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDescription} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={heroImage.startsWith("http") ? heroImage : `${siteUrl}${heroImage}`} />
+    <meta property="og:image" content={`${siteUrl}${heroImage}`} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={pageDescription} />
@@ -158,11 +107,6 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <style>
-      @media (max-width: 768px) {
-        .seo-responsive-signal { display: block; }
-      }
-    </style>
     {gaId && (
       <>
         <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
@@ -196,11 +140,11 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
           </div>
           <div class="project-hero-panel" aria-label="Project summary">
             <div>
-              <strong>{projectItems.length}</strong>
+              <strong data-project-count>0</strong>
               <span data-i18n="project.stat.1.label">Project aktif</span>
             </div>
             <div>
-              <strong>{new Set(projectItems.map((item) => item.labelId)).size}+</strong>
+              <strong data-project-market-count>0</strong>
               <span data-i18n="project.stat.2.label">Target pasar</span>
             </div>
             <div>
@@ -220,37 +164,7 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
           <p class="lead" data-i18n="project.lead">Lihat bagaimana Solivate Studio membantu komunitas, UMKM, dan brand lokal punya website yang rapi, cepat, dan siap dipakai.</p>
         </div>
 
-        <div class="container project-showcase-grid">
-          {projectItems.map((project, index) => (
-            <article class="project-showcase-card">
-              <a class="project-card-media" href={project.primaryHref} aria-label={`Lihat project ${project.title}`} target={project.external ? "_blank" : undefined} rel={project.external ? "noreferrer" : undefined}>
-                <img src={project.image} alt={project.title} width={project.width} height={project.height} loading={index === 0 ? "eager" : "lazy"} />
-              </a>
-              <div class="project-card-body">
-                <div>
-                  <span class="project-card-index">{String(index + 1).padStart(2, "0")}</span>
-                  <h3 data-i18n={`project.${index}.title`}>{project.title}</h3>
-                  <p data-i18n={`project.${index}.description`}>{project.descriptionId}</p>
-                </div>
-                <div class="project-tags">
-                  <span data-i18n={`project.${index}.highlight.0`}>{project.labelId}</span>
-                </div>
-                <div class="project-card-actions">
-                  <a class="btn-primary" href={project.primaryHref} target={project.external ? "_blank" : undefined} rel={project.external ? "noreferrer" : undefined}>
-                    <span>{project.primaryTextId}</span>
-                    <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
-                  </a>
-                  {project.secondaryHref && (
-                    <a class="btn-secondary" href={project.secondaryHref} target="_blank" rel="noreferrer">
-                      <span data-i18n="project.live">Kunjungi Website</span>
-                      <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
-                    </a>
-                  )}
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
+        <div class="container project-showcase-grid"></div>
       </section>
 
       <section class="section project-cta-section">
@@ -271,6 +185,18 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
     <script is:inline>
       const translations = JSON.parse(document.getElementById("project-i18n-data")?.textContent || "{}");
       const header = document.querySelector("[data-header]");
+      const grid = document.querySelector(".project-showcase-grid");
+      const projectCount = document.querySelector("[data-project-count]");
+      const marketCount = document.querySelector("[data-project-market-count]");
+
+      const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#039;"
+      }[char]));
+      const cmsText = (data, key, lang) => data?.[`${key}_${lang}`] || data?.[`${key}_id`] || data?.[key] || "";
 
       const updateHeader = () => {
         const y = Math.max(0, window.scrollY);
@@ -311,14 +237,67 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
         });
       };
 
+      const renderProjects = (items) => {
+        const activeLang = document.documentElement.lang === "en" ? "en" : "id";
+        const published = Array.isArray(items) ? items : [];
+        const labels = new Set();
+
+        projectCount.textContent = String(published.length);
+
+        grid.innerHTML = published.length ? published.map((item, index) => {
+          const data = item?.data || {};
+          const title = escapeHtml(data.title || "Solivate Studio Project");
+          const description = escapeHtml(cmsText(data, "type", activeLang) || cmsText(data, "type", "id") || "Project Showcase");
+          const label = escapeHtml(cmsText(data, "type", activeLang) || cmsText(data, "type", "id") || "Project Showcase");
+          const url = String(data.url || "#").trim() || "#";
+          const external = /^https?:\/\//.test(url);
+          const image = escapeHtml(String(data.image_url || "/solivate-logo.webp").trim() || "/solivate-logo.webp");
+          if (label) labels.add(label);
+          return `<article class="project-showcase-card">
+            <a class="project-card-media" href="${escapeHtml(url)}" aria-label="${title}" ${external ? 'target="_blank" rel="noreferrer"' : ""}>
+              <img src="${image}" alt="${title}" width="1440" height="900" loading="${index === 0 ? "eager" : "lazy"}" />
+            </a>
+            <div class="project-card-body">
+              <div>
+                <span class="project-card-index">${String(index + 1).padStart(2, "0")}</span>
+                <h3>${title}</h3>
+                <p>${description}</p>
+              </div>
+              <div class="project-tags">
+                <span>${label}</span>
+              </div>
+              <div class="project-card-actions">
+                <a class="btn-primary" href="${escapeHtml(url)}" ${external ? 'target="_blank" rel="noreferrer"' : ""}>
+                  <span>${escapeHtml(translations[external ? "project.live" : "project.case"]?.[activeLang] || (external ? "Visit Website" : "View Project"))}</span>
+                  <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
+                </a>
+              </div>
+            </div>
+          </article>`;
+        }).join("") : `<article class="project-showcase-card"><div class="project-card-body"><div><h3>${escapeHtml(translations["project.empty"]?.[activeLang] || "Belum ada project.")}</h3></div></div></article>`;
+
+        marketCount.textContent = String(labels.size);
+      };
+
       document.querySelectorAll("[data-lang-switch]").forEach((button) => {
-        button.addEventListener("click", () => setLanguage(button.getAttribute("data-lang-switch"), true));
+        button.addEventListener("click", () => {
+          setLanguage(button.getAttribute("data-lang-switch"), true);
+          fetch("/api/public/content?type=projects", { cache: "no-store" })
+            .then((response) => response.ok ? response.json() : null)
+            .then((data) => renderProjects(data?.resources?.projects || []))
+            .catch(() => renderProjects([]));
+        });
       });
 
       const savedLanguage = window.localStorage.getItem("solivate-language-manual") === "true"
         ? window.localStorage.getItem("solivate-language")
         : "id";
       setLanguage(savedLanguage || "id");
+
+      fetch("/api/public/content?type=projects", { cache: "no-store" })
+        .then((response) => response.ok ? response.json() : null)
+        .then((data) => renderProjects(data?.resources?.projects || []))
+        .catch(() => renderProjects([]));
     </script>
   </body>
 </html>

@@ -1,17 +1,10 @@
 ---
 import { targetCities } from "../data/seo-pages";
-import { getPublicCmsEntries } from "../lib/public-cms";
 
 const {
   home = false,
   i18n = false
 } = Astro.props;
-
-const cmsEntries = await getPublicCmsEntries();
-const contactEmail = String(cmsEntries.contact_email || "solivatestudio@gmail.com").trim();
-const contactWhatsapp = String(cmsEntries.contact_whatsapp || "6281219118993").replace(/\D/g, "") || "6281219118993";
-const contactInstagram = String(cmsEntries.contact_instagram || "https://www.instagram.com/solivatestudio/").trim();
-const whatsappText = encodeURIComponent("Halo Solivate Studio, saya mau konsultasi gratis untuk project website.");
 
 const attr = (key: string) => (i18n ? { "data-i18n": key } : {});
 const navLinks = [
@@ -62,9 +55,9 @@ const navLinks = [
       </div>
       <div class="footer-col">
         <p class="footer-col-title" {...attr("footer.connect")}>Kontak</p>
-        <a href={`mailto:${contactEmail}`} class="footer-email-link" data-public-contact="email">{contactEmail}</a>
-        <a href={`https://wa.me/${contactWhatsapp}`} target="_blank" rel="noreferrer" data-public-contact="whatsapp">WhatsApp</a>
-        <a href={contactInstagram} target="_blank" rel="noreferrer" data-public-contact="instagram">Instagram</a>
+        <a href="mailto:solivatestudio@gmail.com" class="footer-email-link" data-public-contact="email">solivatestudio@gmail.com</a>
+        <a href="https://wa.me/6281219118993" target="_blank" rel="noreferrer" data-public-contact="whatsapp">WhatsApp</a>
+        <a href="https://www.instagram.com/solivatestudio/" target="_blank" rel="noreferrer" data-public-contact="instagram">Instagram</a>
       </div>
     </div>
 
@@ -89,7 +82,7 @@ const navLinks = [
 
 <a
   class="floating-wa"
-  href={`https://wa.me/${contactWhatsapp}?text=${whatsappText}`}
+  href="https://wa.me/6281219118993?text=Halo%20Solivate%20Studio%2C%20saya%20mau%20konsultasi%20gratis%20untuk%20project%20website."
   target="_blank"
   rel="noreferrer"
   aria-label="Konsultasi sekarang, gratis via WhatsApp"
@@ -131,5 +124,25 @@ const navLinks = [
     sendEvent("pageview");
     window.setInterval(() => sendEvent("heartbeat"), 60000);
 
+    fetch("/api/public/cms", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        const entries = data?.entries || {};
+        const email = String(entries.contact_email || "").trim();
+        const whatsapp = String(entries.contact_whatsapp || "").replace(/\D/g, "");
+        const instagram = String(entries.contact_instagram || "").trim();
+        const emailNode = document.querySelector('[data-public-contact="email"]');
+        const whatsappNode = document.querySelector('[data-public-contact="whatsapp"]');
+        const floatingWhatsappNode = document.querySelector(".floating-wa");
+        const instagramNode = document.querySelector('[data-public-contact="instagram"]');
+        if (email && emailNode) { emailNode.textContent = email; emailNode.href = `mailto:${email}`; }
+        if (whatsapp && whatsappNode) whatsappNode.href = `https://wa.me/${whatsapp}`;
+        if (whatsapp && floatingWhatsappNode) {
+          const text = encodeURIComponent("Halo Solivate Studio, saya mau konsultasi gratis untuk project website.");
+          floatingWhatsappNode.href = `https://wa.me/${whatsapp}?text=${text}`;
+        }
+        if (instagram && instagramNode) instagramNode.href = instagram;
+      })
+      .catch(() => {});
   })();
 </script>
