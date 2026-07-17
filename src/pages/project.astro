@@ -2,7 +2,8 @@
 import "../index.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import { portfolioPageEnglish, portfolioPages, siteUrl } from "../data/seo-pages";
+import { getPublicCmsResources } from "../lib/public-cms";
+import { siteUrl } from "../data/seo-pages";
 
 type LocaleCopy = {
   id: string;
@@ -39,7 +40,7 @@ const projectI18n: Record<string, LocaleCopy> = {
     id: "Showcase website Solivate Studio.",
     en: "Solivate Studio website showcase."
   },
-  "project.case": { id: "Lihat Studi Kasus", en: "View Case Study" },
+  "project.case": { id: "Lihat Project", en: "View Project" },
   "project.live": { id: "Kunjungi Website", en: "Visit Website" },
   "project.cta.eyebrow": { id: "Mau project seperti ini?", en: "Want a project like this?" },
   "project.cta.title": {
@@ -64,24 +65,51 @@ const projectI18n: Record<string, LocaleCopy> = {
   "floating.wa": { id: "Konsultasi sekarang, gratis!", en: "Free consultation now!" }
 };
 
+const cmsResources = await getPublicCmsResources(["projects"]);
+const projectItems = (cmsResources.projects || []).map((item) => {
+  const data = item.data || {};
+  const url = String(data.url || "").trim() || "#";
+  const image = String(data.image_url || "").trim() || "/solivate-logo.webp";
+  const title = String(data.title || "Solivate Studio Project").trim();
+  const labelId = String(data.type_id || "Project Showcase").trim();
+  const labelEn = String(data.type_en || labelId || "Project Showcase").trim();
+  const isInternalPortfolio = url.startsWith("/portfolio/");
+  const isExternal = /^https?:\/\//.test(url);
+  return {
+    id: item.id,
+    sort_order: item.sort_order,
+    title,
+    labelId,
+    labelEn,
+    descriptionId: labelId,
+    descriptionEn: labelEn,
+    image,
+    width: 1440,
+    height: 900,
+    url,
+    primaryHref: url,
+    secondaryHref: isInternalPortfolio ? undefined : url,
+    primaryTextId: isInternalPortfolio ? "Lihat Project" : "Kunjungi Website",
+    primaryTextEn: isInternalPortfolio ? "View Project" : "Visit Website",
+    secondaryTextId: isExternal ? "Kunjungi Website" : "",
+    secondaryTextEn: isExternal ? "Visit Website" : "",
+    external: isExternal,
+  };
+});
+
 const portfolioI18n = Object.fromEntries(
-  portfolioPages.flatMap((project, index) => {
-    const en = portfolioPageEnglish[project.slug];
-    return [
-      [`project.${index}.title`, { id: project.title, en: en.title }],
-      [`project.${index}.description`, { id: project.description, en: en.description }],
-      ...project.highlights.map((highlight, highlightIndex) => [
-        `project.${index}.highlight.${highlightIndex}`,
-        { id: highlight, en: en.highlights[highlightIndex] }
-      ])
-    ];
-  })
+  projectItems.flatMap((project, index) => [
+    [`project.${index}.title`, { id: project.title, en: project.title }],
+    [`project.${index}.description`, { id: project.descriptionId, en: project.descriptionEn }],
+    [`project.${index}.highlight.0`, { id: project.labelId, en: project.labelEn }],
+  ])
 );
 
 const i18nJson = JSON.stringify({ ...projectI18n, ...portfolioI18n });
 const pageTitle = "Project Showcase Solivate Studio | Website UMKM, Komunitas & Digital solution agency Indonesia";
 const pageDescription = projectI18n["meta.description"].id;
 const canonical = `${siteUrl}/project`;
+const heroImage = projectItems[0]?.image || "/solivate-logo.webp";
 const collectionSchema = JSON.stringify({
   "@context": "https://schema.org",
   "@type": "CollectionPage",
@@ -90,15 +118,15 @@ const collectionSchema = JSON.stringify({
   description: pageDescription,
   mainEntity: {
     "@type": "ItemList",
-    itemListElement: portfolioPages.map((project, index) => ({
+    itemListElement: projectItems.map((project, index) => ({
       "@type": "ListItem",
       position: index + 1,
       item: {
         "@type": "CreativeWork",
         name: project.title,
-        url: `${siteUrl}/portfolio/${project.slug}`,
-        image: `${siteUrl}${project.image}`,
-        description: project.description
+        url: project.url.startsWith("http") ? project.url : `${siteUrl}${project.url}`,
+        image: project.image.startsWith("http") ? project.image : `${siteUrl}${project.image}`,
+        description: project.descriptionId
       }
     }))
   }
@@ -121,7 +149,7 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDescription} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={`${siteUrl}${portfolioPages[0].image}`} />
+    <meta property="og:image" content={heroImage.startsWith("http") ? heroImage : `${siteUrl}${heroImage}`} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={pageDescription} />
@@ -168,11 +196,11 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
           </div>
           <div class="project-hero-panel" aria-label="Project summary">
             <div>
-              <strong>{portfolioPages.length}</strong>
+              <strong>{projectItems.length}</strong>
               <span data-i18n="project.stat.1.label">Project aktif</span>
             </div>
             <div>
-              <strong>3+</strong>
+              <strong>{new Set(projectItems.map((item) => item.labelId)).size}+</strong>
               <span data-i18n="project.stat.2.label">Target pasar</span>
             </div>
             <div>
@@ -193,31 +221,31 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
         </div>
 
         <div class="container project-showcase-grid">
-          {portfolioPages.map((project, index) => (
+          {projectItems.map((project, index) => (
             <article class="project-showcase-card">
-              <a class="project-card-media" href={`/portfolio/${project.slug}`} aria-label={`Lihat studi kasus ${project.title}`}>
+              <a class="project-card-media" href={project.primaryHref} aria-label={`Lihat project ${project.title}`} target={project.external ? "_blank" : undefined} rel={project.external ? "noreferrer" : undefined}>
                 <img src={project.image} alt={project.title} width={project.width} height={project.height} loading={index === 0 ? "eager" : "lazy"} />
               </a>
               <div class="project-card-body">
                 <div>
                   <span class="project-card-index">{String(index + 1).padStart(2, "0")}</span>
                   <h3 data-i18n={`project.${index}.title`}>{project.title}</h3>
-                  <p data-i18n={`project.${index}.description`}>{project.description}</p>
+                  <p data-i18n={`project.${index}.description`}>{project.descriptionId}</p>
                 </div>
                 <div class="project-tags">
-                  {project.highlights.slice(0, 4).map((highlight, highlightIndex) => (
-                    <span data-i18n={`project.${index}.highlight.${highlightIndex}`}>{highlight}</span>
-                  ))}
+                  <span data-i18n={`project.${index}.highlight.0`}>{project.labelId}</span>
                 </div>
                 <div class="project-card-actions">
-                  <a class="btn-primary" href={`/portfolio/${project.slug}`}>
-                    <span data-i18n="project.case">Lihat Studi Kasus</span>
+                  <a class="btn-primary" href={project.primaryHref} target={project.external ? "_blank" : undefined} rel={project.external ? "noreferrer" : undefined}>
+                    <span>{project.primaryTextId}</span>
                     <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
                   </a>
-                  <a class="btn-secondary" href={project.url} target="_blank" rel="noreferrer">
-                    <span data-i18n="project.live">Kunjungi Website</span>
-                    <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
-                  </a>
+                  {project.secondaryHref && (
+                    <a class="btn-secondary" href={project.secondaryHref} target="_blank" rel="noreferrer">
+                      <span data-i18n="project.live">Kunjungi Website</span>
+                      <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
+                    </a>
+                  )}
                 </div>
               </div>
             </article>
