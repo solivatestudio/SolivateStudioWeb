@@ -2,7 +2,9 @@
 import "../index.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import { targetCities, servicePages, portfolioPages, siteUrl } from "../data/seo-pages";
+import { targetCities, servicePages, siteUrl } from "../data/seo-pages";
+
+export const prerender = true;
 
 export const getStaticPaths = () =>
   targetCities.map((city) => ({

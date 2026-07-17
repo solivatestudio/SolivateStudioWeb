@@ -2,6 +2,7 @@
 import "../index.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import { getPublicCmsEntries, getPublicCmsResources } from "../lib/public-cms";
 import { servicePageEnglish, servicePages } from "../data/seo-pages";
 
 type LocaleCopy = {
@@ -179,6 +180,18 @@ const i18n: Record<string, LocaleCopy> = {
   "floating.wa": { id: "Konsultasi sekarang, gratis!", en: "Free consultation now!" }
 };
 
+const cmsEntries = await getPublicCmsEntries();
+const cmsResources = await getPublicCmsResources(["pricing", "projects", "faq"]);
+
+Object.keys(i18n).forEach((translationKey) => {
+  ["id", "en"].forEach((locale) => {
+    const value = cmsEntries[`copy:${translationKey}:${locale}`];
+    if (typeof value === "string" && value.trim()) {
+      i18n[translationKey][locale as "id" | "en"] = value;
+    }
+  });
+});
+
 const services = [
   { icon: "UI", titleKey: "service.1.title", descKey: "service.1.desc", href: "/layanan/sme-website" },
   { icon: "</>", titleKey: "service.2.title", descKey: "service.2.desc", href: "/layanan/mosque-community-website" },
@@ -252,6 +265,10 @@ const faqs = [
 
 const marqueeItems = ["marquee.ui", "marquee.web", "marquee.saas", "marquee.brand", "marquee.care", "marquee.auto"];
 const tx = (key: string) => i18n[key]?.id ?? key;
+const cmsText = (data: Record<string, any>, key: string, lang: "id" | "en") =>
+  data?.[`${key}_${lang}`] || data?.[`${key}_id`] || data?.[key] || "";
+const cmsList = (data: Record<string, any>, key: string, lang: "id" | "en") =>
+  Array.isArray(data?.[`${key}_${lang}`]) ? data[`${key}_${lang}`] : [];
 const serviceCategoryI18n = Object.fromEntries(
   servicePages.map((page) => [
     `service.category.${page.slug}`,
@@ -259,6 +276,10 @@ const serviceCategoryI18n = Object.fromEntries(
   ])
 );
 const i18nJson = JSON.stringify({ ...i18n, ...serviceCategoryI18n });
+const cmsResourcesJson = JSON.stringify(cmsResources);
+const homepagePricing = (cmsResources.pricing || []).filter((item) => item.data?.homepage).slice(0, 3);
+const homepageProjects = (cmsResources.projects || []).filter((item) => item.data?.homepage).slice(0, 6);
+const homepageFaqs = (cmsResources.faq || []).slice(0, 6);
 const siteUrl = "https://solivate.com";
 const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
@@ -505,7 +526,21 @@ const organizationSchema = JSON.stringify({
           </div>
         </div>
         <div class="container pricing-grid">
-          {pricingPreview.map((plan, index) => (
+          {homepagePricing.length ? homepagePricing.map((item) => {
+            const data = item.data || {};
+            const features = cmsList(data, "features", "id").slice(0, 4);
+            return (
+              <article class={`pricing-card ${data.featured ? "featured" : ""}`}>
+                <span class="pricing-label">{cmsText(data, "badge", "id")}</span>
+                <div class="card-title">{cmsText(data, "name", "id")}</div>
+                <strong>{cmsText(data, "price", "id")}</strong>
+                <p>{cmsText(data, "description", "id")}</p>
+                <ul>
+                  {features.map((feature: string) => <li>{feature}</li>)}
+                </ul>
+              </article>
+            );
+          }) : pricingPreview.map((plan, index) => (
             <article class={`pricing-card ${index === 1 ? "featured" : ""}`}>
               <span class="pricing-label" data-i18n={plan.labelKey}>{tx(plan.labelKey)}</span>
               <div class="card-title" data-i18n={plan.titleKey}>{tx(plan.titleKey)}</div>
@@ -534,7 +569,20 @@ const organizationSchema = JSON.stringify({
           </div>
         </div>
         <div class="container work-grid">
-          {works.map((item, index) => (
+          {homepageProjects.length ? homepageProjects.map((item, index) => {
+            const data = item.data || {};
+            const url = data.url || "#contact";
+            const external = url.startsWith("http");
+            return (
+              <a class="work-card" data-project-card={index + 1} href={url} target={external ? "_blank" : undefined} rel={external ? "noreferrer" : undefined}>
+                <img data-project-image src={data.image_url || "/solivate-logo.webp"} alt={data.title || "Solivate Project"} width="1440" height="900" loading="lazy" decoding="async" />
+                <div>
+                  <span>{cmsText(data, "type", "id")}</span>
+                  <p class="card-heading" data-project-title>{data.title}</p>
+                </div>
+              </a>
+            );
+          }) : works.map((item, index) => (
             <a class="work-card" data-project-card={index + 1} href={item.url ?? "#contact"} target={item.url?.startsWith("http") ? "_blank" : undefined} rel={item.url?.startsWith("http") ? "noreferrer" : undefined}>
               <img data-project-image src={item.img} alt={item.title} width={item.width} height={item.height} loading="lazy" decoding="async" />
               <div>
@@ -572,7 +620,18 @@ const organizationSchema = JSON.stringify({
             <h2 data-i18n="contact.title">{tx("contact.title")}</h2>
             <p class="lead" data-i18n="contact.lead">{tx("contact.lead")}</p>
             <div class="faq-list">
-              {faqs.map(([q, a], index) => (
+              {homepageFaqs.length ? homepageFaqs.map((item, index) => {
+                const data = item.data || {};
+                return (
+                  <article class="faq-item" data-faq>
+                    <button type="button" data-faq-trigger aria-expanded={index === 0 ? "true" : "false"}>
+                      <span>{cmsText(data, "question", "id")}</span>
+                      <span class="chevron" aria-hidden="true"></span>
+                    </button>
+                    <p data-faq-panel hidden={index !== 0}>{cmsText(data, "answer", "id")}</p>
+                  </article>
+                );
+              }) : faqs.map(([q, a], index) => (
                 <article class="faq-item" data-faq>
                   <button type="button" data-faq-trigger aria-expanded={index === 0 ? "true" : "false"}>
                     <span data-i18n={q}>{tx(q)}</span>
@@ -631,10 +690,11 @@ const organizationSchema = JSON.stringify({
 
     <script is:inline type="application/ld+json" set:html={organizationSchema}></script>
     <script is:inline type="application/json" id="i18n-data" set:html={i18nJson}></script>
+    <script is:inline type="application/json" id="cms-resources-data" set:html={cmsResourcesJson}></script>
     <script is:inline>
       const translations = JSON.parse(document.getElementById("i18n-data")?.textContent || "{}");
       const header = document.querySelector("[data-header]");
-      let cmsResources = {};
+      let cmsResources = JSON.parse(document.getElementById("cms-resources-data")?.textContent || "{}");
 
       const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
         "&": "&amp;",
@@ -770,43 +830,7 @@ const organizationSchema = JSON.stringify({
         : "id";
       setLanguage(savedLanguage || "id");
 
-      fetch("/api/public/cms", { cache: "no-store" })
-        .then((response) => response.ok ? response.json() : null)
-        .then((data) => {
-          const entries = data?.entries || {};
-          Object.keys(translations).forEach((translationKey) => {
-            ["id", "en"].forEach((locale) => {
-              const value = entries[`copy:${translationKey}:${locale}`];
-              if (typeof value === "string" && value.trim()) translations[translationKey][locale] = value;
-            });
-          });
-          const legacyMap = { "hero.title": "hero_title", "hero.text": "hero_text", "about.title": "about_title" };
-          Object.entries(legacyMap).forEach(([translationKey, cmsKey]) => ["id", "en"].forEach((locale) => {
-            const value = entries[`${cmsKey}_${locale}`];
-            if (typeof value === "string" && value.trim() && !entries[`copy:${translationKey}:${locale}`]) translations[translationKey][locale] = value;
-          }));
-          document.querySelectorAll("[data-project-card]").forEach((card) => {
-            const index = card.dataset.projectCard;
-            const title = String(entries[`project:${index}:title`] || "").trim();
-            const url = String(entries[`project:${index}:url`] || "").trim();
-            const image = String(entries[`project:${index}:image`] || "").trim();
-            const titleNode = card.querySelector("[data-project-title]");
-            const imageNode = card.querySelector("[data-project-image]");
-            if (title && titleNode) { titleNode.textContent = title; imageNode.alt = title; }
-            if (url) { card.href = url; card.target = url.startsWith("http") ? "_blank" : ""; card.rel = url.startsWith("http") ? "noreferrer" : ""; }
-            if (image && imageNode) imageNode.src = image;
-          });
-          setLanguage(document.documentElement.lang);
-        })
-        .catch(() => {});
-
-      fetch("/api/public/content", { cache: "no-store" })
-        .then((response) => response.ok ? response.json() : null)
-        .then((data) => {
-          cmsResources = data?.resources || {};
-          renderCmsResources(document.documentElement.lang);
-        })
-        .catch(() => {});
+      renderCmsResources(document.documentElement.lang);
 
       document.querySelectorAll("[data-scroll]").forEach((trigger) => {
         trigger.addEventListener("click", () => {

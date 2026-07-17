@@ -4,6 +4,7 @@ import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 import { servicePageEnglish, servicePages, siteUrl } from "../../data/seo-pages";
 
+export const prerender = true;
 export const getStaticPaths = () =>
   servicePages.map((page) => ({
     params: { slug: page.slug },
