@@ -243,48 +243,7 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
     <script is:inline>
       const translations = JSON.parse(document.getElementById("project-i18n-data")?.textContent || "{}");
       const header = document.querySelector("[data-header]");
-      let cmsProjects = [];
-      const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        "\"": "&quot;",
-        "'": "&#039;"
-      }[char]));
-      const cmsText = (data, key, lang) => data?.[`${key}_${lang}`] || data?.[`${key}_id`] || data?.[key] || "";
-      const renderCmsProjects = (lang = document.documentElement.lang || "id") => {
-        const activeLang = lang === "en" ? "en" : "id";
-        const grid = document.querySelector(".project-showcase-grid");
-        if (!grid || !cmsProjects.length) return;
-        grid.innerHTML = cmsProjects.map((item, index) => {
-          const data = item.data || {};
-          const url = data.url || "#";
-          const external = url.startsWith("http");
-          const title = data.title || "Solivate Studio Project";
-          const type = cmsText(data, "type", activeLang);
-          return `<article class="project-showcase-card">
-            <a class="project-card-media" href="${escapeHtml(url)}" ${external ? 'target="_blank" rel="noreferrer"' : ""} aria-label="${escapeHtml(title)}">
-              <img src="${escapeHtml(data.image_url || "/solivate-logo.webp")}" alt="${escapeHtml(title)}" width="1440" height="900" loading="${index === 0 ? "eager" : "lazy"}" />
-            </a>
-            <div class="project-card-body">
-              <div>
-                <span class="project-card-index">${String(index + 1).padStart(2, "0")}</span>
-                <h3>${escapeHtml(title)}</h3>
-                <p>${escapeHtml(type)}</p>
-              </div>
-              <div class="project-tags"><span>${escapeHtml(type || "Project")}</span><span>Solivate Studio</span><span>Website</span></div>
-              <div class="project-card-actions">
-                <a class="btn-primary" href="${escapeHtml(url)}" ${external ? 'target="_blank" rel="noreferrer"' : ""}>
-                  <span>${activeLang === "en" ? "Visit Website" : "Kunjungi Website"}</span>
-                  <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
-                </a>
-              </div>
-            </div>
-          </article>`;
-        }).join("");
-        const stat = document.querySelector(".project-hero-panel strong");
-        if (stat) stat.textContent = String(cmsProjects.length);
-      };
+
       const updateHeader = () => {
         const y = Math.max(0, window.scrollY);
         header?.classList.toggle("is-scrolled", y > 24);
@@ -322,7 +281,6 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
           button.classList.toggle("active", active);
           button.setAttribute("aria-pressed", String(active));
         });
-        renderCmsProjects(activeLang);
       };
 
       document.querySelectorAll("[data-lang-switch]").forEach((button) => {
@@ -333,14 +291,6 @@ const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
         ? window.localStorage.getItem("solivate-language")
         : "id";
       setLanguage(savedLanguage || "id");
-
-      fetch("/api/public/content?type=projects")
-        .then((response) => response.ok ? response.json() : null)
-        .then((data) => {
-          cmsProjects = data?.resources?.projects || [];
-          renderCmsProjects(document.documentElement.lang);
-        })
-        .catch(() => {});
     </script>
   </body>
 </html>
