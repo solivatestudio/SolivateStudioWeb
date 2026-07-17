@@ -770,7 +770,7 @@ const organizationSchema = JSON.stringify({
         : "id";
       setLanguage(savedLanguage || "id");
 
-      fetch("/api/public/cms")
+      fetch("/api/public/cms", { cache: "no-store" })
         .then((response) => response.ok ? response.json() : null)
         .then((data) => {
           const entries = data?.entries || {};
@@ -800,7 +800,7 @@ const organizationSchema = JSON.stringify({
         })
         .catch(() => {});
 
-      fetch("/api/public/content")
+      fetch("/api/public/content", { cache: "no-store" })
         .then((response) => response.ok ? response.json() : null)
         .then((data) => {
           cmsResources = data?.resources || {};

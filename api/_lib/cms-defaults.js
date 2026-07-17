@@ -261,6 +261,114 @@ export const CMS_DEFAULTS = {
         homepage: true,
       },
     },
+    {
+      id: "hammaddanfulanah",
+      sort_order: 40,
+      data: {
+        title: "Hammad & Fulanah",
+        type_id: "Wedding Invitation",
+        type_en: "Wedding Invitation",
+        url: "/portfolio/hammaddanfulanah",
+        image_url: "/images/hammaddanfulanah.png",
+        homepage: true,
+      },
+    },
+    {
+      id: "weddingpro",
+      sort_order: 50,
+      data: {
+        title: "WeddingPro",
+        type_id: "Wedding Invitation + Dashboard",
+        type_en: "Wedding Invitation + Dashboard",
+        url: "/portfolio/weddingpro",
+        image_url: "/images/weddingpro.png",
+        homepage: true,
+      },
+    },
+    {
+      id: "hbd-matt",
+      sort_order: 60,
+      data: {
+        title: "HBD Matt",
+        type_id: "Birthday Website",
+        type_en: "Birthday Website",
+        url: "/portfolio/hbd-matt",
+        image_url: "/images/hbd-matt.png",
+        homepage: false,
+      },
+    },
+    {
+      id: "smk01-school-profile",
+      sort_order: 70,
+      data: {
+        title: "SMK01 School Profile",
+        type_id: "School Profile Website",
+        type_en: "School Profile Website",
+        url: "/portfolio/smk01-school-profile",
+        image_url: "/images/smk01.png",
+        homepage: true,
+      },
+    },
+    {
+      id: "smk01-spmb-custom",
+      sort_order: 80,
+      data: {
+        title: "SMK01 SPMB Custom",
+        type_id: "SPMB Landing Page",
+        type_en: "Custom Admissions Landing Page",
+        url: "/portfolio/smk01-spmb-custom",
+        image_url: "/images/smk01.png",
+        homepage: false,
+      },
+    },
+    {
+      id: "pedulisesama",
+      sort_order: 90,
+      data: {
+        title: "Peduli Sesama",
+        type_id: "Community + Dashboard",
+        type_en: "Community + Dashboard",
+        url: "/portfolio/pedulisesama",
+        image_url: "/images/pedulisesama.png",
+        homepage: true,
+      },
+    },
+    {
+      id: "cpxindo",
+      sort_order: 100,
+      data: {
+        title: "CPX Indo",
+        type_id: "Company Profile + Ecommerce",
+        type_en: "Company Profile + Ecommerce",
+        url: "/portfolio/cpxindo",
+        image_url: "/images/cpxindo.png",
+        homepage: true,
+      },
+    },
+    {
+      id: "shofifrozen",
+      sort_order: 110,
+      data: {
+        title: "Shofi Frozen",
+        type_id: "Ecommerce + Payment Gateway",
+        type_en: "Ecommerce + Payment Gateway",
+        url: "/portfolio/shofifrozen",
+        image_url: "/images/shofifrozen.png",
+        homepage: false,
+      },
+    },
+    {
+      id: "spectrasec",
+      sort_order: 120,
+      data: {
+        title: "SpectraSec",
+        type_id: "Community Profile",
+        type_en: "Community Profile",
+        url: "/portfolio/spectrasec",
+        image_url: "/images/spectrasec.png",
+        homepage: false,
+      },
+    },
   ],
   faq: [
     {
@@ -354,9 +462,6 @@ export function normalizeCmsResource(type, data = {}) {
 }
 
 export async function seedCmsResourceDefaults(sql, type) {
-  const existing =
-    await sql`SELECT COUNT(*)::int AS count FROM cms_resources WHERE resource_type = ${type}`;
-  if (Number(existing[0]?.count || 0) > 0) return;
   const defaults = CMS_DEFAULTS[type] || [];
   await Promise.all(
     defaults.map(

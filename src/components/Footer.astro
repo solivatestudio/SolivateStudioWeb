@@ -124,7 +124,7 @@ const navLinks = [
     sendEvent("pageview");
     window.setInterval(() => sendEvent("heartbeat"), 60000);
 
-    fetch("/api/public/cms")
+    fetch("/api/public/cms", { cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
       .then((data) => {
         const entries = data?.entries || {};

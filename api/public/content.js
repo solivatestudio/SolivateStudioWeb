@@ -35,10 +35,7 @@ export default async function handler(request, response) {
       });
     });
 
-    response.setHeader(
-      "Cache-Control",
-      "s-maxage=60, stale-while-revalidate=300",
-    );
+    response.setHeader("Cache-Control", "no-store, max-age=0, must-revalidate");
     return response.status(200).json({ resources });
   } catch (error) {
     return fail(response, error);

@@ -572,7 +572,7 @@ const pricingSchema = JSON.stringify({
         : "id";
       setLanguage(savedLanguage || "id");
 
-      fetch("/api/public/content?type=pricing")
+      fetch("/api/public/content?type=pricing", { cache: "no-store" })
         .then((response) => response.ok ? response.json() : null)
         .then((data) => {
           cmsResources = data?.resources || {};
@@ -580,7 +580,7 @@ const pricingSchema = JSON.stringify({
         })
         .catch(() => {});
 
-      fetch("/api/public/cms")
+      fetch("/api/public/cms", { cache: "no-store" })
         .then((response) => response.ok ? response.json() : null)
         .then((data) => {
           const whatsapp = String(data?.entries?.contact_whatsapp || "").replace(/\D/g, "");
