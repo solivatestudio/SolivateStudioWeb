@@ -1,7 +1,6 @@
 export const CMS_RESOURCE_TYPES = new Set(["pricing", "projects", "faq"]);
 
-export const CMS_DEFAULTS = {
-  pricing: [
+const PRICING_DEFAULTS = [
     {
       id: "personal-birthday-basic",
       sort_order: 10,
@@ -223,8 +222,9 @@ export const CMS_DEFAULTS = {
         homepage: true,
       },
     },
-  ],
-  projects: [
+];
+
+const INITIAL_PROJECT_DEFAULTS = [
     {
       id: "masjid-raya-puri-telukjambe",
       sort_order: 10,
@@ -261,6 +261,9 @@ export const CMS_DEFAULTS = {
         homepage: true,
       },
     },
+];
+
+const PORTFOLIO_PROJECT_DEFAULTS = [
     {
       id: "hammaddanfulanah",
       sort_order: 40,
@@ -369,8 +372,9 @@ export const CMS_DEFAULTS = {
         homepage: false,
       },
     },
-  ],
-  faq: [
+];
+
+const FAQ_DEFAULTS = [
     {
       id: "redesign-existing-site",
       sort_order: 10,
@@ -407,7 +411,21 @@ export const CMS_DEFAULTS = {
           "Send a short brief with your goal, references, timeline, and budget range. We will propose a practical scope.",
       },
     },
+];
+
+export const CMS_DEFAULTS = {
+  pricing: PRICING_DEFAULTS,
+  projects: [...INITIAL_PROJECT_DEFAULTS, ...PORTFOLIO_PROJECT_DEFAULTS],
+  faq: FAQ_DEFAULTS,
+};
+
+const CMS_DEFAULT_UPDATES = {
+  pricing: [{ version: 1, items: PRICING_DEFAULTS }],
+  projects: [
+    { version: 1, items: INITIAL_PROJECT_DEFAULTS },
+    { version: 2, items: PORTFOLIO_PROJECT_DEFAULTS },
   ],
+  faq: [{ version: 1, items: FAQ_DEFAULTS }],
 };
 
 const text = (value, max = 600) =>
@@ -462,14 +480,57 @@ export function normalizeCmsResource(type, data = {}) {
 }
 
 export async function seedCmsResourceDefaults(sql, type) {
-  const defaults = CMS_DEFAULTS[type] || [];
-  await Promise.all(
-    defaults.map(
-      (item) => sql`
-    INSERT INTO cms_resources (id, resource_type, sort_order, data, is_published)
-    VALUES (${item.id}, ${type}, ${item.sort_order}, ${JSON.stringify(item.data)}, TRUE)
-    ON CONFLICT (id) DO NOTHING
-  `,
-    ),
-  );
+  const updates = CMS_DEFAULT_UPDATES[type] || [];
+  if (!updates.length) return;
+
+  const versionKey = `cms_defaults_version:${type}`;
+  const [versionRow] =
+    await sql`SELECT value FROM cms_entries WHERE key = ${versionKey} LIMIT 1`;
+
+  let currentVersion = Number(versionRow?.value?.version || 0);
+
+  // Older installs already have baseline records but no version marker yet.
+  // Infer them as version 1 so we only backfill newer bundles once.
+  if (!versionRow) {
+    const [countRow] =
+      await sql`SELECT COUNT(*)::int AS count FROM cms_resources WHERE resource_type = ${type}`;
+    if (Number(countRow?.count || 0) > 0) {
+      currentVersion = 1;
+    }
+  }
+
+  const pendingUpdates = updates.filter((update) => update.version > currentVersion);
+  if (!pendingUpdates.length) {
+    if (!versionRow) {
+      const latestVersion = updates[updates.length - 1]?.version || currentVersion;
+      await sql`INSERT INTO cms_entries (key, value, status, updated_at)
+        VALUES (${versionKey}, ${JSON.stringify({ version: latestVersion })}, 'published', NOW())
+        ON CONFLICT (key) DO UPDATE SET
+          value = EXCLUDED.value,
+          status = 'published',
+          updated_at = NOW()`;
+    }
+    return;
+  }
+
+  for (const update of pendingUpdates) {
+    await Promise.all(
+      update.items.map(
+        (item) => sql`
+      INSERT INTO cms_resources (id, resource_type, sort_order, data, is_published)
+      VALUES (${item.id}, ${type}, ${item.sort_order}, ${JSON.stringify(item.data)}, TRUE)
+      ON CONFLICT (id) DO NOTHING
+    `,
+      ),
+    );
+  }
+
+  const latestVersion =
+    pendingUpdates[pendingUpdates.length - 1]?.version || currentVersion;
+  await sql`INSERT INTO cms_entries (key, value, status, updated_at)
+    VALUES (${versionKey}, ${JSON.stringify({ version: latestVersion })}, 'published', NOW())
+    ON CONFLICT (key) DO UPDATE SET
+      value = EXCLUDED.value,
+      status = 'published',
+      updated_at = NOW()`;
 }
