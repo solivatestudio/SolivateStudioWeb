@@ -1439,6 +1439,11 @@ h2:hover {
   background: var(--paper);
 }
 
+.pricing-page h2:hover,
+.pricing-page h3:hover {
+  color: inherit;
+}
+
 .pricing-hero {
   position: relative;
   overflow: hidden;
@@ -1530,6 +1535,7 @@ h2:hover {
 .pricing-summary-card,
 .pricing-note-card {
   padding: 28px;
+  min-width: 0;
 }
 
 .pricing-summary-table {
@@ -1539,9 +1545,9 @@ h2:hover {
 }
 
 .pricing-summary-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
   gap: 16px;
   padding-top: 16px;
   border-top: 1px solid rgba(2, 62, 138, 0.1);
@@ -1557,6 +1563,8 @@ h2:hover {
   font-size: 14px;
   font-weight: 700;
   line-height: 1.6;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
 }
 
 .pricing-summary-row strong {
@@ -1565,6 +1573,8 @@ h2:hover {
   font-weight: 800;
   line-height: 1.4;
   text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .pricing-detail-grid {
@@ -1572,11 +1582,71 @@ h2:hover {
 }
 
 .pricing-detail-grid.compact .pricing-detail-card {
-  min-height: 360px;
+  min-height: 0;
 }
 
 .pricing-detail-card.business {
-  min-height: 620px;
+  min-height: 0;
+}
+
+.pricing-detail-grid[data-group-grid="personal"],
+.pricing-detail-grid[data-group-grid="enterprise"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pricing-detail-grid[data-group-grid="business"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pricing-detail-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+}
+
+.pricing-detail-card .pricing-label {
+  margin-bottom: 4px;
+}
+
+.pricing-detail-card h3 {
+  margin: 0;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.pricing-detail-card strong {
+  font-size: clamp(1.5rem, 2.6vw, 2.35rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.pricing-detail-card p {
+  margin: 0;
+  max-width: 64ch;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.pricing-detail-card ul {
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.pricing-detail-card li {
+  padding-left: 16px;
+  font-size: 13px;
+  line-height: 1.56;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.pricing-detail-card li::before {
+  top: 7px;
+}
+
+.pricing-detail-card.business li {
+  font-size: 13.5px;
 }
 
 .pricing-detail-band {
@@ -1804,6 +1874,7 @@ h2:hover {
 }
 
 .custom-feature-grid article {
+  min-width: 0;
   border: 1px solid var(--dark-line);
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.06);
@@ -1844,6 +1915,8 @@ h2:hover {
   font-size: clamp(1.25rem, 2vw, 1.6rem);
   font-weight: 800;
   line-height: 1.12;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 
 .pricing-note-card p {
@@ -1851,10 +1924,12 @@ h2:hover {
   color: var(--muted);
   font-size: 14px;
   line-height: 1.76;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
 }
 
 .pricing-flow-list article {
-  min-height: 250px;
+  min-height: 220px;
 }
 
 .pricing-cta-band {
@@ -1871,6 +1946,8 @@ h2:hover {
   font-size: clamp(2rem, 4vw, 3.4rem);
   line-height: 0.98;
   letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 
 .pricing-cta-band p {
@@ -1878,6 +1955,8 @@ h2:hover {
   margin: 14px 0 0;
   color: var(--muted);
   line-height: 1.76;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
 }
 
 .custom-feature-grid article p {
@@ -1886,6 +1965,24 @@ h2:hover {
   font-size: 14px;
   font-weight: 700;
   line-height: 1.6;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.custom-price-box {
+  min-width: 0;
+}
+
+.custom-price-box p,
+.pricing-quote-card p {
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.pricing-quote-card strong,
+.custom-price-box strong {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .work-grid {
