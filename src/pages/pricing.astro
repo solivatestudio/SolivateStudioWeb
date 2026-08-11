@@ -2,129 +2,16 @@
 import "../index.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import { PRICING_RESOURCE_DEFAULTS } from "../data/pricing-data.js";
 
-type LocaleCopy = {
-  id: string;
-  en: string;
-};
+type LocaleCopy = { id: string; en: string };
 
-const personalPlans = [
-  {
-    name: "Birthday Website (Basic)",
-    price: "Rp 49.000",
-    fit: "Untuk hadiah ulang tahun simpel yang tetap terasa personal.",
-    items: ["Landing page", "Kartu ucapan", "Maksimal 3 foto"]
-  },
-  {
-    name: "Birthday Website (Premium)",
-    price: "Rp 84.900",
-    fit: "Untuk ucapan ulang tahun yang lebih hidup dengan visual dan video.",
-    items: ["Landing page", "Digital bucket flower", "Kartu ucapan", "1 video"]
-  },
-  {
-    name: "Party / Wedding Invitation Website",
-    price: "Rp 99.000",
-    fit: "Untuk undangan digital party atau wedding yang bisa dipersonalisasi.",
-    items: ["Landing page", "Custom name nama tamu", "Maksimal 3 foto & 1 video"]
-  }
-];
+const fallbackPricing = PRICING_RESOURCE_DEFAULTS;
 
-const businessPlans = [
-  {
-    name: "Paket 1 - Basic",
-    badge: "Mulai Online",
-    price: "Rp 249.000",
-    note: "Cocok untuk bisnis yang butuh landing page rapi dan cepat live.",
-    items: [
-      "1 landing page utama",
-      "Integrasi media sosial dasar & 1 tombol WhatsApp",
-      "Desain responsive mobile friendly",
-      "Optimasi SEO dasar meta tag standar",
-      "Revisi maksimal 2x",
-      "Garansi 1 bulan setelah go-live"
-    ]
-  },
-  {
-    name: "Paket 2 - Standard",
-    badge: "Paling Populer",
-    price: "Rp 299.000",
-    note: "Best value: beda Rp 50.000 dari Basic, sudah dapat multi-page dan speed optimal.",
-    featured: true,
-    items: [
-      "Multi-page maksimal 5 halaman",
-      "Advanced WhatsApp integration dengan template chat otomatis",
-      "High performance & speed optimization",
-      "SEO menyeluruh termasuk Google Search Console & Maps",
-      "Desain responsive mobile friendly",
-      "Revisi maksimal 5x",
-      "Garansi 5 bulan bebas eror & bug"
-    ]
-  },
-  {
-    name: "Paket 3 - Premium",
-    badge: "All-in-One",
-    price: "Rp 499.000",
-    note: "Terima beres: domain, hosting, fitur premium, SEO, analytics, dan garansi paling panjang.",
-    items: [
-      "Multi-page eksklusif maksimal 10 halaman",
-      "FREE custom domain .com/.id selama 1 tahun",
-      "FREE high-speed hosting selama 1 tahun",
-      "Google Form, animasi interaktif, & copywriting dasar",
-      "Google Analytics untuk pantau pengunjung",
-      "Ultra high performance Google PageSpeed",
-      "Revisi maksimal 7x",
-      "Garansi 1 tahun penuh"
-    ]
-  }
-];
-
-const included = (label = "Termasuk") => ({ type: "check", label });
-const notIncluded = () => ({ type: "none", label: "Tidak termasuk" });
-const detail = (label: string) => ({ type: "detail", label });
-const price = (label: string) => ({ type: "price", label });
-
-const comparisonRows = [
-  { feature: "Jumlah Halaman", basic: detail("1 Landing Page"), standard: detail("Maks. 5 Halaman"), premium: detail("Maks. 10 Halaman") },
-  { feature: "Integrasi WhatsApp", basic: included("Tombol dasar"), standard: included("Template otomatis"), premium: included("Template otomatis") },
-  { feature: "Desain Responsive", basic: included(), standard: included(), premium: included() },
-  { feature: "SEO", basic: included("Meta tag dasar"), standard: included("Search Console & Maps"), premium: included("Analytics lanjutan") },
-  { feature: "Speed Optimization", basic: included("Standar"), standard: included("High performance"), premium: included("Ultra high performance") },
-  { feature: "Custom Domain & Hosting", basic: notIncluded(), standard: notIncluded(), premium: included("Free 1 tahun") },
-  { feature: "Fitur Tambahan", basic: notIncluded(), standard: notIncluded(), premium: included("Google Form, animasi, copywriting") },
-  { feature: "Revisi", basic: detail("Maks. 2x"), standard: detail("Maks. 5x"), premium: detail("Maks. 7x") },
-  { feature: "Garansi", basic: detail("1 bulan"), standard: detail("5 bulan"), premium: detail("1 tahun penuh") },
-  { feature: "Harga", basic: price("Rp 249.000"), standard: price("Rp 299.000"), premium: price("Rp 499.000") }
-];
-
-const comparisonFeatureKeys = ["compare.pages", "compare.whatsapp", "compare.responsive", "compare.seo", "compare.speed", "compare.domain", "compare.extra", "compare.revision", "compare.warranty", "compare.price"];
-const comparisonValueKeys = [
-  ["compare.basicPages", "compare.standardPages", "compare.premiumPages"],
-  ["compare.basicWhatsapp", "compare.autoTemplate", "compare.autoTemplate"],
-  ["compare.included", "compare.included", "compare.included"],
-  ["compare.meta", "compare.search", "compare.analytics"],
-  ["compare.speedStandard", "compare.speedHigh", "compare.speedUltra"],
-  ["compare.notIncluded", "compare.notIncluded", "compare.freeYear"],
-  ["compare.notIncluded", "compare.notIncluded", "compare.extraPremium"],
-  ["compare.revision2", "compare.revision5", "compare.revision7"],
-  ["compare.month1", "compare.month5", "compare.year1"],
-  ["compare.priceBasic", "compare.priceStandard", "compare.pricePremium"]
-];
-const planKeys = ["basic", "standard", "premium"] as const;
-
-const customFeatures = [
-  "Desain UI/UX premium & eksklusif bukan template",
-  "Integrasi pembayaran otomatis Midtrans/Xendit",
-  "Integrasi cek ongkir otomatis RajaOngkir",
-  "Sistem manajemen inventaris/stok barang",
-  "Sistem keamanan tinggi & enkripsi data",
-  "Dashboard manajemen lengkap untuk laporan, user, dan log aktivitas",
-  "Dukungan maintenance prioritas"
-];
-
-const pricingI18n: Record<string, LocaleCopy> = {
+const pageCopy: Record<string, LocaleCopy> = {
   "meta.description": {
-    id: "Daftar harga jasa pembuatan website Solivate Studio murah: website UMKM, company profile, masjid, yayasan, undangan pernikahan digital custom, landing page promosi, booking barbershop, dan rental mobil.",
-    en: "Solivate Studio website pricing: SME sites, company profiles, mosque platforms, foundations, custom wedding invitations, promotional landing pages, barbershop booking, and car rentals."
+    id: "Pricelist jasa pembuatan website Solivate Studio 2026: personal website, wedding invitation, website UMKM, e-commerce, business system, corporate website, government portal, dan custom software.",
+    en: "Solivate Studio 2026 pricing list: personal websites, wedding invitations, SME websites, e-commerce, business systems, corporate websites, government portals, and custom software."
   },
   "nav.about": { id: "Tentang", en: "About" },
   "nav.services": { id: "Layanan", en: "Services" },
@@ -133,120 +20,60 @@ const pricingI18n: Record<string, LocaleCopy> = {
   "nav.process": { id: "Proses", en: "Process" },
   "nav.contact": { id: "Kontak", en: "Contact" },
   "nav.cta": { id: "Mulai Proyek", en: "Start Project" },
-  "hero.eyebrow": { id: "Daftar Harga Layanan", en: "Service Pricing" },
-  "hero.title": { id: "Jasa Pembuatan Website untuk personal, UMKM, hingga korporat.", en: "Website development for personal needs, SMEs, and companies." },
+  "hero.eyebrow": { id: "Pricelist Layanan Solivate Studio 2026", en: "Solivate Studio 2026 Service Pricing" },
+  "hero.title": { id: "Website, e-commerce, business system, dan custom software.", en: "Websites, e-commerce, business systems, and custom software." },
   "hero.lead": {
-    id: "Pilih paket yang paling dekat dengan kebutuhan. Untuk website custom, harga final ditentukan berdasarkan blueprint dan scope of work yang disepakati.",
-    en: "Choose the package closest to your needs. For custom websites, final pricing is based on the agreed blueprint and scope of work."
+    id: "Solivate Studio membantu individu, organisasi, UMKM, perusahaan, dan instansi membangun produk digital sesuai kebutuhan aktual, mulai dari website sederhana hingga software operasional khusus.",
+    en: "Solivate Studio helps individuals, organizations, SMEs, companies, and institutions build digital products around real operational needs, from simple websites to tailored software."
+  },
+  "hero.note": {
+    id: "Seluruh harga adalah harga awal untuk scope representatif. Final quotation disusun setelah kebutuhan, fitur, timeline, dan skala project dikonfirmasi.",
+    en: "All prices are starting prices for representative scopes. Final quotations are prepared after requirements, features, timeline, and project scale are confirmed."
   },
   "quote.label": { id: "Mulai dari", en: "Starting from" },
-  "quote.desc": { id: "Website sederhana untuk ucapan, event, landing page bisnis, sampai sistem custom skala perusahaan.", en: "Simple greeting sites, event pages, business landing pages, and company-scale custom systems." },
   "quote.cta": { id: "Konsultasi Gratis", en: "Free Consultation" },
-  "personal.eyebrow": { id: "01 / Personal & Event", en: "01 / Personal & Event" },
-  "personal.title": { id: "Website sederhana untuk momen personal dan undangan digital.", en: "Simple websites for personal moments and digital invitations." },
-  "personal.lead": { id: "Cocok untuk hadiah ulang tahun, kartu ucapan, party, wedding, dan event kecil.", en: "Suitable for birthday gifts, greeting cards, parties, weddings, and small events." },
-  "business.eyebrow": { id: "02 / Landing & Multi-Page", en: "02 / Landing & Multi-Page" },
-  "business.title": { id: "Paket website bisnis yang paling sering dipakai UMKM dan organisasi.", en: "Business website packages commonly used by SMEs and organizations." },
-  "business.lead": { id: "Untuk school profile, company profile, UMKM, event, konser, komunitas, dan landing page promosi.", en: "For school profiles, company profiles, SMEs, events, concerts, communities, and promotional landing pages." },
-  "comparison.eyebrow": { id: "Perbandingan Paket", en: "Package Comparison" },
-  "comparison.title": { id: "Bandingkan fitur utama sebelum memilih paket.", en: "Compare key features before choosing a package." },
-  "custom.eyebrow": { id: "03 / Custom Eksklusif", en: "03 / Exclusive Custom" },
-  "custom.title": { id: "Solusi advanced untuk sistem yang butuh fitur khusus.", en: "Advanced solutions for systems that need custom features." },
-  "custom.lead": {
-    id: "Cocok untuk marketplace, payment gateway, event skala besar, toko online kompleks, ERP, CRM, dan sistem informasi manajemen perusahaan.",
-    en: "Suitable for marketplaces, payment gateways, large events, complex online stores, ERP, CRM, and company management systems."
-  },
-  "custom.priceLabel": { id: "Harga mulai dari", en: "Starting price" },
-  "custom.priceNote": { id: "Harga akhir ditentukan berdasarkan blueprint dan scope of work yang disepakati.", en: "Final pricing is based on the agreed blueprint and scope of work." },
-  "label.personal": { id: "Personal", en: "Personal" },
-  "personal.0.fit": { id: "Untuk hadiah ulang tahun simpel yang tetap terasa personal.", en: "For simple birthday gifts that still feel personal." },
-  "personal.1.fit": { id: "Untuk ucapan ulang tahun yang lebih hidup dengan visual dan video.", en: "For richer birthday greetings with visuals and video." },
-  "personal.2.fit": { id: "Untuk undangan digital party atau wedding yang bisa dipersonalisasi.", en: "For personalized party or wedding digital invitations." },
-  "business.0.badge": { id: "Mulai Online", en: "Start Online" },
-  "business.1.badge": { id: "Paling Populer", en: "Most Popular" },
-  "business.2.badge": { id: "All-in-One", en: "All-in-One" },
-  "business.0.note": { id: "Cocok untuk bisnis yang butuh landing page rapi dan cepat live.", en: "For businesses that need a clean landing page and fast launch." },
-  "business.1.note": { id: "Best value: beda Rp 50.000 dari Basic, sudah dapat multi-page dan speed optimal.", en: "Best value: only Rp 50,000 more than Basic, with multi-page structure and optimized speed." },
-  "business.2.note": { id: "Terima beres: domain, hosting, fitur premium, SEO, analytics, dan garansi paling panjang.", en: "Done-for-you: domain, hosting, premium features, SEO, analytics, and the longest warranty." },
-  "personal.0.item.0": { id: "Landing page", en: "Landing page" },
-  "personal.0.item.1": { id: "Kartu ucapan", en: "Greeting card" },
-  "personal.0.item.2": { id: "Maksimal 3 foto", en: "Up to 3 photos" },
-  "personal.1.item.0": { id: "Landing page", en: "Landing page" },
-  "personal.1.item.1": { id: "Digital bucket flower", en: "Digital bucket flower" },
-  "personal.1.item.2": { id: "Kartu ucapan", en: "Greeting card" },
-  "personal.1.item.3": { id: "1 video", en: "1 video" },
-  "personal.2.item.0": { id: "Landing page", en: "Landing page" },
-  "personal.2.item.1": { id: "Custom name nama tamu", en: "Custom guest name" },
-  "personal.2.item.2": { id: "Maksimal 3 foto & 1 video", en: "Up to 3 photos & 1 video" },
-  "business.0.item.0": { id: "1 landing page utama", en: "1 main landing page" },
-  "business.0.item.1": { id: "Integrasi media sosial dasar & 1 tombol WhatsApp", en: "Basic social media integration & 1 WhatsApp button" },
-  "business.0.item.2": { id: "Desain responsive mobile friendly", en: "Mobile-friendly responsive design" },
-  "business.0.item.3": { id: "Optimasi SEO dasar meta tag standar", en: "Basic SEO optimization with standard meta tags" },
-  "business.0.item.4": { id: "Revisi maksimal 2x", en: "Up to 2 revisions" },
-  "business.0.item.5": { id: "Garansi 1 bulan setelah go-live", en: "1-month warranty after go-live" },
-  "business.1.item.0": { id: "Multi-page maksimal 5 halaman", en: "Multi-page site up to 5 pages" },
-  "business.1.item.1": { id: "Advanced WhatsApp integration dengan template chat otomatis", en: "Advanced WhatsApp integration with automatic chat template" },
-  "business.1.item.2": { id: "High performance & speed optimization", en: "High performance & speed optimization" },
-  "business.1.item.3": { id: "SEO menyeluruh termasuk Google Search Console & Maps", en: "Comprehensive SEO including Google Search Console & Maps" },
-  "business.1.item.4": { id: "Desain responsive mobile friendly", en: "Mobile-friendly responsive design" },
-  "business.1.item.5": { id: "Revisi maksimal 5x", en: "Up to 5 revisions" },
-  "business.1.item.6": { id: "Garansi 5 bulan bebas eror & bug", en: "5-month error and bug warranty" },
-  "business.2.item.0": { id: "Multi-page eksklusif maksimal 10 halaman", en: "Exclusive multi-page site up to 10 pages" },
-  "business.2.item.1": { id: "FREE custom domain .com/.id selama 1 tahun", en: "FREE .com/.id custom domain for 1 year" },
-  "business.2.item.2": { id: "FREE high-speed hosting selama 1 tahun", en: "FREE high-speed hosting for 1 year" },
-  "business.2.item.3": { id: "Google Form, animasi interaktif, & copywriting dasar", en: "Google Form, interactive animation, & basic copywriting" },
-  "business.2.item.4": { id: "Google Analytics untuk pantau pengunjung", en: "Google Analytics to monitor visitors" },
-  "business.2.item.5": { id: "Ultra high performance Google PageSpeed", en: "Ultra high Google PageSpeed performance" },
-  "business.2.item.6": { id: "Revisi maksimal 7x", en: "Up to 7 revisions" },
-  "business.2.item.7": { id: "Garansi 1 tahun penuh", en: "1 full year warranty" },
-  "compare.feature": { id: "Fitur", en: "Feature" },
-  "compare.plan1": { id: "Paket 1", en: "Package 1" },
-  "compare.plan2": { id: "Paket 2", en: "Package 2" },
-  "compare.plan3": { id: "Paket 3", en: "Package 3" },
-  "compare.basic": { id: "Basic", en: "Basic" },
-  "compare.standard": { id: "Standard", en: "Standard" },
-  "compare.premium": { id: "Premium", en: "Premium" },
-  "compare.pages": { id: "Jumlah Halaman", en: "Page Count" },
-  "compare.whatsapp": { id: "Integrasi WhatsApp", en: "WhatsApp Integration" },
-  "compare.responsive": { id: "Desain Responsive", en: "Responsive Design" },
-  "compare.seo": { id: "SEO", en: "SEO" },
-  "compare.speed": { id: "Speed Optimization", en: "Speed Optimization" },
-  "compare.domain": { id: "Custom Domain & Hosting", en: "Custom Domain & Hosting" },
-  "compare.extra": { id: "Fitur Tambahan", en: "Extra Features" },
-  "compare.revision": { id: "Revisi", en: "Revisions" },
-  "compare.warranty": { id: "Garansi", en: "Warranty" },
-  "compare.price": { id: "Harga", en: "Price" },
-  "compare.included": { id: "Termasuk", en: "Included" },
-  "compare.notIncluded": { id: "Tidak termasuk", en: "Not included" },
-  "compare.basicPages": { id: "1 Landing Page", en: "1 Landing Page" },
-  "compare.standardPages": { id: "Maks. 5 Halaman", en: "Max. 5 Pages" },
-  "compare.premiumPages": { id: "Maks. 10 Halaman", en: "Max. 10 Pages" },
-  "compare.basicWhatsapp": { id: "Tombol dasar", en: "Basic button" },
-  "compare.autoTemplate": { id: "Template otomatis", en: "Auto template" },
-  "compare.meta": { id: "Meta tag dasar", en: "Basic meta tags" },
-  "compare.search": { id: "Search Console & Maps", en: "Search Console & Maps" },
-  "compare.analytics": { id: "Analytics lanjutan", en: "Advanced analytics" },
-  "compare.speedStandard": { id: "Standar", en: "Standard" },
-  "compare.speedHigh": { id: "High performance", en: "High performance" },
-  "compare.speedUltra": { id: "Ultra high performance", en: "Ultra high performance" },
-  "compare.freeYear": { id: "Free 1 tahun", en: "Free 1 year" },
-  "compare.extraPremium": { id: "Google Form, animasi, copywriting", en: "Google Form, animation, copywriting" },
-  "compare.revision2": { id: "Maks. 2x", en: "Up to 2x" },
-  "compare.revision5": { id: "Maks. 5x", en: "Up to 5x" },
-  "compare.revision7": { id: "Maks. 7x", en: "Up to 7x" },
-  "compare.month1": { id: "1 bulan", en: "1 month" },
-  "compare.month5": { id: "5 bulan", en: "5 months" },
-  "compare.year1": { id: "1 tahun penuh", en: "1 full year" },
-  "compare.priceBasic": { id: "Rp 249.000", en: "Rp 249,000" },
-  "compare.priceStandard": { id: "Rp 299.000", en: "Rp 299,000" },
-  "compare.pricePremium": { id: "Rp 499.000", en: "Rp 499,000" },
-  "custom.feature.0": { id: "Desain UI/UX premium & eksklusif bukan template", en: "Premium exclusive UI/UX design, not a template" },
-  "custom.feature.1": { id: "Integrasi pembayaran otomatis Midtrans/Xendit", en: "Automatic payment integration with Midtrans/Xendit" },
-  "custom.feature.2": { id: "Integrasi cek ongkir otomatis RajaOngkir", en: "Automatic shipping rate integration with RajaOngkir" },
-  "custom.feature.3": { id: "Sistem manajemen inventaris/stok barang", en: "Inventory and stock management system" },
-  "custom.feature.4": { id: "Sistem keamanan tinggi & enkripsi data", en: "High-security system and data encryption" },
-  "custom.feature.5": { id: "Dashboard manajemen lengkap untuk laporan, user, dan log aktivitas", en: "Complete management dashboard for reports, users, and activity logs" },
-  "custom.feature.6": { id: "Dukungan maintenance prioritas", en: "Priority maintenance support" },
+  "summary.eyebrow": { id: "Ringkasan Harga", en: "Price Summary" },
+  "summary.title": { id: "Kategori layanan utama untuk 2026.", en: "Core service categories for 2026." },
+  "summary.personal": { id: "Personal & Non-Profit", en: "Personal & Non-Profit" },
+  "summary.business": { id: "UMKM & Growing Business", en: "SME & Growing Business" },
+  "summary.enterprise": { id: "Business & Enterprise", en: "Business & Enterprise" },
+  "section.personal.eyebrow": { id: "01 / Personal & Non-Profit", en: "01 / Personal & Non-Profit" },
+  "section.personal.title": { id: "Website personal, undangan, dan platform institusi yang lebih rapi dan kredibel.", en: "Personal sites, digital invitations, and institution platforms with clearer structure and stronger credibility." },
+  "section.personal.lead": { id: "Untuk personal brand, celebration, komunitas, yayasan, masjid, sekolah kecil, dan lembaga non-profit yang ingin hadir profesional di ranah digital.", en: "For personal brands, celebrations, communities, foundations, mosques, small schools, and non-profits that need a professional digital presence." },
+  "section.business.eyebrow": { id: "02 / UMKM & Growing Business", en: "02 / SME & Growing Business" },
+  "section.business.title": { id: "Website promosi, e-commerce, event platform, dan sistem bisnis yang mendukung operasional.", en: "Promotional websites, e-commerce, event platforms, and business systems that support day-to-day operations." },
+  "section.business.lead": { id: "Untuk UMKM, bisnis bertumbuh, event organizer, retail, brand lokal, dan tim operasional yang butuh software kerja yang lebih terstruktur.", en: "For SMEs, growing businesses, event teams, retail, local brands, and operations teams that need more structured working software." },
+  "section.enterprise.eyebrow": { id: "03 / Business & Enterprise", en: "03 / Business & Enterprise" },
+  "section.enterprise.title": { id: "Corporate website, public portal, dan workflow digital berskala organisasi.", en: "Corporate websites, public portals, and digital workflows at organizational scale." },
+  "section.enterprise.lead": { id: "Untuk perusahaan, instansi, unit pemerintah, dan organisasi yang membutuhkan sistem lebih formal, terdokumentasi, dan terintegrasi.", en: "For companies, institutions, government units, and organizations that need more formal, documented, and integrated systems." },
+  "custom.eyebrow": { id: "04 / Custom Software & Enterprise Solution", en: "04 / Custom Software & Enterprise Solution" },
+  "custom.title": { id: "Untuk scope besar, kompleks, dan tidak aman dipaketkan secara generik.", en: "For large, complex scopes that are not safe to package generically." },
+  "custom.lead": { id: "Cocok untuk ERP, SaaS, multi-tenant platform, marketplace, mobile app, sistem terintegrasi lintas unit, atau platform high-scale lainnya.", en: "Suitable for ERP, SaaS, multi-tenant platforms, marketplaces, mobile apps, cross-unit integrated systems, and other high-scale platforms." },
+  "info.eyebrow": { id: "Informasi Tambahan", en: "Additional Information" },
+  "info.title": { id: "Hal-hal yang perlu dipahami sebelum final quotation disusun.", en: "Things to understand before the final quotation is prepared." },
+  "info.domain.title": { id: "Domain, Hosting, & SSL", en: "Domain, Hosting, & SSL" },
+  "info.domain.body": { id: "Project senilai Rp400.000 atau di bawahnya menggunakan subdomain Solivate atau domain milik client. Domain umum dapat di-include sesuai paket, kebijakan, dan biaya registrar. Domain khusus atau premium dapat menjadi biaya terpisah.", en: "Projects worth Rp400,000 or below use a Solivate subdomain or a client-owned domain. Common domains may be included depending on package policy and registrar cost. Special or premium domains can become separate costs." },
+  "info.third.title": { id: "Biaya Pihak Ketiga", en: "Third-Party Costs" },
+  "info.third.body": { id: "MDR, settlement fee, subscription provider, transaction fee, shipping API, WhatsApp provider, dan biaya layanan pihak ketiga tidak termasuk kecuali dinyatakan included secara tertulis dalam proposal.", en: "MDR, settlement fees, provider subscriptions, transaction fees, shipping APIs, WhatsApp providers, and other third-party service costs are excluded unless explicitly stated as included in the proposal." },
+  "info.scope.title": { id: "Bagaimana Harga Final Ditentukan?", en: "How Is the Final Price Determined?" },
+  "info.scope.body": { id: "Harga final dipengaruhi jumlah halaman atau modul, fitur dan integrasi, jumlah user dan role, workflow, volume data, traffic, timeline urgent, support, maintenance, SLA, dan biaya provider terkait.", en: "Final pricing is influenced by page or module count, features and integrations, number of users and roles, workflow complexity, data volume, traffic, urgent timelines, support, maintenance, SLA, and relevant provider costs." },
+  "info.disclaimer.title": { id: "Disclaimer", en: "Disclaimer" },
+  "info.disclaimer.body": { id: "Harga yang ditampilkan adalah harga awal untuk scope representatif. Final quotation dapat berubah berdasarkan kebutuhan aktual client dan hasil discovery singkat bersama tim Solivate Studio.", en: "Displayed prices are starting prices for representative scopes. Final quotations may change based on actual client needs and the short discovery process with the Solivate Studio team." },
+  "flow.eyebrow": { id: "Alur Pemesanan", en: "Ordering Flow" },
+  "flow.title": { id: "Cara project berjalan dari konsultasi sampai pengerjaan.", en: "How projects move from consultation to execution." },
+  "flow.0.title": { id: "Konsultasi singkat", en: "Short consultation" },
+  "flow.0.body": { id: "Client menjelaskan kebutuhan, objective, dan konteks project.", en: "The client explains the need, objective, and project context." },
+  "flow.1.title": { id: "Pemilihan solusi", en: "Solution selection" },
+  "flow.1.body": { id: "Tim Solivate merekomendasikan paket awal yang paling sesuai.", en: "The Solivate team recommends the most suitable starting package." },
+  "flow.2.title": { id: "Konfirmasi scope", en: "Scope confirmation" },
+  "flow.2.body": { id: "Fitur, deliverable, timeline, dan batasan project disepakati bersama.", en: "Features, deliverables, timeline, and project boundaries are aligned together." },
+  "flow.3.title": { id: "Quotation final", en: "Final quotation" },
+  "flow.3.body": { id: "Client menerima penawaran harga final sesuai scope aktual.", en: "The client receives a final quotation based on the actual scope." },
+  "flow.4.title": { id: "Pengerjaan", en: "Execution" },
+  "flow.4.body": { id: "Project dimulai sesuai timeline dan termin pembayaran yang disepakati.", en: "The project starts based on the agreed timeline and payment terms." },
+  "cta.title": { id: "Right Scope. Right Capability. Right Price.", en: "Right Scope. Right Capability. Right Price." },
+  "cta.body": { id: "Kalau kebutuhan project Anda belum pas masuk paket tertentu, kami bantu mapping supaya scope dan quotation tetap realistis.", en: "If your project does not neatly fit a package, we will help map it so the scope and quotation remain realistic." },
+  "cta.button": { id: "Diskusikan Project", en: "Discuss Your Project" },
   "footer.title": { id: "Bangun sesuatu yang orang ingat.", en: "Let's build something people remember." },
   "footer.cta": { id: "Mulai Proyek", en: "Start Project" },
   "footer.desc": { id: "Digital solution provider untuk UMKM, komunitas sosial, event, celebration, dan sistem custom yang ingin naik kelas secara digital.", en: "Digital solution provider for SMEs, social communities, events, celebrations, and custom systems ready to level up digitally." },
@@ -261,45 +88,44 @@ const pricingI18n: Record<string, LocaleCopy> = {
   "floating.wa": { id: "Konsultasi sekarang, gratis!", en: "Free consultation now!" }
 };
 
-const tx = (key: string) => pricingI18n[key]?.id ?? key;
-const pricingI18nJson = JSON.stringify(pricingI18n);
+const tx = (key: string) => pageCopy[key]?.id ?? key;
+const pricingI18nJson = JSON.stringify(pageCopy);
+const fallbackPricingJson = JSON.stringify(fallbackPricing);
 const siteUrl = "https://solivate.com";
 const gaId = import.meta.env.PUBLIC_GA_ID || "G-H1R8S8W5W6";
 const pricingUrl = `${siteUrl}/pricing`;
-const pageTitle = "Harga Jasa Pembuatan Website Murah | Solivate Studio";
+const pageTitle = "Pricelist Jasa Website, E-Commerce, & Custom Software | Solivate Studio";
 const pageDescription = tx("meta.description");
-const pricingSchema = JSON.stringify({
+const priceSchema = JSON.stringify({
   "@context": "https://schema.org",
   "@type": "Service",
-  name: "Jasa Pembuatan Website Solivate Studio",
+  name: "Pricelist Layanan Solivate Studio 2026",
   provider: {
     "@type": "Organization",
     name: "Solivate Studio",
     url: siteUrl,
     logo: `${siteUrl}/solivate-logo.webp`,
-    email: "admin@solivate.com",
     sameAs: ["https://www.instagram.com/solivatestudio/"]
   },
   areaServed: "Indonesia",
-  serviceType: "Website Development",
+  serviceType: "Website Development, E-Commerce, Business System, Custom Software",
   description: pageDescription,
   offers: {
     "@type": "AggregateOffer",
-    lowPrice: "49000",
-    highPrice: "2999000",
+    lowPrice: "199000",
+    highPrice: "10000000",
     priceCurrency: "IDR",
-    offerCount: "7",
-    offers: [
-      { "@type": "Offer", name: "Birthday Website Basic", price: "49000", priceCurrency: "IDR" },
-      { "@type": "Offer", name: "Birthday Website Premium", price: "84900", priceCurrency: "IDR" },
-      { "@type": "Offer", name: "Party / Wedding Invitation Website", price: "99000", priceCurrency: "IDR" },
-      { "@type": "Offer", name: "Paket Basic Website", price: "249000", priceCurrency: "IDR" },
-      { "@type": "Offer", name: "Paket Standard Website", price: "299000", priceCurrency: "IDR" },
-      { "@type": "Offer", name: "Paket Premium Website", price: "499000", priceCurrency: "IDR" },
-      { "@type": "Offer", name: "Website Custom Eksklusif", price: "2999000", priceCurrency: "IDR" }
-    ]
+    offerCount: String(fallbackPricing.length)
   }
 });
+
+const flowSteps = ["0", "1", "2", "3", "4"];
+
+const byGroup = (group: string) => fallbackPricing.filter((item) => item.data.group === group);
+const personalPlans = byGroup("personal");
+const businessPlans = byGroup("business");
+const enterprisePlans = byGroup("enterprise");
+const customPlan = fallbackPricing.find((item) => item.data.group === "custom");
 ---
 
 <!doctype html>
@@ -309,8 +135,7 @@ const pricingSchema = JSON.stringify({
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{pageTitle}</title>
     <meta name="description" content={pageDescription} />
-    <meta name="keywords" content="daftar harga website, harga jasa website, jasa pembuatan website murah, birthday website, website undangan digital, website UMKM, website company profile, landing page UMKM, website custom, Solivate Studio, jasa pembuatan website Solivate Studio, digital solution agency Indonesia, jasa buat website undangan nikah custom murah, jasa website masjid, sistem booking online barbershop" />
-    <meta name="author" content="Solivate Studio" />
+    <meta name="keywords" content="pricelist website 2026, jasa pembuatan website, harga website UMKM, harga website company profile, harga wedding invitation, harga ecommerce, harga custom software, business system, corporate website, government website, Solivate Studio" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href={pricingUrl} />
     <meta property="og:type" content="website" />
@@ -328,11 +153,6 @@ const pricingSchema = JSON.stringify({
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <style>
-      @media (max-width: 768px) {
-        .seo-responsive-signal { display: block; }
-      }
-    </style>
     {gaId && (
       <>
         <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
@@ -356,11 +176,12 @@ const pricingSchema = JSON.stringify({
             <p class="eyebrow" data-i18n="hero.eyebrow">{tx("hero.eyebrow")}</p>
             <h1 data-i18n="hero.title">{tx("hero.title")}</h1>
             <p class="hero-text" data-i18n="hero.lead">{tx("hero.lead")}</p>
+            <p class="pricing-hero-note" data-i18n="hero.note">{tx("hero.note")}</p>
           </div>
           <div class="pricing-quote-card">
             <span data-i18n="quote.label">{tx("quote.label")}</span>
-            <strong>Rp 49.000</strong>
-            <p data-i18n="quote.desc">{tx("quote.desc")}</p>
+            <strong data-min-price>Rp199.000+</strong>
+            <p data-i18n="hero.note">{tx("hero.note")}</p>
             <a class="btn-primary" href="https://wa.me/6281219118993" target="_blank" rel="noreferrer" data-whatsapp-cta>
               <span data-i18n="quote.cta">{tx("quote.cta")}</span>
               <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
@@ -369,23 +190,71 @@ const pricingSchema = JSON.stringify({
         </div>
       </section>
 
+      <section class="section light pricing-summary-section">
+        <div class="container section-head">
+          <p class="eyebrow" data-i18n="summary.eyebrow">{tx("summary.eyebrow")}</p>
+          <h2 data-i18n="summary.title">{tx("summary.title")}</h2>
+        </div>
+        <div class="container pricing-summary-grid">
+          <article class="pricing-summary-card" data-summary-group="personal">
+            <span class="pricing-label" data-i18n="summary.personal">{tx("summary.personal")}</span>
+            <div class="pricing-summary-table">
+              {personalPlans.map((item) => (
+                <div class="pricing-summary-row">
+                  <span>{item.data.name_id}</span>
+                  <strong>{item.data.price_id}</strong>
+                </div>
+              ))}
+            </div>
+          </article>
+          <article class="pricing-summary-card" data-summary-group="business">
+            <span class="pricing-label" data-i18n="summary.business">{tx("summary.business")}</span>
+            <div class="pricing-summary-table">
+              {businessPlans.map((item) => (
+                <div class="pricing-summary-row">
+                  <span>{item.data.name_id}</span>
+                  <strong>{item.data.price_id}</strong>
+                </div>
+              ))}
+            </div>
+          </article>
+          <article class="pricing-summary-card" data-summary-group="enterprise">
+            <span class="pricing-label" data-i18n="summary.enterprise">{tx("summary.enterprise")}</span>
+            <div class="pricing-summary-table">
+              {enterprisePlans.map((item) => (
+                <div class="pricing-summary-row">
+                  <span>{item.data.name_id}</span>
+                  <strong>{item.data.price_id}</strong>
+                </div>
+              ))}
+              {customPlan && (
+                <div class="pricing-summary-row">
+                  <span>{customPlan.data.name_id}</span>
+                  <strong>{customPlan.data.price_id}</strong>
+                </div>
+              )}
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section class="section light">
         <div class="container section-head split">
           <div>
-            <p class="eyebrow" data-i18n="personal.eyebrow">{tx("personal.eyebrow")}</p>
-            <h2 data-i18n="personal.title">{tx("personal.title")}</h2>
+            <p class="eyebrow" data-i18n="section.personal.eyebrow">{tx("section.personal.eyebrow")}</p>
+            <h2 data-i18n="section.personal.title">{tx("section.personal.title")}</h2>
           </div>
-          <p class="lead" data-i18n="personal.lead">{tx("personal.lead")}</p>
+          <p class="lead" data-i18n="section.personal.lead">{tx("section.personal.lead")}</p>
         </div>
-        <div class="container pricing-detail-grid compact">
-          {personalPlans.map((plan, planIndex) => (
-            <article class="pricing-detail-card">
-              <span class="pricing-label" data-i18n="label.personal">{tx("label.personal")}</span>
-              <h3>{plan.name}</h3>
-              <strong>{plan.price}</strong>
-              <p data-i18n={`personal.${planIndex}.fit`}>{tx(`personal.${planIndex}.fit`)}</p>
+        <div class="container pricing-detail-grid compact" data-group-grid="personal">
+          {personalPlans.map((item) => (
+            <article class={`pricing-detail-card ${item.data.featured ? "featured" : ""}`}>
+              <span class="pricing-label">{item.data.badge_id}</span>
+              <h3>{item.data.name_id}</h3>
+              <strong>{item.data.price_id}</strong>
+              <p>{item.data.description_id}</p>
               <ul>
-                {plan.items.map((item, itemIndex) => <li data-i18n={`personal.${planIndex}.item.${itemIndex}`}>{item}</li>)}
+                {item.data.features_id.map((feature) => <li>{feature}</li>)}
               </ul>
             </article>
           ))}
@@ -395,114 +264,152 @@ const pricingSchema = JSON.stringify({
       <section class="section pricing-detail-band">
         <div class="container section-head split">
           <div>
-            <p class="eyebrow" data-i18n="business.eyebrow">{tx("business.eyebrow")}</p>
-            <h2 data-i18n="business.title">{tx("business.title")}</h2>
+            <p class="eyebrow" data-i18n="section.business.eyebrow">{tx("section.business.eyebrow")}</p>
+            <h2 data-i18n="section.business.title">{tx("section.business.title")}</h2>
           </div>
-          <p class="lead" data-i18n="business.lead">{tx("business.lead")}</p>
+          <p class="lead" data-i18n="section.business.lead">{tx("section.business.lead")}</p>
         </div>
-        <div class="container pricing-detail-grid">
-          {businessPlans.map((plan, planIndex) => (
-            <article class={`pricing-detail-card business ${plan.featured ? "featured" : ""}`}>
-              <span class="pricing-label" data-i18n={`business.${planIndex}.badge`}>{tx(`business.${planIndex}.badge`)}</span>
-              <h3>{plan.name}</h3>
-              <strong>{plan.price}</strong>
-              <p data-i18n={`business.${planIndex}.note`}>{tx(`business.${planIndex}.note`)}</p>
+        <div class="container pricing-detail-grid" data-group-grid="business">
+          {businessPlans.map((item) => (
+            <article class={`pricing-detail-card business ${item.data.featured ? "featured" : ""}`}>
+              <span class="pricing-label">{item.data.badge_id}</span>
+              <h3>{item.data.name_id}</h3>
+              <strong>{item.data.price_id}</strong>
+              <p>{item.data.description_id}</p>
               <ul>
-                {plan.items.map((item, itemIndex) => <li data-i18n={`business.${planIndex}.item.${itemIndex}`}>{item}</li>)}
+                {item.data.features_id.map((feature) => <li>{feature}</li>)}
               </ul>
             </article>
           ))}
         </div>
       </section>
 
-      <section class="section light comparison-section">
-        <div class="container section-head">
-          <p class="eyebrow" data-i18n="comparison.eyebrow">{tx("comparison.eyebrow")}</p>
-          <h2 data-i18n="comparison.title">{tx("comparison.title")}</h2>
+      <section class="section light">
+        <div class="container section-head split">
+          <div>
+            <p class="eyebrow" data-i18n="section.enterprise.eyebrow">{tx("section.enterprise.eyebrow")}</p>
+            <h2 data-i18n="section.enterprise.title">{tx("section.enterprise.title")}</h2>
+          </div>
+          <p class="lead" data-i18n="section.enterprise.lead">{tx("section.enterprise.lead")}</p>
         </div>
-        <div class="container comparison-shell">
-          <table class="comparison-table">
-            <thead>
-              <tr>
-                <th><span class="comparison-plan-title" data-i18n="compare.feature">{tx("compare.feature")}</span></th>
-                <th>
-                  <span class="comparison-plan-title" data-i18n="compare.plan1">{tx("compare.plan1")}</span>
-                  <span class="comparison-plan-badge" data-i18n="compare.basic">{tx("compare.basic")}</span>
-                </th>
-                <th>
-                  <span class="comparison-plan-title" data-i18n="compare.plan2">{tx("compare.plan2")}</span>
-                  <span class="comparison-plan-badge" data-i18n="compare.standard">{tx("compare.standard")}</span>
-                </th>
-                <th>
-                  <span class="comparison-plan-title" data-i18n="compare.plan3">{tx("compare.plan3")}</span>
-                  <span class="comparison-plan-badge" data-i18n="compare.premium">{tx("compare.premium")}</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {comparisonRows.map((row, rowIndex) => (
-                <tr>
-                  <th data-i18n={comparisonFeatureKeys[rowIndex]}>{tx(comparisonFeatureKeys[rowIndex])}</th>
-                  {planKeys.map((plan, planIndex) => (
-                    <td>
-                      <span class={`comparison-cell ${row[plan].type}`}>
-                        <span class="comparison-icon" aria-hidden="true"></span>
-                        <span data-i18n={comparisonValueKeys[rowIndex][planIndex] || undefined}>{comparisonValueKeys[rowIndex][planIndex] ? tx(comparisonValueKeys[rowIndex][planIndex]) : row[plan].label}</span>
-                      </span>
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div class="container pricing-detail-grid compact" data-group-grid="enterprise">
+          {enterprisePlans.map((item) => (
+            <article class={`pricing-detail-card ${item.data.featured ? "featured" : ""}`}>
+              <span class="pricing-label">{item.data.badge_id}</span>
+              <h3>{item.data.name_id}</h3>
+              <strong>{item.data.price_id}</strong>
+              <p>{item.data.description_id}</p>
+              <ul>
+                {item.data.features_id.map((feature) => <li>{feature}</li>)}
+              </ul>
+            </article>
+          ))}
         </div>
       </section>
 
-      <section class="section dark custom-pricing">
-        <div class="container custom-pricing-grid">
-          <div>
-            <p class="eyebrow" data-i18n="custom.eyebrow">{tx("custom.eyebrow")}</p>
-            <h2 data-i18n="custom.title">{tx("custom.title")}</h2>
-            <p class="lead" data-i18n="custom.lead">{tx("custom.lead")}</p>
+      {customPlan && (
+        <section class="section dark custom-pricing">
+          <div class="container custom-pricing-grid">
+            <div>
+              <p class="eyebrow" data-i18n="custom.eyebrow">{tx("custom.eyebrow")}</p>
+              <h2 data-i18n="custom.title">{tx("custom.title")}</h2>
+              <p class="lead" data-i18n="custom.lead">{tx("custom.lead")}</p>
+            </div>
+            <div class="custom-price-box" data-custom-box>
+              <span>{customPlan.data.badge_id}</span>
+              <strong>{customPlan.data.price_id}</strong>
+              <p>{customPlan.data.description_id}</p>
+            </div>
           </div>
-          <div class="custom-price-box">
-            <span data-i18n="custom.priceLabel">{tx("custom.priceLabel")}</span>
-            <strong>Rp 2.999.000</strong>
-            <p data-i18n="custom.priceNote">{tx("custom.priceNote")}</p>
+          <div class="container custom-feature-grid" data-custom-features>
+            {customPlan.data.features_id.map((feature) => (
+              <article>
+                <span></span>
+                <p>{feature}</p>
+              </article>
+            ))}
           </div>
+        </section>
+      )}
+
+      <section class="section light pricing-info-section">
+        <div class="container section-head">
+          <p class="eyebrow" data-i18n="info.eyebrow">{tx("info.eyebrow")}</p>
+          <h2 data-i18n="info.title">{tx("info.title")}</h2>
         </div>
-        <div class="container custom-feature-grid">
-          {customFeatures.map((_, index) => (
+        <div class="container pricing-info-grid">
+          <article class="pricing-note-card">
+            <h3 data-i18n="info.domain.title">{tx("info.domain.title")}</h3>
+            <p data-i18n="info.domain.body">{tx("info.domain.body")}</p>
+          </article>
+          <article class="pricing-note-card">
+            <h3 data-i18n="info.third.title">{tx("info.third.title")}</h3>
+            <p data-i18n="info.third.body">{tx("info.third.body")}</p>
+          </article>
+          <article class="pricing-note-card">
+            <h3 data-i18n="info.scope.title">{tx("info.scope.title")}</h3>
+            <p data-i18n="info.scope.body">{tx("info.scope.body")}</p>
+          </article>
+          <article class="pricing-note-card">
+            <h3 data-i18n="info.disclaimer.title">{tx("info.disclaimer.title")}</h3>
+            <p data-i18n="info.disclaimer.body">{tx("info.disclaimer.body")}</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section dark">
+        <div class="container section-head">
+          <p class="eyebrow" data-i18n="flow.eyebrow">{tx("flow.eyebrow")}</p>
+          <h2 data-i18n="flow.title">{tx("flow.title")}</h2>
+        </div>
+        <div class="container process-grid pricing-flow-list">
+          {flowSteps.map((step, index) => (
             <article>
-              <span></span>
-              <p data-i18n={`custom.feature.${index}`}>{tx(`custom.feature.${index}`)}</p>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <div class="card-title" data-i18n={`flow.${step}.title`}>{tx(`flow.${step}.title`)}</div>
+              <p data-i18n={`flow.${step}.body`}>{tx(`flow.${step}.body`)}</p>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section class="section light">
+        <div class="container pricing-cta-band">
+          <div>
+            <h2 data-i18n="cta.title">{tx("cta.title")}</h2>
+            <p data-i18n="cta.body">{tx("cta.body")}</p>
+          </div>
+          <a class="btn-primary" href="/#contact">
+            <span data-i18n="cta.button">{tx("cta.button")}</span>
+            <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"></path><path d="M7 7h10v10"></path></svg>
+          </a>
         </div>
       </section>
     </main>
 
     <Footer i18n />
 
-    <script is:inline type="application/ld+json" set:html={pricingSchema}></script>
+    <script is:inline type="application/ld+json" set:html={priceSchema}></script>
     <script is:inline type="application/json" id="pricing-i18n-data" set:html={pricingI18nJson}></script>
+    <script is:inline type="application/json" id="pricing-fallback-data" set:html={fallbackPricingJson}></script>
     <script is:inline>
       const translations = JSON.parse(document.getElementById("pricing-i18n-data")?.textContent || "{}");
+      const fallbackPricing = JSON.parse(document.getElementById("pricing-fallback-data")?.textContent || "[]");
       const header = document.querySelector("[data-header]");
-      let cmsResources = {};
+      let pricingItems = fallbackPricing;
+
       const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        "\"": "&quot;",
-        "'": "&#039;"
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;"
       }[char]));
       const cmsText = (data, key, lang) => data?.[`${key}_${lang}`] || data?.[`${key}_id`] || data?.[key] || "";
       const cmsList = (data, key, lang) => Array.isArray(data?.[`${key}_${lang}`]) ? data[`${key}_${lang}`] : [];
-      const pricingCard = (item, lang) => {
-        const data = item.data || {};
+      const groupItems = (group) => pricingItems.filter((item) => item?.data?.group === group);
+
+      const renderPlanCard = (item, lang, extraClass = "") => {
+        const data = item?.data || {};
         const features = cmsList(data, "features", lang);
-        return `<article class="pricing-detail-card ${data.group === "business" ? "business" : ""} ${data.featured ? "featured" : ""}">
+        const featuredClass = data.featured ? " featured" : "";
+        return `<article class="pricing-detail-card ${extraClass}${featuredClass}">
           <span class="pricing-label">${escapeHtml(cmsText(data, "badge", lang))}</span>
           <h3>${escapeHtml(cmsText(data, "name", lang))}</h3>
           <strong>${escapeHtml(cmsText(data, "price", lang))}</strong>
@@ -510,30 +417,66 @@ const pricingSchema = JSON.stringify({
           <ul>${features.map((feature) => `<li>${escapeHtml(feature)}</li>`).join("")}</ul>
         </article>`;
       };
-      const renderCmsPricing = (lang = document.documentElement.lang || "id") => {
+
+      const renderSummaryCard = (group, lang, includeCustom = false) => {
+        const items = groupItems(group);
+        const custom = includeCustom ? pricingItems.find((item) => item?.data?.group === "custom") : null;
+        const rows = [...items, ...(custom ? [custom] : [])];
+        return rows.map((item) => {
+          const data = item?.data || {};
+          return `<div class="pricing-summary-row">
+            <span>${escapeHtml(cmsText(data, "name", lang))}</span>
+            <strong>${escapeHtml(cmsText(data, "price", lang))}</strong>
+          </div>`;
+        }).join("");
+      };
+
+      const parsePrice = (value) => {
+        const digits = String(value || "").replace(/\D/g, "");
+        return digits ? Number(digits) : Number.POSITIVE_INFINITY;
+      };
+
+      const renderPricing = (lang = document.documentElement.lang || "id") => {
         const activeLang = lang === "en" ? "en" : "id";
-        const pricing = cmsResources.pricing || [];
-        const personal = pricing.filter((item) => item.data?.group === "personal");
-        const business = pricing.filter((item) => item.data?.group === "business");
-        const custom = pricing.find((item) => item.data?.group === "custom");
-        const personalGrid = document.querySelector(".pricing-detail-grid.compact");
-        const businessGrid = document.querySelector(".pricing-detail-band .pricing-detail-grid");
-        if (personalGrid && personal.length) personalGrid.innerHTML = personal.map((item) => pricingCard(item, activeLang)).join("");
-        if (businessGrid && business.length) businessGrid.innerHTML = business.map((item) => pricingCard(item, activeLang)).join("");
-        if (custom) {
+        const personalGrid = document.querySelector('[data-group-grid="personal"]');
+        const businessGrid = document.querySelector('[data-group-grid="business"]');
+        const enterpriseGrid = document.querySelector('[data-group-grid="enterprise"]');
+        const summaryPersonal = document.querySelector('[data-summary-group="personal"] .pricing-summary-table');
+        const summaryBusiness = document.querySelector('[data-summary-group="business"] .pricing-summary-table');
+        const summaryEnterprise = document.querySelector('[data-summary-group="enterprise"] .pricing-summary-table');
+        const minPriceNode = document.querySelector("[data-min-price]");
+        const custom = pricingItems.find((item) => item?.data?.group === "custom");
+        const customBox = document.querySelector("[data-custom-box]");
+        const customFeatures = document.querySelector("[data-custom-features]");
+
+        if (summaryPersonal) summaryPersonal.innerHTML = renderSummaryCard("personal", activeLang);
+        if (summaryBusiness) summaryBusiness.innerHTML = renderSummaryCard("business", activeLang);
+        if (summaryEnterprise) summaryEnterprise.innerHTML = renderSummaryCard("enterprise", activeLang, true);
+
+        if (personalGrid) personalGrid.innerHTML = groupItems("personal").map((item) => renderPlanCard(item, activeLang)).join("");
+        if (businessGrid) businessGrid.innerHTML = groupItems("business").map((item) => renderPlanCard(item, activeLang, "business")).join("");
+        if (enterpriseGrid) enterpriseGrid.innerHTML = groupItems("enterprise").map((item) => renderPlanCard(item, activeLang)).join("");
+
+        if (custom && customBox) {
           const data = custom.data || {};
-          const priceBox = document.querySelector(".custom-price-box");
-          const featureGrid = document.querySelector(".custom-feature-grid");
-          const customTitle = document.querySelector(".custom-pricing h2");
-          if (customTitle) customTitle.textContent = cmsText(data, "name", activeLang);
-          if (priceBox) {
-            priceBox.innerHTML = `<span>${activeLang === "en" ? "Starting price" : "Harga mulai dari"}</span><strong>${escapeHtml(cmsText(data, "price", activeLang))}</strong><p>${escapeHtml(cmsText(data, "description", activeLang))}</p>`;
-          }
-          if (featureGrid) {
-            featureGrid.innerHTML = cmsList(data, "features", activeLang).map((feature) => `<article><span></span><p>${escapeHtml(feature)}</p></article>`).join("");
-          }
+          customBox.innerHTML = `<span>${escapeHtml(cmsText(data, "badge", activeLang))}</span><strong>${escapeHtml(cmsText(data, "price", activeLang))}</strong><p>${escapeHtml(cmsText(data, "description", activeLang))}</p>`;
+        }
+        if (custom && customFeatures) {
+          const data = custom.data || {};
+          customFeatures.innerHTML = cmsList(data, "features", activeLang).map((feature) => `<article><span></span><p>${escapeHtml(feature)}</p></article>`).join("");
+        }
+
+        const visiblePrices = pricingItems
+          .filter((item) => item?.data?.group !== "custom")
+          .map((item) => parsePrice(cmsText(item.data, "price", activeLang)))
+          .filter((value) => Number.isFinite(value));
+
+        if (minPriceNode && visiblePrices.length) {
+          const min = Math.min(...visiblePrices);
+          minPriceNode.textContent = `Rp${min.toLocaleString("id-ID")}+`;
         }
       };
+
       const updateHeader = () => {
         const y = Math.max(0, window.scrollY);
         header?.classList.toggle("is-scrolled", y > 24);
@@ -549,24 +492,23 @@ const pricingSchema = JSON.stringify({
           window.localStorage.setItem("solivate-language", activeLang);
           window.localStorage.setItem("solivate-language-manual", "true");
         }
-
         document.querySelectorAll("[data-i18n]").forEach((node) => {
           const key = node.getAttribute("data-i18n");
           const next = translations[key]?.[activeLang];
           if (next) node.textContent = next;
         });
-
         document.querySelectorAll("[data-lang-switch]").forEach((button) => {
           const active = button.getAttribute("data-lang-switch") === activeLang;
           button.classList.toggle("active", active);
           button.setAttribute("aria-pressed", String(active));
         });
-        renderCmsPricing(activeLang);
+        renderPricing(activeLang);
       };
 
       document.querySelectorAll("[data-lang-switch]").forEach((button) => {
         button.addEventListener("click", () => setLanguage(button.getAttribute("data-lang-switch"), true));
       });
+
       const savedLanguage = window.localStorage.getItem("solivate-language-manual") === "true"
         ? window.localStorage.getItem("solivate-language")
         : "id";
@@ -575,10 +517,13 @@ const pricingSchema = JSON.stringify({
       fetch("/api/public/content?type=pricing", { cache: "no-store" })
         .then((response) => response.ok ? response.json() : null)
         .then((data) => {
-          cmsResources = data?.resources || {};
-          renderCmsPricing(document.documentElement.lang);
+          pricingItems = data?.resources?.pricing?.length ? data.resources.pricing : fallbackPricing;
+          renderPricing(document.documentElement.lang);
         })
-        .catch(() => {});
+        .catch(() => {
+          pricingItems = fallbackPricing;
+          renderPricing(document.documentElement.lang);
+        });
 
       fetch("/api/public/cms", { cache: "no-store" })
         .then((response) => response.ok ? response.json() : null)
@@ -595,15 +540,12 @@ const pricingSchema = JSON.stringify({
       document.querySelectorAll("[data-top]").forEach((trigger) => {
         trigger.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
       });
-
       document.querySelectorAll("[data-home-contact]").forEach((trigger) => {
-        trigger.addEventListener("click", () => {
-          window.location.href = "/#contact";
-        });
+        trigger.addEventListener("click", () => { window.location.href = "/#contact"; });
       });
 
       if (!window.matchMedia("(hover: none)").matches) {
-        document.querySelectorAll(".btn-primary, .nav-cta, .pricing-detail-card, .custom-feature-grid article").forEach((el) => {
+        document.querySelectorAll(".btn-primary, .nav-cta, .pricing-detail-card, .pricing-summary-card, .pricing-note-card, .custom-feature-grid article").forEach((el) => {
           let frame = 0;
           const strength = el.matches(".btn-primary, .nav-cta") ? 0.12 : 0.035;
           el.addEventListener("mousemove", (event) => {
