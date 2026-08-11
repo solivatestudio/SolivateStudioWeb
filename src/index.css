@@ -4813,10 +4813,71 @@ h2:hover {
     gap: 18px;
   }
 
+  .pricing-page,
+  .pricing-page .pricing-hero,
+  .pricing-page section,
+  .pricing-page .container,
+  .pricing-page .section-head,
+  .pricing-page .section-head.split {
+    overflow-x: clip;
+  }
+
+  .pricing-page .section-head {
+    margin-bottom: 28px;
+  }
+
+  .pricing-page .section-head.split {
+    gap: 14px;
+  }
+
+  .pricing-page .lead,
+  .pricing-page .hero-text,
+  .pricing-page .pricing-hero-note {
+    max-width: none;
+    font-size: 0.92rem;
+    line-height: 1.68;
+    overflow-wrap: anywhere;
+    text-wrap: pretty;
+  }
+
   .pricing-intro .btn-primary,
   .pricing-quote-card .btn-primary,
   .footer-top a.btn-primary {
     width: 100%;
+  }
+
+  .pricing-quote-card,
+  .pricing-summary-card,
+  .pricing-note-card,
+  .pricing-detail-card,
+  .custom-price-box,
+  .custom-feature-grid article,
+  .pricing-flow-list article,
+  .pricing-cta-band {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .pricing-quote-card,
+  .custom-price-box,
+  .pricing-summary-card,
+  .pricing-note-card,
+  .pricing-cta-band {
+    border-radius: 24px;
+    padding: 22px;
+  }
+
+  .pricing-summary-card,
+  .pricing-note-card,
+  .pricing-info-grid article,
+  .pricing-flow-list article {
+    overflow: hidden;
+  }
+
+  .pricing-summary-table {
+    gap: 14px;
+    margin-top: 18px;
   }
 
   .pricing-card,
@@ -4851,12 +4912,114 @@ h2:hover {
   }
 
   .pricing-summary-row {
-    flex-direction: column;
-    gap: 6px;
+    grid-template-columns: 1fr;
+    gap: 4px;
+    padding-top: 14px;
   }
 
   .pricing-summary-row strong {
     text-align: left;
+    white-space: normal;
+  }
+
+  .pricing-summary-row span,
+  .pricing-summary-row strong,
+  .pricing-detail-card h3,
+  .pricing-detail-card p,
+  .pricing-detail-card li,
+  .pricing-note-card h3,
+  .pricing-note-card p,
+  .custom-feature-grid article p,
+  .pricing-cta-band h2,
+  .pricing-cta-band p {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .pricing-detail-grid[data-group-grid="personal"],
+  .pricing-detail-grid[data-group-grid="business"],
+  .pricing-detail-grid[data-group-grid="enterprise"] {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .pricing-detail-card {
+    gap: 12px;
+    padding: 22px;
+  }
+
+  .pricing-detail-card .pricing-label {
+    margin-bottom: 2px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+  }
+
+  .pricing-detail-card h3 {
+    font-size: clamp(1.28rem, 6.2vw, 1.78rem);
+    line-height: 1.12;
+    text-wrap: pretty;
+  }
+
+  .pricing-detail-card strong,
+  .pricing-quote-card strong,
+  .custom-price-box strong {
+    font-size: clamp(1.55rem, 7vw, 2.1rem);
+    line-height: 1.04;
+  }
+
+  .pricing-detail-card p,
+  .pricing-note-card p,
+  .custom-feature-grid article p {
+    font-size: 13px;
+    line-height: 1.64;
+  }
+
+  .pricing-detail-card ul {
+    gap: 7px;
+    margin-top: 2px;
+  }
+
+  .pricing-detail-card li {
+    padding-left: 14px;
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+
+  .custom-pricing-grid {
+    gap: 24px;
+  }
+
+  .custom-feature-grid {
+    margin-top: 24px;
+    gap: 14px;
+  }
+
+  .custom-feature-grid article span {
+    margin-bottom: 22px;
+  }
+
+  .pricing-info-grid,
+  .pricing-flow-list {
+    gap: 14px;
+  }
+
+  .pricing-flow-list article {
+    min-height: 0;
+    padding: 22px;
+  }
+
+  .pricing-cta-band {
+    gap: 18px;
+    padding: 24px 22px;
+  }
+
+  .pricing-cta-band h2 {
+    font-size: clamp(1.75rem, 8vw, 2.5rem);
+    line-height: 1.02;
+  }
+
+  .comparison-shell {
+    border-radius: 22px;
   }
 
   .seo-hero-grid {
