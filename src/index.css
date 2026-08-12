@@ -5600,7 +5600,7 @@ h2:hover {
   padding: 8px max(18px, env(safe-area-inset-right)) 8px max(18px, env(safe-area-inset-left));
   color: var(--white);
   background: #c90820;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+  border-bottom: 0;
   box-shadow: 0 10px 30px -20px rgba(94, 0, 10, 0.8);
 }
 
@@ -6081,6 +6081,8 @@ body.campaign-active main { padding-top: 42px; }
   background: linear-gradient(90deg, #b5121b 0%, #e5232a 52%, #023e8a 100%);
 }
 
+body.campaign-active .header { top: 76px; }
+
 .campaign-atmosphere {
   position: absolute;
   z-index: 3;
@@ -6245,35 +6247,36 @@ body.campaign-active main { padding-top: 42px; }
   left: 0;
   display: block;
   width: 100%;
-  height: 38px;
+  height: 52px;
   overflow: hidden;
   pointer-events: none;
 }
 .campaign-bunting-checkpoint {
   position: absolute;
-  top: -1px;
+  top: 0;
   display: block;
-  height: 42px;
+  height: 50px;
   transform-origin: top center;
 }
 .campaign-bunting-checkpoint svg {
   position: absolute;
   inset: 0 0 auto;
   width: 100%;
-  height: 30px;
+  height: 38px;
   overflow: visible;
   fill: none;
-  stroke: rgba(255,255,255,.52);
-  stroke-width: .45;
+  stroke: rgba(255,255,255,.34);
+  stroke-width: .32;
   vector-effect: non-scaling-stroke;
 }
-.campaign-bunting .checkpoint-1 { left: -3%; width: 35%; transform: rotate(1.5deg); }
-.campaign-bunting .checkpoint-2 { right: -2%; width: 29%; transform: rotate(-1.8deg); }
+.campaign-bunting .checkpoint-1 { left: -4%; width: 36%; transform: rotate(1.8deg); }
+.campaign-bunting .checkpoint-2 { top: 5px; right: -3%; width: 27%; transform: rotate(-2.4deg); }
 .campaign-bunting i {
   --drop: 2px;
   --tilt: -3deg;
+  --flag-scale: 1;
   position: absolute;
-  top: calc(4px + var(--drop));
+  top: calc(2px + var(--drop));
   width: clamp(8px, .9vw, 14px);
   height: clamp(14px, 1.6vw, 22px);
   background: #e5232a;
@@ -6281,12 +6284,12 @@ body.campaign-active main { padding-top: 42px; }
   animation: campaignBuntingWave 2.6s var(--ease-in-out) infinite alternate;
   transform-origin: top center;
 }
-.campaign-bunting i:nth-child(1) { left: 5%; --drop: 0px; --tilt: -5deg; }
-.campaign-bunting i:nth-child(2) { left: 23%; --drop: 6px; --tilt: 3deg; }
-.campaign-bunting i:nth-child(3) { left: 41%; --drop: 10px; --tilt: -2deg; }
-.campaign-bunting i:nth-child(4) { left: 59%; --drop: 9px; --tilt: 4deg; }
-.campaign-bunting i:nth-child(5) { left: 77%; --drop: 5px; --tilt: -4deg; }
-.campaign-bunting i:nth-child(6) { left: 94%; --drop: 0px; --tilt: 2deg; }
+.campaign-bunting i:nth-child(1) { left: 3%; --drop: 0px; --tilt: -7deg; --flag-scale: .88; }
+.campaign-bunting i:nth-child(2) { left: 20%; --drop: 11px; --tilt: 4deg; --flag-scale: 1.04; }
+.campaign-bunting i:nth-child(3) { left: 39%; --drop: 18px; --tilt: -3deg; --flag-scale: .94; }
+.campaign-bunting i:nth-child(4) { left: 58%; --drop: 17px; --tilt: 6deg; --flag-scale: 1.08; }
+.campaign-bunting i:nth-child(5) { left: 78%; --drop: 9px; --tilt: -5deg; --flag-scale: .9; }
+.campaign-bunting i:nth-child(6) { left: 96%; --drop: 0px; --tilt: 3deg; --flag-scale: 1.02; }
 .campaign-bunting i:nth-child(2) { animation-delay: -.35s; }
 .campaign-bunting i:nth-child(3) { animation-delay: -.7s; }
 .campaign-bunting i:nth-child(4) { animation-delay: -1.05s; }
@@ -6651,8 +6654,8 @@ body.campaign-active .campaign-footer-pennants {
   100% { transform: translate3d(0, -3px, 0) rotateY(12deg); }
 }
 @keyframes campaignBuntingWave {
-  0% { transform: rotateZ(calc(var(--tilt) - 2deg)) rotateY(-7deg); }
-  100% { transform: rotateZ(calc(var(--tilt) + 2deg)) rotateY(7deg); }
+  0% { transform: rotateZ(calc(var(--tilt) - 2deg)) rotateY(-7deg) scale(var(--flag-scale)); }
+  100% { transform: rotateZ(calc(var(--tilt) + 2deg)) rotateY(7deg) scale(var(--flag-scale)); }
 }
 @keyframes campaignRosette { to { transform: rotate(360deg); } }
 @keyframes campaignConfettiBurst {
@@ -6664,6 +6667,7 @@ body.campaign-active .campaign-footer-pennants {
 
 @media (max-width: 767px) {
   body.campaign-active main { padding-top: 40px; }
+  body.campaign-active .header { top: 70px; }
   .campaign-map-art { display: none; }
   .campaign-map-year { display: none; }
   .campaign-corner-flag { top: 112px; right: 14px; padding: 6px 8px; }
@@ -6677,10 +6681,12 @@ body.campaign-active .campaign-footer-pennants {
   .campaign-side-right .campaign-side-pole { right: 7px; left: auto; }
   .campaign-side-cloth { top: 7px; left: 9px; width: 39px; height: 26px; }
   .campaign-side-cloth i { width: 2.8px; height: 26px; flex-basis: 2.8px; }
-  .campaign-bunting { height: 32px; }
-  .campaign-bunting .checkpoint-1 { left: -8%; width: 47%; }
-  .campaign-bunting .checkpoint-2 { right: -7%; width: 42%; }
-  .campaign-bunting-checkpoint svg { height: 26px; }
+  .campaign-bunting { height: 44px; }
+  .campaign-bunting .checkpoint-1 { left: -9%; width: 48%; }
+  .campaign-bunting .checkpoint-2 { top: 4px; right: -8%; width: 39%; }
+  .campaign-bunting-checkpoint svg { height: 32px; }
+  .campaign-bunting i:nth-child(3),
+  .campaign-bunting i:nth-child(4) { --drop: 14px; }
   .campaign-bunting i { width: 7px; height: 12px; }
   .campaign-ribbon-banner { left: 18px; bottom: 80px; padding: 7px 12px; }
   .campaign-ribbon-banner span { display: none; }
