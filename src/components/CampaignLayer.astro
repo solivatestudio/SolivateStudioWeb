@@ -39,17 +39,24 @@ const defaultsJson = JSON.stringify(defaults);
     <img src="/images/campaign/indonesia-flag.svg" alt="" width="900" height="600" />
     <span>INDONESIA 81</span>
   </div>
+  <canvas class="campaign-three-flag" data-campaign-three-flag width="360" height="240"></canvas>
   <span class="campaign-star star-one">✦</span>
   <span class="campaign-star star-two">✦</span>
   <div class="campaign-side-flags campaign-side-left">
     <span class="campaign-side-pole"></span>
-    <span class="campaign-side-cloth"><i></i><i></i></span>
+    <span class="campaign-side-cloth">{Array.from({ length: 14 }).map((_, index) => <i style={`animation-delay:${index * -72}ms`}></i>)}</span>
     <b>17.08</b>
   </div>
   <div class="campaign-side-flags campaign-side-right">
     <span class="campaign-side-pole"></span>
-    <span class="campaign-side-cloth"><i></i><i></i></span>
+    <span class="campaign-side-cloth">{Array.from({ length: 14 }).map((_, index) => <i style={`animation-delay:${index * -72}ms`}></i>)}</span>
     <b>81</b>
+  </div>
+  <div class="campaign-bunting" aria-hidden="true">
+    {Array.from({ length: 18 }).map((_, index) => <i class={index % 2 ? "is-white" : "is-red"} style={`animation-delay:${index * -90}ms`}></i>)}
+  </div>
+  <div class="campaign-ribbon-banner">
+    <i></i><strong>INDONESIA 81</strong><span>MERDEKA UNTUK BERKARYA</span><i></i>
   </div>
   <div class="campaign-pennants pennants-left">{Array.from({ length: 7 }).map((_, index) => <i style={`--p:${index}`}></i>)}</div>
   <div class="campaign-pennants pennants-right">{Array.from({ length: 7 }).map((_, index) => <i style={`--p:${index}`}></i>)}</div>
@@ -57,27 +64,29 @@ const defaultsJson = JSON.stringify(defaults);
 </div>
 
 <div class="campaign-transition" data-campaign-transition hidden aria-hidden="true">
-  <div class="campaign-transition-date">
-    <strong>17.08</strong>
-    <span>1945—2026</span>
-  </div>
   <div class="campaign-transition-window campaign-transition-red">
     <div class="campaign-transition-track">
-      <span>MERDEKA UNTUK BERKARYA</span><i></i><span>CREATE</span><i></i><span>BUILD</span><i></i><span>GROW</span><i></i><span>INDONESIA 81</span><i></i><span>17 · 08 · 1945</span><i></i>
-      <span>MERDEKA UNTUK BERKARYA</span><i></i><span>CREATE</span><i></i><span>BUILD</span><i></i><span>GROW</span><i></i><span>INDONESIA 81</span><i></i><span>17 · 08 · 1945</span><i></i>
+      {Array.from({ length: 2 }).map(() => (
+        <div class="campaign-transition-group">
+          <b>17.08</b><i></i><span>MERDEKA UNTUK BERKARYA</span><i></i><span>CREATE</span><i></i><span>BUILD</span><i></i><span>INDONESIA 81</span><i></i>
+        </div>
+      ))}
     </div>
   </div>
   <div class="campaign-transition-window campaign-transition-white">
     <div class="campaign-transition-track is-reverse">
-      <span>17 AGUSTUS</span><i></i><span>DARI INDONESIA</span><i></i><span>UNTUK IDE YANG LEBIH BESAR</span><i></i><span>81 YEARS</span><i></i>
-      <span>17 AGUSTUS</span><i></i><span>DARI INDONESIA</span><i></i><span>UNTUK IDE YANG LEBIH BESAR</span><i></i><span>81 YEARS</span><i></i>
+      {Array.from({ length: 2 }).map(() => (
+        <div class="campaign-transition-group">
+          <b>81 YEARS</b><i></i><span>17 AGUSTUS 1945</span><i></i><span>DARI INDONESIA</span><i></i><span>UNTUK IDE YANG LEBIH BESAR</span><i></i>
+        </div>
+      ))}
     </div>
   </div>
-  <div class="campaign-transition-mark"><span></span><span></span><b>81</b></div>
 </div>
 
 {home && (
   <div class="campaign-popup-backdrop" data-campaign-popup hidden>
+    <canvas class="campaign-confetti-canvas" data-campaign-confetti-canvas aria-hidden="true"></canvas>
     <section class="campaign-popup" role="dialog" aria-modal="true" aria-labelledby="campaign-popup-title">
       <button class="campaign-popup-close" type="button" data-campaign-close aria-label="Tutup promo">
         <span></span><span></span>
@@ -101,6 +110,87 @@ const defaultsJson = JSON.stringify(defaults);
 )}
 
 <script is:inline type="application/json" id="campaign-defaults" set:html={defaultsJson}></script>
+<script>
+  import party from "party-js";
+
+  (window as Window & { solivateParty?: typeof party }).solivateParty = party;
+  window.dispatchEvent(new CustomEvent("solivate:party-ready"));
+
+  const setupThreeFlag = async () => {
+    const canvas = document.querySelector<HTMLCanvasElement>("[data-campaign-three-flag]");
+    if (!canvas) return;
+    const {
+      CylinderGeometry,
+      DoubleSide,
+      Mesh,
+      MeshBasicMaterial,
+      OrthographicCamera,
+      PlaneGeometry,
+      Scene,
+      ShaderMaterial,
+      WebGLRenderer
+    } = await import("three");
+    const renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setSize(canvas.clientWidth || 180, canvas.clientHeight || 120, false);
+    const scene = new Scene();
+    const camera = new OrthographicCamera(-.35, 2.8, 1.05, -1.05, .1, 10);
+    camera.position.z = 4;
+    const geometry = new PlaneGeometry(2.45, 1.5, 32, 18);
+    geometry.translate(1.225, 0, 0);
+    const uniforms = { time: { value: 0 } };
+    const material = new ShaderMaterial({
+      uniforms,
+      transparent: true,
+      side: DoubleSide,
+      vertexShader: `
+        uniform float time;
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          vec3 p = position;
+          float grip = smoothstep(0.0, 0.16, uv.x);
+          p.z += sin(p.x * 4.4 - time * 2.6) * 0.16 * grip;
+          p.y += sin(p.x * 3.2 - time * 2.1) * 0.055 * grip;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec2 vUv;
+        void main() {
+          vec3 red = vec3(0.898, 0.137, 0.165);
+          vec3 white = vec3(1.0);
+          vec3 color = vUv.y > 0.5 ? red : white;
+          float edge = smoothstep(0.0, .025, vUv.x) * smoothstep(0.0, .025, 1.0 - vUv.x);
+          gl_FragColor = vec4(color, edge * .96);
+        }
+      `
+    });
+    scene.add(new Mesh(geometry, material));
+    const pole = new Mesh(
+      new CylinderGeometry(.025, .025, 2.05, 10),
+      new MeshBasicMaterial({ color: 0xdce3ea })
+    );
+    pole.position.set(0, -.28, -.04);
+    scene.add(pole);
+    let frame = 0;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const render = (time: number) => {
+      const active = document.body.classList.contains("campaign-active");
+      if (active && canvas.offsetParent !== null && !document.hidden) {
+        uniforms.time.value = reduced ? 0 : time / 1000;
+        renderer.render(scene, camera);
+      }
+      frame = window.requestAnimationFrame(render);
+    };
+    frame = window.requestAnimationFrame(render);
+    window.addEventListener("solivate:campaign", (event) => {
+      canvas.hidden = !Boolean((event as CustomEvent).detail?.active);
+    });
+    window.addEventListener("pagehide", () => window.cancelAnimationFrame(frame), { once: true });
+  };
+  setupThreeFlag();
+</script>
 <script is:inline define:vars={{ home }}>
   (() => {
     if (window.solivateCampaignBooted) return;
@@ -113,6 +203,7 @@ const defaultsJson = JSON.stringify(defaults);
     let campaign = defaults;
     let whatsapp = "6281219118993";
     let lastFocused = null;
+    let confettiFrame = 0;
 
     const jakartaDate = () => new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Jakarta", year: "numeric", month: "2-digit", day: "2-digit"
@@ -150,6 +241,7 @@ const defaultsJson = JSON.stringify(defaults);
 
     const closePopup = () => {
       if (!popup || popup.hidden) return;
+      window.cancelAnimationFrame(confettiFrame);
       popup.classList.remove("is-open");
       document.body.classList.remove("campaign-popup-open");
       window.setTimeout(() => { popup.hidden = true; }, 280);
@@ -158,27 +250,70 @@ const defaultsJson = JSON.stringify(defaults);
 
     const celebratePopup = () => {
       if (!popup || popup.dataset.celebrated || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const party = window.solivateParty;
+      if (!party) {
+        window.addEventListener("solivate:party-ready", celebratePopup, { once: true });
+        return;
+      }
       popup.dataset.celebrated = "true";
-      const origin = popup.querySelector(".campaign-popup-mark")?.getBoundingClientRect();
-      const centerX = origin ? origin.left + origin.width / 2 : window.innerWidth / 2;
-      const centerY = origin ? origin.top + origin.height / 2 : window.innerHeight / 2;
-      const colors = ["#e5232a", "#ffffff", "#023e8a", "#d7ff3f"];
-      const particleCount = window.innerWidth < 640 ? 36 : 56;
-      Array.from({ length: particleCount }).forEach((_, index) => {
-        const particle = document.createElement("i");
-        const angle = (Math.PI * 2 * index) / particleCount + (Math.random() - 0.5) * 0.34;
-        const distance = 110 + Math.random() * (window.innerWidth < 640 ? 140 : 250);
-        particle.className = `campaign-confetti${index % 7 === 0 ? " is-star" : index % 5 === 0 ? " is-ribbon" : ""}`;
-        particle.style.setProperty("--confetti-x", `${centerX}px`);
-        particle.style.setProperty("--confetti-y", `${centerY}px`);
-        particle.style.setProperty("--confetti-dx", `${Math.cos(angle) * distance}px`);
-        particle.style.setProperty("--confetti-dy", `${Math.sin(angle) * distance + 34}px`);
-        particle.style.setProperty("--confetti-color", colors[index % colors.length]);
-        particle.style.setProperty("--confetti-rotate", `${180 + Math.random() * 360}deg`);
-        particle.style.setProperty("--confetti-delay", `${Math.random() * 90}ms`);
-        document.body.appendChild(particle);
-        window.setTimeout(() => particle.remove(), 1200);
+      const source = popup.querySelector(".campaign-popup-mark") || popup;
+      const colors = ["#e5232a", "#ffffff", "#b5121b", "#023e8a", "#d7ff3f"];
+      const flag = document.createElement("span");
+      flag.className = "campaign-party-flag";
+      party.confetti(source, {
+        count: party.variation.range(window.innerWidth < 640 ? 90 : 150, window.innerWidth < 640 ? 120 : 190),
+        spread: party.variation.range(58, 82),
+        speed: party.variation.range(360, 680),
+        size: party.variation.range(.72, 1.28),
+        color: () => party.Color.fromHex(colors[Math.floor(Math.random() * colors.length)]),
+        shapes: ["rectangle", "circle", "star", flag]
       });
+
+      const canvas = popup.querySelector("[data-campaign-confetti-canvas]");
+      const context = canvas?.getContext?.("2d");
+      if (!canvas || !context) return;
+      const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      canvas.width = Math.floor(width * ratio);
+      canvas.height = Math.floor(height * ratio);
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      const pieces = Array.from({ length: width < 640 ? 72 : 118 }, (_, index) => ({
+        x: Math.random() * width,
+        y: -30 - Math.random() * height * .7,
+        size: 4 + Math.random() * 8,
+        speed: 1.5 + Math.random() * 3,
+        drift: (Math.random() - .5) * 1.1,
+        angle: Math.random() * Math.PI,
+        spin: (Math.random() - .5) * .16,
+        flag: index % 8 === 0,
+        color: colors[index % colors.length]
+      }));
+      const started = performance.now();
+      const draw = (now) => {
+        context.clearRect(0, 0, width, height);
+        pieces.forEach((piece) => {
+          piece.y += piece.speed;
+          piece.x += piece.drift;
+          piece.angle += piece.spin;
+          context.save();
+          context.translate(piece.x, piece.y);
+          context.rotate(piece.angle);
+          if (piece.flag) {
+            context.fillStyle = "#e5232a";
+            context.fillRect(-piece.size, -piece.size * .62, piece.size * 2, piece.size * .62);
+            context.fillStyle = "#ffffff";
+            context.fillRect(-piece.size, 0, piece.size * 2, piece.size * .62);
+          } else {
+            context.fillStyle = piece.color;
+            context.fillRect(-piece.size * .55, -piece.size * .22, piece.size * 1.1, piece.size * .44);
+          }
+          context.restore();
+        });
+        if (now - started < 5200 && !popup.hidden) confettiFrame = window.requestAnimationFrame(draw);
+        else context.clearRect(0, 0, width, height);
+      };
+      confettiFrame = window.requestAnimationFrame(draw);
     };
 
     const openPopup = () => {
