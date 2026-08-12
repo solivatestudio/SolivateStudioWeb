@@ -6170,61 +6170,129 @@ body.campaign-active main { padding-top: 42px; }
 
 .campaign-side-flags {
   position: fixed;
-  z-index: 2;
-  top: 55%;
-  width: 70px;
-  height: 148px;
-  opacity: .78;
-  transform-origin: 8px 100%;
+  z-index: 3;
+  top: 58%;
+  width: 60px;
+  height: 128px;
+  opacity: .96;
+  filter: drop-shadow(0 10px 18px rgba(2,18,38,.2));
 }
 
-.campaign-side-left { left: -10px; transform: translateY(-50%) rotate(18deg); }
-.campaign-side-right { right: -10px; transform: translateY(-50%) scaleX(-1) rotate(18deg); }
-.campaign-side-pole { position: absolute; left: 8px; inset-block: 0; width: 2px; background: linear-gradient(#fff, rgba(255,255,255,.2)); }
+.campaign-side-left {
+  left: -9px;
+  transform: translateY(-50%) rotate(9deg);
+  transform-origin: 9px 100%;
+}
+.campaign-side-right {
+  right: -9px;
+  transform: translateY(-50%) rotate(-9deg);
+  transform-origin: calc(100% - 9px) 100%;
+}
+.campaign-side-pole {
+  position: absolute;
+  left: 9px;
+  inset-block: 0;
+  width: 2px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff 0%, #dce3ea 72%, rgba(220,227,234,.38) 100%);
+  box-shadow: 0 0 0 1px rgba(2,18,38,.08);
+}
+.campaign-side-pole::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -2px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #dce3ea;
+  transform: translateX(-50%);
+}
+.campaign-side-right .campaign-side-pole { right: 9px; left: auto; }
 .campaign-side-cloth {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 8px;
+  left: 11px;
   display: flex;
-  width: 56px;
-  height: 34px;
+  width: 46px;
+  height: 30px;
   perspective: 110px;
-  filter: drop-shadow(0 8px 8px rgba(0,0,0,.15));
+  filter: drop-shadow(0 7px 7px rgba(0,0,0,.18));
   transform-origin: left center;
 }
 .campaign-side-cloth i {
   display: block;
-  width: 4px;
-  height: 34px;
-  flex: 0 0 4px;
+  width: 3.3px;
+  height: 30px;
+  flex: 0 0 3.3px;
   background: linear-gradient(180deg, #e5232a 0 50%, #fff 50% 100%);
   animation: campaignFlagSegment 1.4s var(--ease-in-out) infinite alternate;
   transform-origin: center;
 }
 .campaign-side-cloth i:last-child { clip-path: polygon(0 0, 100% 5%, 100% 92%, 0 100%); }
-.campaign-side-flags b { position: absolute; left: 18px; bottom: 4px; color: rgba(255,255,255,.48); font-size: 7px; letter-spacing: .16em; writing-mode: vertical-rl; }
+.campaign-side-right .campaign-side-cloth {
+  right: 11px;
+  left: auto;
+  flex-direction: row-reverse;
+  transform-origin: right center;
+}
+.campaign-side-flags b { display: none; }
 
 .campaign-bunting {
   position: absolute;
-  z-index: 2;
-  top: 92px;
-  left: 6%;
-  display: flex;
-  width: 88%;
-  justify-content: space-between;
-  border-top: 1px solid rgba(255,255,255,.36);
-  opacity: .72;
-  transform: rotate(-1deg);
+  z-index: -1;
+  top: calc(100% - 1px);
+  left: 0;
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  pointer-events: none;
 }
+.campaign-bunting-checkpoint {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  justify-content: space-around;
+  padding-inline: clamp(8px, 2.2vw, 36px);
+  border-top: 1px solid rgba(201,8,32,.5);
+  transform-origin: top center;
+}
+.campaign-bunting-checkpoint::before,
+.campaign-bunting-checkpoint::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(201,8,32,.28);
+}
+.campaign-bunting-checkpoint::before { left: 0; }
+.campaign-bunting-checkpoint::after { right: 0; }
+.campaign-bunting-checkpoint:nth-child(odd) { transform: rotate(1.2deg); }
+.campaign-bunting-checkpoint:nth-child(even) { transform: rotate(-1.2deg); }
+.campaign-bunting-checkpoint:nth-child(2),
+.campaign-bunting-checkpoint:nth-child(3) { padding-inline: clamp(18px, 3vw, 48px); }
+.campaign-bunting-checkpoint:nth-child(2) i,
+.campaign-bunting-checkpoint:nth-child(3) i { height: clamp(12px, 1.4vw, 19px); }
+.campaign-bunting-checkpoint:nth-child(2) i:nth-child(even),
+.campaign-bunting-checkpoint:nth-child(3) i:nth-child(even) { transform: translateY(3px); }
+.campaign-bunting-checkpoint:nth-child(1) i:nth-child(odd),
+.campaign-bunting-checkpoint:nth-child(4) i:nth-child(odd) { transform: translateY(2px); }
 .campaign-bunting i {
-  width: clamp(12px, 1.4vw, 22px);
-  height: clamp(20px, 2.2vw, 34px);
+  width: clamp(8px, .9vw, 14px);
+  height: clamp(14px, 1.6vw, 22px);
   margin-top: -1px;
   background: #e5232a;
   clip-path: polygon(0 0, 100% 0, 50% 100%);
   animation: campaignBuntingWave 2.6s var(--ease-in-out) infinite alternate;
   transform-origin: top center;
 }
+.campaign-bunting i:nth-child(2) { animation-delay: -.35s; }
+.campaign-bunting i:nth-child(3) { animation-delay: -.7s; }
+.campaign-bunting i:nth-child(4) { animation-delay: -1.05s; }
+.campaign-bunting i:nth-child(5) { animation-delay: -1.4s; }
 .campaign-bunting .is-white { background: #fff; }
 
 .campaign-ribbon-banner {
@@ -6259,19 +6327,19 @@ body.campaign-active main { padding-top: 42px; }
 .campaign-ribbon-banner span { color: rgba(255,255,255,.72); font-size: 7px; font-weight: 800; letter-spacing: .1em; }
 
 .campaign-pennants {
-  position: fixed;
-  z-index: 1;
-  top: 70%;
+  position: absolute;
+  z-index: 2;
+  top: 50%;
   display: flex;
-  gap: 3px;
+  gap: 4px;
   padding-top: 1px;
-  border-top: 1px solid rgba(255,255,255,.35);
-  opacity: .36;
-  transform: rotate(-42deg);
+  border-top: 1px solid rgba(255,255,255,.68);
+  opacity: .88;
+  pointer-events: none;
 }
-.pennants-left { left: -24px; }
-.pennants-right { right: -24px; transform: rotate(42deg) scaleX(-1); }
-.campaign-pennants i { width: 9px; height: 16px; background: #e5232a; clip-path: polygon(0 0,100% 0,50% 100%); }
+.pennants-left { left: 12px; transform: translateY(-50%) rotate(-11deg); transform-origin: left center; }
+.pennants-right { right: 12px; transform: translateY(-50%) rotate(11deg); transform-origin: right center; }
+.campaign-pennants i { width: 9px; height: 14px; background: #e5232a; clip-path: polygon(0 0,100% 0,50% 100%); }
 .campaign-pennants i:nth-child(even) { background: #fff; }
 
 .campaign-rosette {
@@ -6603,17 +6671,27 @@ body.campaign-active .campaign-footer-pennants {
   .campaign-corner-flag span { display: none; }
   .campaign-three-flag { display: none; }
   .campaign-star { display: none; }
-  .campaign-side-flags { top: 62%; width: 46px; height: 118px; opacity: .42; }
-  .campaign-side-left { left: -32px; }
-  .campaign-side-right { right: -32px; }
-  .campaign-side-cloth { width: 38px; }
-  .campaign-side-cloth i { width: 3px; height: 24px; flex-basis: 3px; }
-  .campaign-bunting { top: 78px; left: 4%; width: 92%; opacity: .48; }
-  .campaign-bunting i { width: 10px; height: 17px; }
+  .campaign-side-flags { top: 64%; width: 50px; height: 104px; opacity: .9; }
+  .campaign-side-left { left: -7px; transform: translateY(-50%) rotate(8deg); transform-origin: 7px 100%; }
+  .campaign-side-right { right: -7px; transform: translateY(-50%) rotate(-8deg); transform-origin: calc(100% - 7px) 100%; }
+  .campaign-side-pole { left: 7px; }
+  .campaign-side-right .campaign-side-pole { right: 7px; left: auto; }
+  .campaign-side-cloth { top: 7px; left: 9px; width: 39px; height: 26px; }
+  .campaign-side-cloth i { width: 2.8px; height: 26px; flex-basis: 2.8px; }
+  .campaign-bunting { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .campaign-bunting-checkpoint { padding-inline: 8px; }
+  .campaign-bunting-checkpoint:nth-child(2),
+  .campaign-bunting-checkpoint:nth-child(3) { padding-inline: 10px; }
+  .campaign-bunting-checkpoint:nth-child(4) { display: none; }
+  .campaign-bunting i { width: 7px; height: 12px; }
   .campaign-ribbon-banner { left: 18px; bottom: 80px; padding: 7px 12px; }
   .campaign-ribbon-banner span { display: none; }
-  .campaign-pennants,
   .campaign-rosette { display: none; }
+  .campaign-pennants { gap: 2px; }
+  .campaign-pennants i { width: 6px; height: 10px; }
+  .campaign-pennants i:nth-child(n + 6) { display: none; }
+  .pennants-left { left: 4px; }
+  .pennants-right { right: 4px; }
   .campaign-transition { grid-template-rows: 30px 30px; }
   .campaign-transition-track { min-height: 30px; }
   .campaign-transition-group { padding-inline: 5px; }

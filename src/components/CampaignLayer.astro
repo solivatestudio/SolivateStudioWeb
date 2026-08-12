@@ -25,9 +25,20 @@ const defaultsJson = JSON.stringify(defaults);
 ---
 
 <div class="campaign-rail" data-campaign-rail hidden>
+  <div class="campaign-pennants pennants-left" aria-hidden="true">{Array.from({ length: 7 }).map(() => <i></i>)}</div>
   <span class="campaign-flag" aria-hidden="true"><i></i><i></i></span>
   <p><b data-campaign-rail-title>Promo Merdeka HUT RI ke-81</b><span>Harga spesial hingga Rp81.000</span></p>
   <a href="/#pricing">Lihat promo <span aria-hidden="true">↗</span></a>
+  <div class="campaign-pennants pennants-right" aria-hidden="true">{Array.from({ length: 7 }).map(() => <i></i>)}</div>
+  <div class="campaign-bunting" aria-hidden="true">
+    {Array.from({ length: 4 }).map((_, groupIndex) => (
+      <span class={`campaign-bunting-checkpoint checkpoint-${groupIndex + 1}`}>
+        {Array.from({ length: 5 }).map((_, flagIndex) => (
+          <i class={(groupIndex + flagIndex) % 2 ? "is-white" : "is-red"}></i>
+        ))}
+      </span>
+    ))}
+  </div>
 </div>
 
 <div class="campaign-atmosphere" data-campaign-atmosphere aria-hidden="true" hidden>
@@ -52,14 +63,9 @@ const defaultsJson = JSON.stringify(defaults);
     <span class="campaign-side-cloth">{Array.from({ length: 14 }).map((_, index) => <i style={`animation-delay:${index * -72}ms`}></i>)}</span>
     <b>81</b>
   </div>
-  <div class="campaign-bunting" aria-hidden="true">
-    {Array.from({ length: 18 }).map((_, index) => <i class={index % 2 ? "is-white" : "is-red"} style={`animation-delay:${index * -90}ms`}></i>)}
-  </div>
   <div class="campaign-ribbon-banner">
     <i></i><strong>INDONESIA 81</strong><span>MERDEKA UNTUK BERKARYA</span><i></i>
   </div>
-  <div class="campaign-pennants pennants-left">{Array.from({ length: 7 }).map((_, index) => <i style={`--p:${index}`}></i>)}</div>
-  <div class="campaign-pennants pennants-right">{Array.from({ length: 7 }).map((_, index) => <i style={`--p:${index}`}></i>)}</div>
   <span class="campaign-rosette" data-campaign-rosette></span>
 </div>
 
@@ -289,13 +295,18 @@ const defaultsJson = JSON.stringify(defaults);
         flag: index % 8 === 0,
         color: colors[index % colors.length]
       }));
-      const started = performance.now();
-      const draw = (now) => {
+      const draw = () => {
         context.clearRect(0, 0, width, height);
         pieces.forEach((piece) => {
           piece.y += piece.speed;
           piece.x += piece.drift;
           piece.angle += piece.spin;
+          if (piece.y > height + 30) {
+            piece.y = -30 - Math.random() * 80;
+            piece.x = Math.random() * width;
+          }
+          if (piece.x < -30) piece.x = width + 30;
+          if (piece.x > width + 30) piece.x = -30;
           context.save();
           context.translate(piece.x, piece.y);
           context.rotate(piece.angle);
@@ -310,7 +321,7 @@ const defaultsJson = JSON.stringify(defaults);
           }
           context.restore();
         });
-        if (now - started < 5200 && !popup.hidden) confettiFrame = window.requestAnimationFrame(draw);
+        if (!popup.hidden) confettiFrame = window.requestAnimationFrame(draw);
         else context.clearRect(0, 0, width, height);
       };
       confettiFrame = window.requestAnimationFrame(draw);
