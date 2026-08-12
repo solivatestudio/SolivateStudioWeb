@@ -3,6 +3,12 @@ import DashboardLayout from "../../layouts/DashboardLayout.astro";
 
 const modules = [
   {
+    label: "Campaign control",
+    href: "/dashboard/cms/campaign",
+    metric: "HUT RI 81",
+    text: "Atur periode promo, harga coret otomatis, poster popup, copy bilingual, dan CTA WhatsApp."
+  },
+  {
     label: "Pricing packages",
     href: "/dashboard/cms/pricing",
     metric: "7 paket",
@@ -34,7 +40,7 @@ const modules = [
     <div>
       <p class="cms-kicker">Website content</p>
       <h2>Kelola konten yang sering berubah tanpa sentuh kode.</h2>
-      <p>Pricing, project showcase, FAQ, dan kontak dipisah sebagai resource CMS agar alurnya jelas: tambah data, edit, upload gambar, reorder, publish.</p>
+      <p>Kampanye, pricing, project showcase, FAQ, dan kontak dipisah sebagai resource CMS agar alurnya jelas dan perubahan langsung tersambung ke website publik.</p>
     </div>
     <a class="admin-button accent" href="/" target="_blank" rel="noreferrer">Preview website</a>
   </section>
@@ -42,7 +48,7 @@ const modules = [
   <section class="cms-resource-grid">
     {modules.map((item, index) => (
       <a class="cms-module-card" href={item.href}>
-        <span>0{index + 1}</span>
+        <span>{String(index + 1).padStart(2, "0")}</span>
         <small>{item.metric}</small>
         <h3>{item.label}</h3>
         <p>{item.text}</p>

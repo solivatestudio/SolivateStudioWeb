@@ -21,7 +21,10 @@ const navItems: NavItem[] = [
 ];
 
 const spanAttrs = (key?: string) => (i18n && key ? { "data-i18n": key } : {});
+import CampaignLayer from "./CampaignLayer.astro";
 ---
+
+<CampaignLayer home={home} />
 
 <header class={`header ${compact ? "is-scrolled is-compact" : ""}`} data-header>
   <div class="wrap header-inner">

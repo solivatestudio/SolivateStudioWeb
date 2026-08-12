@@ -13,6 +13,7 @@ const managementNavigation = [
 const navigation = mode === "cms"
   ? [
       ["cms", "Ringkasan CMS", "/dashboard/cms", "C"],
+      ["campaign", "Kampanye", "/dashboard/cms/campaign", "M"],
       ["pricing", "Pricing", "/dashboard/cms/pricing", "H"],
       ["projects", "Showcase", "/dashboard/cms/projects", "S"],
       ["faq", "FAQ", "/dashboard/cms/faq", "F"],
@@ -206,6 +207,10 @@ const currentLabel = navigation.find(([key]) => key === active)?.[1] || title;
         pricing: {
           title: "Panduan CMS Pricing",
           html: `<h3>Cara pakai</h3><ol><li>Kelola paket pricing dari list.</li><li>Isi nama, harga, highlight, dan fitur paket.</li><li>Pastikan paket populer ditandai agar tampil jelas.</li></ol>`
+        },
+        campaign: {
+          title: "Panduan Kampanye Website",
+          html: `<h3>Cara pakai</h3><ol><li>Atur periode dan nominal promo.</li><li>Upload poster desktop dan mobile agar popup tetap rapi.</li><li>Lengkapi copy ID/EN dan pesan WhatsApp.</li><li>Simpan, lalu cek status tayang di panel preview.</li></ol><h3>FAQ</h3><p><strong>Kapan kampanye tampil?</strong><br/>Hanya ketika toggle aktif dan tanggal Jakarta berada dalam periode yang dipilih.</p>`
         },
         faq: {
           title: "Panduan CMS FAQ",

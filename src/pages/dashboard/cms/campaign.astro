@@ -1,0 +1,181 @@
+---
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+---
+
+<DashboardLayout title="Kampanye Website" active="campaign" mode="cms" eyebrow="Website CMS">
+  <section class="cms-resource-head campaign-admin-head">
+    <div>
+      <p class="cms-kicker">Campaign control</p>
+      <h2>Atur promo Merdeka dari satu tempat.</h2>
+      <p>Jadwal, nominal promo, poster desktop/mobile, copy bilingual, dan CTA WhatsApp langsung berlaku di website publik.</p>
+    </div>
+    <a class="admin-button ghost" href="/" target="_blank" rel="noreferrer">Preview homepage</a>
+  </section>
+
+  <p class="admin-error" data-campaign-error hidden></p>
+
+  <section class="campaign-admin-layout">
+    <form class="admin-panel campaign-admin-form" data-campaign-form>
+      <header class="campaign-admin-section-head">
+        <div><span>01</span><h3>Status & periode</h3></div>
+        <label class="cms-switch campaign-master-switch">
+          <input type="checkbox" name="enabled" />
+          <span></span>
+          Kampanye aktif
+        </label>
+      </header>
+
+      <div class="admin-form campaign-form-grid">
+        <label class="admin-field"><span>Tanggal mulai</span><input name="start_date" type="date" required /></label>
+        <label class="admin-field"><span>Tanggal selesai</span><input name="end_date" type="date" required /></label>
+        <label class="admin-field full"><span>Nominal promo</span><div class="campaign-money-input"><b>Rp</b><input name="discount_amount" type="number" min="0" step="1000" required /></div><small>Harga coret dihitung otomatis dari harga aktif + nominal ini.</small></label>
+      </div>
+
+      <header class="campaign-admin-section-head"><div><span>02</span><h3>Poster responsif</h3></div></header>
+      <div class="campaign-upload-grid">
+        <div class="campaign-upload-card">
+          <span>Poster desktop</span>
+          <small>Landscape, disarankan rasio 3:2</small>
+          <img data-campaign-preview="desktop_image" src="/images/campaign/merdeka-81-desktop.webp" alt="Preview poster desktop" />
+          <input name="desktop_image" type="url" required />
+          <input type="file" accept="image/png,image/jpeg,image/webp" data-campaign-upload="desktop_image" hidden />
+          <button type="button" data-upload-trigger="desktop_image">Upload gambar</button>
+        </div>
+        <div class="campaign-upload-card portrait">
+          <span>Poster mobile</span>
+          <small>Portrait, disarankan rasio 2:3</small>
+          <img data-campaign-preview="mobile_image" src="/images/campaign/merdeka-81-mobile.webp" alt="Preview poster mobile" />
+          <input name="mobile_image" type="url" required />
+          <input type="file" accept="image/png,image/jpeg,image/webp" data-campaign-upload="mobile_image" hidden />
+          <button type="button" data-upload-trigger="mobile_image">Upload gambar</button>
+        </div>
+      </div>
+      <div class="admin-form campaign-form-grid">
+        <label class="admin-field"><span>Alt gambar ID</span><input name="image_alt_id" required /></label>
+        <label class="admin-field"><span>Alt gambar EN</span><input name="image_alt_en" required /></label>
+      </div>
+
+      <header class="campaign-admin-section-head"><div><span>03</span><h3>Copy Indonesia & Inggris</h3></div></header>
+      <div class="campaign-copy-grid">
+        <section>
+          <strong>Bahasa Indonesia</strong>
+          <label class="admin-field"><span>Eyebrow</span><input name="eyebrow_id" required /></label>
+          <label class="admin-field"><span>Headline</span><textarea name="headline_id" rows="2" required></textarea></label>
+          <label class="admin-field"><span>Deskripsi</span><textarea name="description_id" rows="3" required></textarea></label>
+          <label class="admin-field"><span>Label CTA</span><input name="cta_id" required /></label>
+          <label class="admin-field"><span>Pesan WhatsApp</span><textarea name="whatsapp_message_id" rows="3" required></textarea></label>
+        </section>
+        <section>
+          <strong>English</strong>
+          <label class="admin-field"><span>Eyebrow</span><input name="eyebrow_en" required /></label>
+          <label class="admin-field"><span>Headline</span><textarea name="headline_en" rows="2" required></textarea></label>
+          <label class="admin-field"><span>Description</span><textarea name="description_en" rows="3" required></textarea></label>
+          <label class="admin-field"><span>CTA label</span><input name="cta_en" required /></label>
+          <label class="admin-field"><span>WhatsApp message</span><textarea name="whatsapp_message_en" rows="3" required></textarea></label>
+        </section>
+      </div>
+
+      <div class="cms-editor-actions campaign-admin-actions">
+        <span data-campaign-state>Belum disimpan</span>
+        <button class="admin-button accent" type="submit">Simpan kampanye</button>
+      </div>
+    </form>
+
+    <aside class="campaign-admin-preview">
+      <div class="campaign-preview-status" data-campaign-live-status><i></i><span>Memeriksa status...</span></div>
+      <div class="campaign-preview-window">
+        <img data-live-preview-image src="/images/campaign/merdeka-81-desktop.webp" alt="Preview kampanye" />
+        <div>
+          <small data-live-preview-eyebrow>Promo Merdeka HUT RI ke-81</small>
+          <strong data-live-preview-title>Merdeka bikin website. Hemat hingga Rp81.000.</strong>
+          <p data-live-preview-description>Rayakan kemerdekaan dengan langkah digital baru untuk bisnis, komunitas, atau momen spesialmu.</p>
+          <span data-live-preview-cta>Klaim Promo via WhatsApp ↗</span>
+        </div>
+      </div>
+      <p>Preview menggunakan copy Bahasa Indonesia dan poster desktop.</p>
+    </aside>
+  </section>
+
+  <script is:inline>
+    window.addEventListener("DOMContentLoaded", async () => {
+      const form = document.querySelector("[data-campaign-form]");
+      const errorNode = document.querySelector("[data-campaign-error]");
+      const stateNode = document.querySelector("[data-campaign-state]");
+      const fields = ["start_date", "end_date", "discount_amount", "desktop_image", "mobile_image", "image_alt_id", "image_alt_en", "eyebrow_id", "eyebrow_en", "headline_id", "headline_en", "description_id", "description_en", "cta_id", "cta_en", "whatsapp_message_id", "whatsapp_message_en"];
+
+      const jakartaDate = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+      const status = () => {
+        const now = jakartaDate();
+        const active = form.elements.enabled.checked && now >= form.elements.start_date.value && now <= form.elements.end_date.value;
+        const node = document.querySelector("[data-campaign-live-status]");
+        node.classList.toggle("active", active);
+        node.querySelector("span").textContent = active ? "Sedang tayang di website" : form.elements.enabled.checked ? "Di luar periode tayang" : "Kampanye dimatikan";
+      };
+      const preview = () => {
+        document.querySelector("[data-live-preview-image]").src = form.elements.desktop_image.value || "/images/campaign/merdeka-81-desktop.webp";
+        document.querySelector("[data-live-preview-eyebrow]").textContent = form.elements.eyebrow_id.value;
+        document.querySelector("[data-live-preview-title]").textContent = form.elements.headline_id.value;
+        document.querySelector("[data-live-preview-description]").textContent = form.elements.description_id.value;
+        document.querySelector("[data-live-preview-cta]").textContent = `${form.elements.cta_id.value} ↗`;
+        document.querySelectorAll("[data-campaign-preview]").forEach((image) => {
+          image.src = form.elements[image.dataset.campaignPreview].value || image.src;
+        });
+        status();
+      };
+      const populate = (campaign) => {
+        form.elements.enabled.checked = campaign.enabled !== false;
+        fields.forEach((key) => { if (form.elements[key]) form.elements[key].value = campaign[key] ?? ""; });
+        preview();
+      };
+      const payload = () => ({
+        enabled: form.elements.enabled.checked,
+        ...Object.fromEntries(fields.map((key) => [key, key === "discount_amount" ? Number(form.elements[key].value || 0) : form.elements[key].value.trim()]))
+      });
+
+      form.addEventListener("input", () => { stateNode.textContent = "Ada perubahan belum disimpan"; preview(); });
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (form.elements.end_date.value < form.elements.start_date.value) {
+          window.showAdminToast("Tanggal selesai tidak boleh sebelum tanggal mulai.", "error");
+          return;
+        }
+        try {
+          const data = await window.adminApi("/api/admin/campaign", { method: "PUT", body: JSON.stringify(payload()) });
+          populate(data.campaign);
+          stateNode.textContent = "Tersimpan dan langsung berlaku";
+          window.showAdminToast("Kampanye tersimpan.");
+        } catch (error) { window.showAdminToast(error.message, "error"); }
+      });
+
+      document.querySelectorAll("[data-campaign-upload]").forEach((input) => {
+        input.addEventListener("change", async () => {
+          const file = input.files?.[0];
+          if (!file) return;
+          if (file.size > 4 * 1024 * 1024) { window.showAdminToast("Ukuran gambar maksimal 4MB.", "error"); return; }
+          try {
+            window.showAdminToast(`Mengupload ${file.name}...`);
+            const response = await fetch(`/api/admin/upload?filename=${encodeURIComponent(file.name)}`, { method: "POST", credentials: "same-origin", headers: { "Content-Type": file.type }, body: file });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.message || "Upload gagal.");
+            form.elements[input.dataset.campaignUpload].value = data.url;
+            stateNode.textContent = "Gambar terupload, simpan perubahan";
+            preview();
+          } catch (error) { window.showAdminToast(error.message, "error"); }
+          finally { input.value = ""; }
+        });
+      });
+      document.querySelectorAll("[data-upload-trigger]").forEach((button) => {
+        button.addEventListener("click", () => document.querySelector(`[data-campaign-upload="${button.dataset.uploadTrigger}"]`)?.click());
+      });
+
+      try {
+        const data = await window.adminApi("/api/admin/campaign");
+        populate(data.campaign);
+        stateNode.textContent = data.updated_at ? `Terakhir disimpan ${window.formatDate(data.updated_at)}` : "Menggunakan konfigurasi default";
+      } catch (error) {
+        errorNode.textContent = error.message;
+        errorNode.hidden = false;
+      }
+    });
+  </script>
+</DashboardLayout>

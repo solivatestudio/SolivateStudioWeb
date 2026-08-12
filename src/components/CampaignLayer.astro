@@ -1,0 +1,160 @@
+---
+const { home = false } = Astro.props;
+
+const defaults = {
+  enabled: true,
+  start_date: "2026-08-12",
+  end_date: "2026-08-31",
+  discount_amount: 81000,
+  desktop_image: "/images/campaign/merdeka-81-desktop.webp",
+  mobile_image: "/images/campaign/merdeka-81-mobile.webp",
+  image_alt_id: "Kampanye Promo Merdeka Solivate Studio",
+  image_alt_en: "Solivate Studio Independence Day promotion",
+  eyebrow_id: "Promo Merdeka HUT RI ke-81",
+  eyebrow_en: "Indonesia's 81st Independence Day",
+  headline_id: "Merdeka bikin website. Hemat hingga Rp81.000.",
+  headline_en: "Build your website and save up to Rp81,000.",
+  description_id: "Rayakan kemerdekaan dengan langkah digital baru untuk bisnis, komunitas, atau momen spesialmu.",
+  description_en: "Celebrate Independence Day with a new digital step for your business, community, or meaningful moment.",
+  cta_id: "Klaim Promo via WhatsApp",
+  cta_en: "Claim Promo via WhatsApp",
+  whatsapp_message_id: "Halo Solivate Studio, saya tertarik dengan Promo Merdeka HUT RI ke-81 dan ingin konsultasi project.",
+  whatsapp_message_en: "Hello Solivate Studio, I am interested in the 81st Independence Day promotion and would like to discuss a project."
+};
+const defaultsJson = JSON.stringify(defaults);
+---
+
+<div class="campaign-rail" data-campaign-rail hidden>
+  <span class="campaign-flag" aria-hidden="true"><i></i><i></i></span>
+  <p><b data-campaign-rail-title>Promo Merdeka HUT RI ke-81</b><span>Harga spesial hingga Rp81.000</span></p>
+  <a href="/#pricing">Lihat promo <span aria-hidden="true">↗</span></a>
+</div>
+
+<div class="campaign-atmosphere" data-campaign-atmosphere aria-hidden="true" hidden>
+  <span class="campaign-ribbon ribbon-a"></span>
+  <span class="campaign-ribbon ribbon-b"></span>
+  {Array.from({ length: 14 }).map((_, index) => <i style={`--i:${index}`}></i>)}
+</div>
+
+{home && (
+  <div class="campaign-popup-backdrop" data-campaign-popup hidden>
+    <section class="campaign-popup" role="dialog" aria-modal="true" aria-labelledby="campaign-popup-title">
+      <button class="campaign-popup-close" type="button" data-campaign-close aria-label="Tutup promo">
+        <span></span><span></span>
+      </button>
+      <picture class="campaign-popup-media">
+        <source media="(max-width: 640px)" data-campaign-mobile-srcset />
+        <img data-campaign-image src={defaults.desktop_image} alt={defaults.image_alt_id} width="1536" height="1024" />
+      </picture>
+      <div class="campaign-popup-copy">
+        <div class="campaign-popup-mark" aria-hidden="true"><small>HUT RI</small><strong>81</strong><span>1945—2026</span></div>
+        <p class="campaign-popup-eyebrow" data-campaign-eyebrow>{defaults.eyebrow_id}</p>
+        <h2 id="campaign-popup-title" data-campaign-headline>{defaults.headline_id}</h2>
+        <p data-campaign-description>{defaults.description_id}</p>
+        <a class="campaign-popup-cta" data-campaign-cta href="#" target="_blank" rel="noreferrer">
+          <span data-campaign-cta-label>{defaults.cta_id}</span>
+          <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </section>
+  </div>
+)}
+
+<script is:inline type="application/json" id="campaign-defaults" set:html={defaultsJson}></script>
+<script is:inline define:vars={{ home }}>
+  (() => {
+    if (window.solivateCampaignBooted) return;
+    window.solivateCampaignBooted = true;
+    const defaults = JSON.parse(document.getElementById("campaign-defaults")?.textContent || "{}");
+    const popup = document.querySelector("[data-campaign-popup]");
+    const rail = document.querySelector("[data-campaign-rail]");
+    const atmosphere = document.querySelector("[data-campaign-atmosphere]");
+    let campaign = defaults;
+    let whatsapp = "6281219118993";
+    let lastFocused = null;
+
+    const jakartaDate = () => new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Jakarta", year: "numeric", month: "2-digit", day: "2-digit"
+    }).format(new Date());
+    const isActive = (value) => Boolean(value?.enabled)
+      && jakartaDate() >= String(value.start_date || "0000-00-00")
+      && jakartaDate() <= String(value.end_date || "9999-99-99");
+    const language = () => document.documentElement.lang === "en" ? "en" : "id";
+    const copy = (key) => campaign?.[`${key}_${language()}`] || campaign?.[`${key}_id`] || "";
+
+    const updateCopy = () => {
+      const lang = language();
+      const amount = Number(campaign.discount_amount || 0).toLocaleString(lang === "en" ? "en-US" : "id-ID");
+      const railTitle = rail?.querySelector("[data-campaign-rail-title]");
+      const railDetail = rail?.querySelector("p span");
+      if (railTitle) railTitle.textContent = lang === "en" ? "Indonesia's 81st Independence Day" : "Promo Merdeka HUT RI ke-81";
+      if (railDetail) railDetail.textContent = lang === "en" ? `Save up to Rp${amount}` : `Hemat hingga Rp${amount}`;
+      const railLink = rail?.querySelector("a");
+      if (railLink) railLink.firstChild.textContent = lang === "en" ? "View promo " : "Lihat promo ";
+      const eyebrow = popup?.querySelector("[data-campaign-eyebrow]");
+      const headline = popup?.querySelector("[data-campaign-headline]");
+      const description = popup?.querySelector("[data-campaign-description]");
+      const ctaLabel = popup?.querySelector("[data-campaign-cta-label]");
+      const image = popup?.querySelector("[data-campaign-image]");
+      const mobile = popup?.querySelector("[data-campaign-mobile-srcset]");
+      const cta = popup?.querySelector("[data-campaign-cta]");
+      if (eyebrow) eyebrow.textContent = copy("eyebrow");
+      if (headline) headline.textContent = copy("headline");
+      if (description) description.textContent = copy("description");
+      if (ctaLabel) ctaLabel.textContent = copy("cta");
+      if (image) { image.src = campaign.desktop_image || defaults.desktop_image; image.alt = copy("image_alt"); }
+      if (mobile) mobile.srcset = campaign.mobile_image || campaign.desktop_image || defaults.mobile_image;
+      if (cta) cta.href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(copy("whatsapp_message"))}`;
+    };
+
+    const closePopup = () => {
+      if (!popup || popup.hidden) return;
+      popup.classList.remove("is-open");
+      document.body.classList.remove("campaign-popup-open");
+      window.setTimeout(() => { popup.hidden = true; }, 280);
+      lastFocused?.focus?.();
+    };
+    const openPopup = () => {
+      if (!home || !popup || !isActive(campaign)) return;
+      lastFocused = document.activeElement;
+      popup.hidden = false;
+      document.body.classList.add("campaign-popup-open");
+      window.requestAnimationFrame(() => popup.classList.add("is-open"));
+      popup.querySelector("[data-campaign-close]")?.focus();
+    };
+    const apply = (value) => {
+      campaign = { ...defaults, ...(value || {}) };
+      const active = isActive(campaign);
+      window.solivateCampaign = { ...campaign, active };
+      document.body.classList.toggle("campaign-active", active);
+      if (rail) rail.hidden = !active;
+      if (atmosphere) atmosphere.hidden = !active;
+      updateCopy();
+      window.dispatchEvent(new CustomEvent("solivate:campaign", { detail: window.solivateCampaign }));
+      if (active && home) openPopup();
+      if (!active) closePopup();
+    };
+
+    popup?.querySelector("[data-campaign-close]")?.addEventListener("click", closePopup);
+    popup?.addEventListener("click", (event) => { if (event.target === popup) closePopup(); });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closePopup();
+      if (event.key !== "Tab" || !popup || popup.hidden) return;
+      const focusable = [...popup.querySelectorAll('button, a[href]')];
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    });
+    new MutationObserver(updateCopy).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
+
+    Promise.all([
+      fetch("/api/public/campaign", { cache: "no-store" }).then((response) => response.ok ? response.json() : null),
+      fetch("/api/public/cms", { cache: "no-store" }).then((response) => response.ok ? response.json() : null)
+    ]).then(([campaignData, cmsData]) => {
+      whatsapp = String(cmsData?.entries?.contact_whatsapp || whatsapp).replace(/\D/g, "") || whatsapp;
+      apply(campaignData?.campaign || defaults);
+    }).catch(() => apply(defaults));
+  })();
+</script>

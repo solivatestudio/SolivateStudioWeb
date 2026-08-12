@@ -645,6 +645,17 @@ const organizationSchema = JSON.stringify({
       }[char]));
       const cmsText = (data, key, lang) => data?.[`${key}_${lang}`] || data?.[`${key}_id`] || data?.[key] || "";
       const cmsList = (data, key, lang) => Array.isArray(data?.[`${key}_${lang}`]) ? data[`${key}_${lang}`] : [];
+      const campaignPrice = (value, lang) => {
+        const current = String(value || "");
+        const settings = window.solivateCampaign;
+        const digits = current.replace(/\D/g, "");
+        if (!settings?.active || !digits || !Number(settings.discount_amount)) return `<strong>${escapeHtml(current)}</strong>`;
+        const locale = lang === "en" ? "en-US" : "id-ID";
+        const suffix = current.trim().endsWith("+") ? "+" : "";
+        const previous = `Rp${(Number(digits) + Number(settings.discount_amount)).toLocaleString(locale)}${suffix}`;
+        const saving = `Rp${Number(settings.discount_amount).toLocaleString(locale)}`;
+        return `<div class="campaign-price"><del>${escapeHtml(previous)}</del><strong class="campaign-current-price">${escapeHtml(current)}</strong><span class="campaign-promo-chip">${lang === "en" ? "SAVE" : "HEMAT"} ${saving}</span></div>`;
+      };
       const enableFaqToggles = () => {
         document.querySelectorAll("[data-faq]").forEach((item) => {
           const button = item.querySelector("[data-faq-trigger]");
@@ -672,7 +683,7 @@ const organizationSchema = JSON.stringify({
             return `<article class="pricing-card${featured}">
               <span class="pricing-label">${escapeHtml(cmsText(data, "badge", activeLang))}</span>
               <div class="card-title">${escapeHtml(cmsText(data, "name", activeLang))}</div>
-              <strong>${escapeHtml(cmsText(data, "price", activeLang))}</strong>
+              ${campaignPrice(cmsText(data, "price", activeLang), activeLang)}
               <p>${escapeHtml(cmsText(data, "description", activeLang))}</p>
               <ul>${features.map((feature) => `<li>${escapeHtml(feature)}</li>`).join("")}</ul>
             </article>`;
@@ -780,6 +791,8 @@ const organizationSchema = JSON.stringify({
           cmsResources = { pricing: [], projects: [], faq: [] };
           renderCmsResources(document.documentElement.lang);
         });
+
+      window.addEventListener("solivate:campaign", () => renderCmsResources(document.documentElement.lang));
 
       document.querySelectorAll("[data-scroll]").forEach((trigger) => {
         trigger.addEventListener("click", () => {

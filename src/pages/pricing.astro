@@ -180,7 +180,7 @@ const customPlan = fallbackPricing.find((item) => item.data.group === "custom");
           </div>
           <div class="pricing-quote-card">
             <span data-i18n="quote.label">{tx("quote.label")}</span>
-            <strong data-min-price>Rp199.000+</strong>
+            <div class="pricing-min-price" data-min-price>Rp199.000+</div>
             <p data-i18n="hero.note">{tx("hero.note")}</p>
             <a class="btn-primary" href="https://wa.me/6281219118993" target="_blank" rel="noreferrer" data-whatsapp-cta>
               <span data-i18n="quote.cta">{tx("quote.cta")}</span>
@@ -404,6 +404,17 @@ const customPlan = fallbackPricing.find((item) => item.data.group === "custom");
       const cmsText = (data, key, lang) => data?.[`${key}_${lang}`] || data?.[`${key}_id`] || data?.[key] || "";
       const cmsList = (data, key, lang) => Array.isArray(data?.[`${key}_${lang}`]) ? data[`${key}_${lang}`] : [];
       const groupItems = (group) => pricingItems.filter((item) => item?.data?.group === group);
+      const campaignPrice = (value, lang, compact = false) => {
+        const current = String(value || "");
+        const settings = window.solivateCampaign;
+        const digits = current.replace(/\D/g, "");
+        if (!settings?.active || !digits || !Number(settings.discount_amount)) return `<strong>${escapeHtml(current)}</strong>`;
+        const locale = lang === "en" ? "en-US" : "id-ID";
+        const suffix = current.trim().endsWith("+") ? "+" : "";
+        const previous = `Rp${(Number(digits) + Number(settings.discount_amount)).toLocaleString(locale)}${suffix}`;
+        const saving = `Rp${Number(settings.discount_amount).toLocaleString(locale)}`;
+        return `<div class="campaign-price${compact ? " compact" : ""}"><del>${escapeHtml(previous)}</del><strong class="campaign-current-price">${escapeHtml(current)}</strong>${compact ? "" : `<span class="campaign-promo-chip">${lang === "en" ? "SAVE" : "HEMAT"} ${saving}</span>`}</div>`;
+      };
 
       const renderPlanCard = (item, lang, extraClass = "") => {
         const data = item?.data || {};
@@ -412,7 +423,7 @@ const customPlan = fallbackPricing.find((item) => item.data.group === "custom");
         return `<article class="pricing-detail-card ${extraClass}${featuredClass}">
           <span class="pricing-label">${escapeHtml(cmsText(data, "badge", lang))}</span>
           <h3>${escapeHtml(cmsText(data, "name", lang))}</h3>
-          <strong>${escapeHtml(cmsText(data, "price", lang))}</strong>
+          ${campaignPrice(cmsText(data, "price", lang), lang)}
           <p>${escapeHtml(cmsText(data, "description", lang))}</p>
           <ul>${features.map((feature) => `<li>${escapeHtml(feature)}</li>`).join("")}</ul>
         </article>`;
@@ -426,7 +437,7 @@ const customPlan = fallbackPricing.find((item) => item.data.group === "custom");
           const data = item?.data || {};
           return `<div class="pricing-summary-row">
             <span>${escapeHtml(cmsText(data, "name", lang))}</span>
-            <strong>${escapeHtml(cmsText(data, "price", lang))}</strong>
+            ${campaignPrice(cmsText(data, "price", lang), lang, true)}
           </div>`;
         }).join("");
       };
@@ -473,7 +484,8 @@ const customPlan = fallbackPricing.find((item) => item.data.group === "custom");
 
         if (minPriceNode && visiblePrices.length) {
           const min = Math.min(...visiblePrices);
-          minPriceNode.textContent = `Rp${min.toLocaleString("id-ID")}+`;
+          const current = `Rp${min.toLocaleString(activeLang === "en" ? "en-US" : "id-ID")}+`;
+          minPriceNode.innerHTML = campaignPrice(current, activeLang);
         }
       };
 
@@ -536,6 +548,8 @@ const customPlan = fallbackPricing.find((item) => item.data.group === "custom");
           });
         })
         .catch(() => {});
+
+      window.addEventListener("solivate:campaign", () => renderPricing(document.documentElement.lang));
 
       document.querySelectorAll("[data-top]").forEach((trigger) => {
         trigger.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
