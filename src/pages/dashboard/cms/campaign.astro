@@ -132,7 +132,27 @@ import DashboardLayout from "../../../layouts/DashboardLayout.astro";
         ...Object.fromEntries(fields.map((key) => [key, key === "discount_amount" ? Number(form.elements[key].value || 0) : form.elements[key].value.trim()]))
       });
 
+      let savePromise = Promise.resolve();
+      const saveCampaign = (message = "Kampanye tersimpan.") => {
+        savePromise = savePromise.catch(() => {}).then(async () => {
+          stateNode.textContent = "Menyimpan...";
+          const data = await window.adminApi("/api/admin/data?resource=campaign", { method: "PUT", body: JSON.stringify(payload()) });
+          populate(data.campaign);
+          stateNode.textContent = "Tersimpan dan langsung berlaku";
+          window.showAdminToast(message);
+          return data;
+        }).catch((error) => {
+          stateNode.textContent = "Gagal disimpan";
+          window.showAdminToast(error.message, "error");
+          throw error;
+        });
+        return savePromise;
+      };
+
       form.addEventListener("input", () => { stateNode.textContent = "Ada perubahan belum disimpan"; preview(); });
+      form.elements.enabled.addEventListener("change", () => {
+        saveCampaign(form.elements.enabled.checked ? "Kampanye diaktifkan." : "Kampanye dimatikan.").catch(() => {});
+      });
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
         if (form.elements.end_date.value < form.elements.start_date.value) {
@@ -140,11 +160,8 @@ import DashboardLayout from "../../../layouts/DashboardLayout.astro";
           return;
         }
         try {
-          const data = await window.adminApi("/api/admin/data?resource=campaign", { method: "PUT", body: JSON.stringify(payload()) });
-          populate(data.campaign);
-          stateNode.textContent = "Tersimpan dan langsung berlaku";
-          window.showAdminToast("Kampanye tersimpan.");
-        } catch (error) { window.showAdminToast(error.message, "error"); }
+          await saveCampaign();
+        } catch {}
       });
 
       document.querySelectorAll("[data-campaign-upload]").forEach((input) => {
@@ -158,8 +175,8 @@ import DashboardLayout from "../../../layouts/DashboardLayout.astro";
             const data = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(data.message || "Upload gagal.");
             form.elements[input.dataset.campaignUpload].value = data.url;
-            stateNode.textContent = "Gambar terupload, simpan perubahan";
             preview();
+            await saveCampaign("Gambar terupload dan tersimpan.");
           } catch (error) { window.showAdminToast(error.message, "error"); }
           finally { input.value = ""; }
         });
@@ -169,7 +186,7 @@ import DashboardLayout from "../../../layouts/DashboardLayout.astro";
       });
 
       try {
-        const data = await window.adminApi("/api/admin/data?resource=campaign");
+        const data = await window.adminApi("/api/admin/data?resource=campaign", { cache: "no-store" });
         populate(data.campaign);
         stateNode.textContent = data.updated_at ? `Terakhir disimpan ${window.formatDate(data.updated_at)}` : "Menggunakan konfigurasi default";
       } catch (error) {

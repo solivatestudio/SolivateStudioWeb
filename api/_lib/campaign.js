@@ -1,7 +1,7 @@
 export const CAMPAIGN_KEY = "campaign_hut_ri_81";
 
 export const CAMPAIGN_DEFAULTS = {
-  enabled: true,
+  enabled: false,
   start_date: "2026-08-12",
   end_date: "2026-08-31",
   discount_amount: 81000,
@@ -35,9 +35,10 @@ export function normalizeCampaign(value = {}) {
   const discount = Number(value.discount_amount);
   const startDate = date(value.start_date, CAMPAIGN_DEFAULTS.start_date);
   const endDate = date(value.end_date, CAMPAIGN_DEFAULTS.end_date);
+  const enabled = value.enabled === true || value.enabled === 1 || String(value.enabled).toLowerCase() === "true";
 
   return {
-    enabled: value.enabled !== false,
+    enabled,
     start_date: startDate,
     end_date: endDate < startDate ? startDate : endDate,
     discount_amount: Number.isFinite(discount)

@@ -449,6 +449,7 @@ export default async function handler(request, response) {
         return response.status(200).json({ entries: Object.fromEntries(rows.map((row) => [row.key, row.value])) });
       }
       if (resource === "campaign") {
+        response.setHeader("Cache-Control", "no-store, max-age=0, must-revalidate");
         const [row] = await sql`SELECT value, updated_at FROM cms_entries WHERE key = ${CAMPAIGN_KEY} LIMIT 1`;
         return response.status(200).json({
           campaign: normalizeCampaign(row?.value || CAMPAIGN_DEFAULTS),
@@ -650,6 +651,7 @@ export default async function handler(request, response) {
     }
 
     if (resource === "campaign" && request.method === "PUT") {
+      response.setHeader("Cache-Control", "no-store, max-age=0, must-revalidate");
       const campaign = normalizeCampaign(body);
       await sql`
         INSERT INTO cms_entries (key, value, status, updated_at)
@@ -657,7 +659,13 @@ export default async function handler(request, response) {
         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, status = 'published', updated_at = NOW()
       `;
       await audit(session.username, "update", "cms_campaign", CAMPAIGN_KEY);
-      return response.status(200).json({ ok: true, campaign });
+      const [saved] = await sql`SELECT value, updated_at FROM cms_entries WHERE key = ${CAMPAIGN_KEY} LIMIT 1`;
+      if (!saved) throw new Error("Campaign was not persisted.");
+      return response.status(200).json({
+        ok: true,
+        campaign: normalizeCampaign(saved.value),
+        updated_at: saved.updated_at
+      });
     }
 
     if (resource === "projects") {
