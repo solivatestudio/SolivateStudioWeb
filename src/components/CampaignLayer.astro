@@ -31,9 +31,12 @@ const defaultsJson = JSON.stringify(defaults);
   <a href="/#pricing">Lihat promo <span aria-hidden="true">↗</span></a>
   <div class="campaign-pennants pennants-right" aria-hidden="true">{Array.from({ length: 7 }).map(() => <i></i>)}</div>
   <div class="campaign-bunting" aria-hidden="true">
-    {Array.from({ length: 4 }).map((_, groupIndex) => (
+    {Array.from({ length: 2 }).map((_, groupIndex) => (
       <span class={`campaign-bunting-checkpoint checkpoint-${groupIndex + 1}`}>
-        {Array.from({ length: 5 }).map((_, flagIndex) => (
+        <svg viewBox="0 0 100 22" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M 0 1 Q 50 21 100 1" />
+        </svg>
+        {Array.from({ length: 6 }).map((_, flagIndex) => (
           <i class={(groupIndex + flagIndex) % 2 ? "is-white" : "is-red"}></i>
         ))}
       </span>
@@ -117,14 +120,26 @@ const defaultsJson = JSON.stringify(defaults);
 
 <script is:inline type="application/json" id="campaign-defaults" set:html={defaultsJson}></script>
 <script>
-  import party from "party-js";
-
-  (window as Window & { solivateParty?: typeof party }).solivateParty = party;
-  window.dispatchEvent(new CustomEvent("solivate:party-ready"));
+  type Party = typeof import("party-js").default;
+  const campaignWindow = window as Window & {
+    solivateParty?: Party;
+    loadSolivateParty?: () => Promise<Party>;
+  };
+  let partyPromise: Promise<Party> | undefined;
+  campaignWindow.loadSolivateParty = () => {
+    if (!partyPromise) {
+      partyPromise = import("party-js").then(({ default: party }) => {
+        campaignWindow.solivateParty = party;
+        return party;
+      });
+    }
+    return partyPromise;
+  };
 
   const setupThreeFlag = async () => {
     const canvas = document.querySelector<HTMLCanvasElement>("[data-campaign-three-flag]");
     if (!canvas) return;
+    if (window.matchMedia("(max-width: 767px)").matches) return;
     const {
       CylinderGeometry,
       DoubleSide,
@@ -137,12 +152,12 @@ const defaultsJson = JSON.stringify(defaults);
       WebGLRenderer
     } = await import("three");
     const renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
     renderer.setSize(canvas.clientWidth || 180, canvas.clientHeight || 120, false);
     const scene = new Scene();
     const camera = new OrthographicCamera(-.35, 2.8, 1.05, -1.05, .1, 10);
     camera.position.z = 4;
-    const geometry = new PlaneGeometry(2.45, 1.5, 32, 18);
+    const geometry = new PlaneGeometry(2.45, 1.5, 24, 12);
     geometry.translate(1.225, 0, 0);
     const uniforms = { time: { value: 0 } };
     const material = new ShaderMaterial({
@@ -180,20 +195,49 @@ const defaultsJson = JSON.stringify(defaults);
     pole.position.set(0, -.28, -.04);
     scene.add(pole);
     let frame = 0;
+    let lastFrame = 0;
+    let inView = false;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const render = (time: number) => {
-      const active = document.body.classList.contains("campaign-active");
-      if (active && canvas.offsetParent !== null && !document.hidden) {
-        uniforms.time.value = reduced ? 0 : time / 1000;
-        renderer.render(scene, camera);
-      }
-      frame = window.requestAnimationFrame(render);
+    const saveData = Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData);
+    const animate = !reduced && !saveData;
+    const renderFrame = (time: number) => {
+      uniforms.time.value = animate ? time / 1000 : 0;
+      renderer.render(scene, camera);
     };
-    frame = window.requestAnimationFrame(render);
+    const render = (time: number) => {
+      frame = 0;
+      if (!document.body.classList.contains("campaign-active") || !inView || document.hidden) return;
+      if (!animate || time - lastFrame >= 1000 / 30) {
+        renderFrame(time);
+        lastFrame = time;
+      }
+      if (animate) frame = window.requestAnimationFrame(render);
+    };
+    const syncRenderLoop = () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = 0;
+      if (document.body.classList.contains("campaign-active") && inView && !document.hidden) {
+        frame = window.requestAnimationFrame(render);
+      }
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      inView = Boolean(entry?.isIntersecting);
+      syncRenderLoop();
+    }, { rootMargin: "80px" });
+    observer.observe(canvas);
     window.addEventListener("solivate:campaign", (event) => {
-      canvas.hidden = !Boolean((event as CustomEvent).detail?.active);
+      const active = Boolean((event as CustomEvent).detail?.active);
+      canvas.hidden = !active;
+      syncRenderLoop();
     });
-    window.addEventListener("pagehide", () => window.cancelAnimationFrame(frame), { once: true });
+    document.addEventListener("visibilitychange", syncRenderLoop);
+    window.addEventListener("pagehide", () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      observer.disconnect();
+      renderer.dispose();
+      geometry.dispose();
+      material.dispose();
+    }, { once: true });
   };
   setupThreeFlag();
 </script>
@@ -254,20 +298,17 @@ const defaultsJson = JSON.stringify(defaults);
       lastFocused?.focus?.();
     };
 
-    const celebratePopup = () => {
+    const celebratePopup = async () => {
       if (!popup || popup.dataset.celebrated || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      const party = window.solivateParty;
-      if (!party) {
-        window.addEventListener("solivate:party-ready", celebratePopup, { once: true });
-        return;
-      }
+      const party = window.solivateParty || await window.loadSolivateParty?.();
+      if (!party || popup.hidden) return;
       popup.dataset.celebrated = "true";
       const source = popup.querySelector(".campaign-popup-mark") || popup;
       const colors = ["#e5232a", "#ffffff", "#b5121b", "#023e8a", "#d7ff3f"];
       const flag = document.createElement("span");
       flag.className = "campaign-party-flag";
       party.confetti(source, {
-        count: party.variation.range(window.innerWidth < 640 ? 90 : 150, window.innerWidth < 640 ? 120 : 190),
+        count: party.variation.range(window.innerWidth < 640 ? 42 : 68, window.innerWidth < 640 ? 62 : 96),
         spread: party.variation.range(58, 82),
         speed: party.variation.range(360, 680),
         size: party.variation.range(.72, 1.28),
@@ -278,13 +319,13 @@ const defaultsJson = JSON.stringify(defaults);
       const canvas = popup.querySelector("[data-campaign-confetti-canvas]");
       const context = canvas?.getContext?.("2d");
       if (!canvas || !context) return;
-      const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
+      const ratio = Math.min(window.devicePixelRatio || 1, window.innerWidth < 640 ? 1 : 1.25);
       const width = window.innerWidth;
       const height = window.innerHeight;
       canvas.width = Math.floor(width * ratio);
       canvas.height = Math.floor(height * ratio);
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
-      const pieces = Array.from({ length: width < 640 ? 72 : 118 }, (_, index) => ({
+      const pieces = Array.from({ length: width < 640 ? 38 : 68 }, (_, index) => ({
         x: Math.random() * width,
         y: -30 - Math.random() * height * .7,
         size: 4 + Math.random() * 8,
@@ -295,7 +336,13 @@ const defaultsJson = JSON.stringify(defaults);
         flag: index % 8 === 0,
         color: colors[index % colors.length]
       }));
-      const draw = () => {
+      let lastDraw = 0;
+      const draw = (now) => {
+        if (now - lastDraw < 1000 / 30) {
+          if (!popup.hidden) confettiFrame = window.requestAnimationFrame(draw);
+          return;
+        }
+        lastDraw = now;
         context.clearRect(0, 0, width, height);
         pieces.forEach((piece) => {
           piece.y += piece.speed;
