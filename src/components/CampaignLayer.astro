@@ -41,6 +41,19 @@ const defaultsJson = JSON.stringify(defaults);
   </div>
   <span class="campaign-star star-one">✦</span>
   <span class="campaign-star star-two">✦</span>
+  <div class="campaign-side-flags campaign-side-left">
+    <span class="campaign-side-pole"></span>
+    <span class="campaign-side-cloth"><i></i><i></i></span>
+    <b>17.08</b>
+  </div>
+  <div class="campaign-side-flags campaign-side-right">
+    <span class="campaign-side-pole"></span>
+    <span class="campaign-side-cloth"><i></i><i></i></span>
+    <b>81</b>
+  </div>
+  <div class="campaign-pennants pennants-left">{Array.from({ length: 7 }).map((_, index) => <i style={`--p:${index}`}></i>)}</div>
+  <div class="campaign-pennants pennants-right">{Array.from({ length: 7 }).map((_, index) => <i style={`--p:${index}`}></i>)}</div>
+  <span class="campaign-rosette" data-campaign-rosette></span>
 </div>
 
 <div class="campaign-transition" data-campaign-transition hidden aria-hidden="true">
@@ -48,10 +61,16 @@ const defaultsJson = JSON.stringify(defaults);
     <strong>17.08</strong>
     <span>1945—2026</span>
   </div>
-  <div class="campaign-transition-window">
+  <div class="campaign-transition-window campaign-transition-red">
     <div class="campaign-transition-track">
-      <span>MERDEKA UNTUK BERKARYA</span><i></i><span>CREATE</span><i></i><span>BUILD</span><i></i><span>GROW</span><i></i><span>INDONESIA 81</span><i></i>
-      <span>MERDEKA UNTUK BERKARYA</span><i></i><span>CREATE</span><i></i><span>BUILD</span><i></i><span>GROW</span><i></i><span>INDONESIA 81</span><i></i>
+      <span>MERDEKA UNTUK BERKARYA</span><i></i><span>CREATE</span><i></i><span>BUILD</span><i></i><span>GROW</span><i></i><span>INDONESIA 81</span><i></i><span>17 · 08 · 1945</span><i></i>
+      <span>MERDEKA UNTUK BERKARYA</span><i></i><span>CREATE</span><i></i><span>BUILD</span><i></i><span>GROW</span><i></i><span>INDONESIA 81</span><i></i><span>17 · 08 · 1945</span><i></i>
+    </div>
+  </div>
+  <div class="campaign-transition-window campaign-transition-white">
+    <div class="campaign-transition-track is-reverse">
+      <span>17 AGUSTUS</span><i></i><span>DARI INDONESIA</span><i></i><span>UNTUK IDE YANG LEBIH BESAR</span><i></i><span>81 YEARS</span><i></i>
+      <span>17 AGUSTUS</span><i></i><span>DARI INDONESIA</span><i></i><span>UNTUK IDE YANG LEBIH BESAR</span><i></i><span>81 YEARS</span><i></i>
     </div>
   </div>
   <div class="campaign-transition-mark"><span></span><span></span><b>81</b></div>
@@ -144,11 +163,12 @@ const defaultsJson = JSON.stringify(defaults);
       const centerX = origin ? origin.left + origin.width / 2 : window.innerWidth / 2;
       const centerY = origin ? origin.top + origin.height / 2 : window.innerHeight / 2;
       const colors = ["#e5232a", "#ffffff", "#023e8a", "#d7ff3f"];
-      Array.from({ length: window.innerWidth < 640 ? 24 : 38 }).forEach((_, index) => {
+      const particleCount = window.innerWidth < 640 ? 36 : 56;
+      Array.from({ length: particleCount }).forEach((_, index) => {
         const particle = document.createElement("i");
-        const angle = (Math.PI * 2 * index) / (window.innerWidth < 640 ? 24 : 38) + (Math.random() - 0.5) * 0.28;
-        const distance = 90 + Math.random() * (window.innerWidth < 640 ? 100 : 180);
-        particle.className = `campaign-confetti${index % 5 === 0 ? " is-star" : ""}`;
+        const angle = (Math.PI * 2 * index) / particleCount + (Math.random() - 0.5) * 0.34;
+        const distance = 110 + Math.random() * (window.innerWidth < 640 ? 140 : 250);
+        particle.className = `campaign-confetti${index % 7 === 0 ? " is-star" : index % 5 === 0 ? " is-ribbon" : ""}`;
         particle.style.setProperty("--confetti-x", `${centerX}px`);
         particle.style.setProperty("--confetti-y", `${centerY}px`);
         particle.style.setProperty("--confetti-dx", `${Math.cos(angle) * distance}px`);
