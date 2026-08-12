@@ -6081,8 +6081,6 @@ body.campaign-active main { padding-top: 42px; }
   background: linear-gradient(90deg, #b5121b 0%, #e5232a 52%, #023e8a 100%);
 }
 
-body.campaign-active .header { top: 76px; }
-
 .campaign-atmosphere {
   position: absolute;
   z-index: 3;
@@ -6667,7 +6665,6 @@ body.campaign-active .campaign-footer-pennants {
 
 @media (max-width: 767px) {
   body.campaign-active main { padding-top: 40px; }
-  body.campaign-active .header { top: 70px; }
   .campaign-map-art { display: none; }
   .campaign-map-year { display: none; }
   .campaign-corner-flag { top: 112px; right: 14px; padding: 6px 8px; }
