@@ -44,10 +44,17 @@ const defaultsJson = JSON.stringify(defaults);
 </div>
 
 <div class="campaign-transition" data-campaign-transition hidden aria-hidden="true">
-  <div>
-    <span>MERDEKA UNTUK BERKARYA</span><i></i><span>CREATE</span><i></i><span>BUILD</span><i></i><span>GROW</span><i></i><span>INDONESIA 81</span><i></i>
-    <span>MERDEKA UNTUK BERKARYA</span><i></i><span>CREATE</span><i></i><span>BUILD</span><i></i><span>GROW</span><i></i><span>INDONESIA 81</span><i></i>
+  <div class="campaign-transition-date">
+    <strong>17.08</strong>
+    <span>1945—2026</span>
   </div>
+  <div class="campaign-transition-window">
+    <div class="campaign-transition-track">
+      <span>MERDEKA UNTUK BERKARYA</span><i></i><span>CREATE</span><i></i><span>BUILD</span><i></i><span>GROW</span><i></i><span>INDONESIA 81</span><i></i>
+      <span>MERDEKA UNTUK BERKARYA</span><i></i><span>CREATE</span><i></i><span>BUILD</span><i></i><span>GROW</span><i></i><span>INDONESIA 81</span><i></i>
+    </div>
+  </div>
+  <div class="campaign-transition-mark"><span></span><span></span><b>81</b></div>
 </div>
 
 {home && (
@@ -129,12 +136,40 @@ const defaultsJson = JSON.stringify(defaults);
       window.setTimeout(() => { popup.hidden = true; }, 280);
       lastFocused?.focus?.();
     };
+
+    const celebratePopup = () => {
+      if (!popup || popup.dataset.celebrated || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      popup.dataset.celebrated = "true";
+      const origin = popup.querySelector(".campaign-popup-mark")?.getBoundingClientRect();
+      const centerX = origin ? origin.left + origin.width / 2 : window.innerWidth / 2;
+      const centerY = origin ? origin.top + origin.height / 2 : window.innerHeight / 2;
+      const colors = ["#e5232a", "#ffffff", "#023e8a", "#d7ff3f"];
+      Array.from({ length: window.innerWidth < 640 ? 24 : 38 }).forEach((_, index) => {
+        const particle = document.createElement("i");
+        const angle = (Math.PI * 2 * index) / (window.innerWidth < 640 ? 24 : 38) + (Math.random() - 0.5) * 0.28;
+        const distance = 90 + Math.random() * (window.innerWidth < 640 ? 100 : 180);
+        particle.className = `campaign-confetti${index % 5 === 0 ? " is-star" : ""}`;
+        particle.style.setProperty("--confetti-x", `${centerX}px`);
+        particle.style.setProperty("--confetti-y", `${centerY}px`);
+        particle.style.setProperty("--confetti-dx", `${Math.cos(angle) * distance}px`);
+        particle.style.setProperty("--confetti-dy", `${Math.sin(angle) * distance + 34}px`);
+        particle.style.setProperty("--confetti-color", colors[index % colors.length]);
+        particle.style.setProperty("--confetti-rotate", `${180 + Math.random() * 360}deg`);
+        particle.style.setProperty("--confetti-delay", `${Math.random() * 90}ms`);
+        document.body.appendChild(particle);
+        window.setTimeout(() => particle.remove(), 1200);
+      });
+    };
+
     const openPopup = () => {
       if (!home || !popup || !isActive(campaign)) return;
       lastFocused = document.activeElement;
       popup.hidden = false;
       document.body.classList.add("campaign-popup-open");
-      window.requestAnimationFrame(() => popup.classList.add("is-open"));
+      window.requestAnimationFrame(() => {
+        popup.classList.add("is-open");
+        window.setTimeout(celebratePopup, 160);
+      });
       popup.querySelector("[data-campaign-close]")?.focus();
     };
     const apply = (value) => {

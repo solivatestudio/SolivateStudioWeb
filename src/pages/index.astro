@@ -435,11 +435,11 @@ const organizationSchema = JSON.stringify({
 
         <div class="marquee" aria-hidden="true">
           <div class="marquee-track">
-            {Array.from({ length: 2 }).map((_, groupIndex) => (
+            {Array.from({ length: 2 }).map(() => (
               <div class="marquee-group">
                 {marqueeItems.map((key, index) => (
                   <span>
-                    <span class={(index + groupIndex) % 2 ? "muted" : ""} data-i18n={key}>{tx(key)}</span>
+                    <span class={index % 2 ? "muted" : ""} data-i18n={key}>{tx(key)}</span>
                     <i class="marquee-dot"></i>
                   </span>
                 ))}
@@ -773,13 +773,27 @@ const organizationSchema = JSON.stringify({
       window.addEventListener("hashchange", updateHeader);
       window.setTimeout(updateHeader, 120);
 
+      const marquee = document.querySelector(".marquee");
+      const startMarquee = () => {
+        const ready = document.fonts?.ready || Promise.resolve();
+        ready.then(() => window.requestAnimationFrame(() => marquee?.classList.add("is-ready")));
+      };
+      const restartMarquee = () => {
+        marquee?.classList.remove("is-ready");
+        window.requestAnimationFrame(() => window.requestAnimationFrame(startMarquee));
+      };
+
       document.querySelectorAll("[data-lang-switch]").forEach((button) => {
-        button.addEventListener("click", () => setLanguage(button.getAttribute("data-lang-switch"), true));
+        button.addEventListener("click", () => {
+          setLanguage(button.getAttribute("data-lang-switch"), true);
+          restartMarquee();
+        });
       });
       const savedLanguage = window.localStorage.getItem("solivate-language-manual") === "true"
         ? window.localStorage.getItem("solivate-language")
         : "id";
       setLanguage(savedLanguage || "id");
+      startMarquee();
 
       fetch("/api/public/content", { cache: "no-store" })
         .then((response) => response.ok ? response.json() : null)
