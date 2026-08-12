@@ -6213,29 +6213,26 @@ body.campaign-active main { padding-top: 42px; }
   position: absolute;
   top: 8px;
   left: 11px;
-  display: flex;
   width: 46px;
   height: 30px;
-  perspective: 110px;
   filter: drop-shadow(0 7px 7px rgba(0,0,0,.18));
   transform-origin: left center;
+  animation: campaignSideClothWave 2.2s var(--ease-in-out) infinite alternate;
 }
-.campaign-side-cloth i {
+.campaign-side-cloth svg {
   display: block;
-  width: 3.3px;
-  height: 30px;
-  flex: 0 0 3.3px;
-  background: linear-gradient(180deg, #e5232a 0 50%, #fff 50% 100%);
-  animation: campaignFlagSegment 1.4s var(--ease-in-out) infinite alternate;
-  transform-origin: center;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
-.campaign-side-cloth i:last-child { clip-path: polygon(0 0, 100% 5%, 100% 92%, 0 100%); }
+.campaign-side-cloth .side-flag-red { fill: #e5232a; }
+.campaign-side-cloth .side-flag-white { fill: #fff; }
 .campaign-side-right .campaign-side-cloth {
   right: 11px;
   left: auto;
-  flex-direction: row-reverse;
   transform-origin: right center;
 }
+.campaign-side-right .campaign-side-cloth svg { transform: scaleX(-1); }
 .campaign-side-flags b { display: none; }
 
 .campaign-bunting {
@@ -6263,7 +6260,7 @@ body.campaign-active main { padding-top: 42px; }
   height: 38px;
   overflow: visible;
   fill: none;
-  stroke: rgba(255,255,255,.34);
+  stroke: rgba(181,18,27,.58);
   stroke-width: .32;
   vector-effect: non-scaling-stroke;
 }
@@ -6294,6 +6291,7 @@ body.campaign-active main { padding-top: 42px; }
 .campaign-bunting i:nth-child(5) { animation-delay: -1.4s; }
 .campaign-bunting i:nth-child(6) { animation-delay: -1.75s; }
 .campaign-bunting .is-white { background: #fff; }
+.campaign-bunting .is-white { filter: drop-shadow(0 0 1px rgba(2,18,38,.82)); }
 
 .campaign-ribbon-banner {
   position: absolute;
@@ -6536,7 +6534,7 @@ body.campaign-active .nav-cta {
 .campaign-footer-banner { display: none; }
 
 body.campaign-active .footer {
-  border-top: 4px solid #e5232a;
+  border-top: 0;
   padding-top: 0;
   background:
     radial-gradient(circle at 82% 4%, rgba(229,35,42,.16), transparent 34%),
@@ -6556,14 +6554,50 @@ body.campaign-active .campaign-footer-banner {
 
 .campaign-footer-pennants { display: none; }
 body.campaign-active .campaign-footer-pennants {
-  display: flex;
-  height: 24px;
-  justify-content: space-around;
+  position: relative;
+  display: block;
+  height: 62px;
   overflow: hidden;
-  border-top: 1px solid rgba(255,255,255,.18);
   background: var(--ink);
 }
-.campaign-footer-pennants i { width: 18px; height: 22px; flex: 0 0 18px; clip-path: polygon(0 0,100% 0,50% 100%); }
+.campaign-footer-garland {
+  position: absolute;
+  top: -1px;
+  display: block;
+  height: 58px;
+  transform-origin: top center;
+}
+.campaign-footer-garland svg {
+  position: absolute;
+  inset: 0 0 auto;
+  width: 100%;
+  height: 38px;
+  overflow: visible;
+  fill: none;
+  stroke: rgba(255,255,255,.26);
+  stroke-width: .3;
+  vector-effect: non-scaling-stroke;
+}
+.footer-garland-1 { left: -3%; width: 33%; transform: rotate(1.6deg); }
+.footer-garland-2 { top: 8px; left: 42%; width: 19%; transform: rotate(-1.2deg); }
+.footer-garland-3 { right: -3%; width: 27%; transform: rotate(-2deg); }
+.campaign-footer-pennants i {
+  --footer-drop: 0px;
+  --footer-tilt: -3deg;
+  position: absolute;
+  top: calc(2px + var(--footer-drop));
+  width: clamp(10px, 1.15vw, 17px);
+  height: clamp(16px, 1.8vw, 25px);
+  clip-path: polygon(0 0,100% 0,50% 100%);
+  transform: rotate(var(--footer-tilt));
+  transform-origin: top center;
+}
+.campaign-footer-pennants i:nth-child(2) { left: 3%; --footer-tilt: -6deg; transform: rotate(var(--footer-tilt)) scale(.9); }
+.campaign-footer-pennants i:nth-child(3) { left: 20%; --footer-drop: 10px; --footer-tilt: 4deg; }
+.campaign-footer-pennants i:nth-child(4) { left: 39%; --footer-drop: 17px; --footer-tilt: -3deg; transform: rotate(var(--footer-tilt)) scale(.94); }
+.campaign-footer-pennants i:nth-child(5) { left: 58%; --footer-drop: 16px; --footer-tilt: 6deg; transform: rotate(var(--footer-tilt)) scale(1.06); }
+.campaign-footer-pennants i:nth-child(6) { left: 78%; --footer-drop: 8px; --footer-tilt: -4deg; transform: rotate(var(--footer-tilt)) scale(.92); }
+.campaign-footer-pennants i:nth-child(7) { left: 96%; --footer-tilt: 3deg; }
 .campaign-footer-pennants .is-red { background: #e5232a; }
 .campaign-footer-pennants .is-white { background: #fff; }
 
@@ -6647,9 +6681,9 @@ body.campaign-active .campaign-footer-pennants {
   50% { opacity: .82; transform: rotate(45deg) scale(1.18); }
 }
 @keyframes campaignEditorialMarquee { to { transform: translateX(-50%); } }
-@keyframes campaignFlagSegment {
-  0% { transform: translate3d(0, 3px, 0) rotateY(-12deg); }
-  100% { transform: translate3d(0, -3px, 0) rotateY(12deg); }
+@keyframes campaignSideClothWave {
+  0% { transform: skewY(-1.5deg) rotate(-.7deg); }
+  100% { transform: skewY(1.5deg) rotate(.7deg); }
 }
 @keyframes campaignBuntingWave {
   0% { transform: rotateZ(calc(var(--tilt) - 2deg)) rotateY(-7deg) scale(var(--flag-scale)); }
@@ -6677,7 +6711,6 @@ body.campaign-active .campaign-footer-pennants {
   .campaign-side-pole { left: 7px; }
   .campaign-side-right .campaign-side-pole { right: 7px; left: auto; }
   .campaign-side-cloth { top: 7px; left: 9px; width: 39px; height: 26px; }
-  .campaign-side-cloth i { width: 2.8px; height: 26px; flex-basis: 2.8px; }
   .campaign-bunting { height: 44px; }
   .campaign-bunting .checkpoint-1 { left: -9%; width: 48%; }
   .campaign-bunting .checkpoint-2 { top: 4px; right: -8%; width: 39%; }
@@ -6704,10 +6737,31 @@ body.campaign-active .campaign-footer-pennants {
   body.campaign-active .pricing::before,
   body.campaign-active .contact::before { font-size: 100px; opacity: .7; }
   .campaign-footer-inner { grid-template-columns: 92px minmax(0, 1fr); width: calc(100% - 28px); min-height: 210px; gap: 20px; padding-block: 30px; }
+  body.campaign-active .campaign-footer-pennants { height: 54px; }
+  .campaign-footer-garland { height: 50px; }
+  .footer-garland-1 { left: -9%; width: 48%; }
+  .footer-garland-2 { display: none; }
+  .footer-garland-3 { top: 4px; right: -8%; width: 42%; }
+  .campaign-footer-garland svg { height: 32px; }
+  .campaign-footer-pennants i { width: 9px; height: 15px; }
+  .campaign-footer-pennants i:nth-child(4),
+  .campaign-footer-pennants i:nth-child(5) { --footer-drop: 14px; }
   .campaign-footer-number strong { font-size: 72px; }
   .campaign-footer-number span { font-size: 6px; }
   .campaign-footer-copy strong { font-size: clamp(25px, 7vw, 34px); }
-  .campaign-footer-map { position: absolute; right: -54px; bottom: -22px; width: 210px; min-height: 0; opacity: .35; pointer-events: none; }
+  .campaign-footer-map {
+    position: absolute;
+    right: -30px;
+    bottom: -8px;
+    width: 250px;
+    min-height: 0;
+    opacity: 1;
+    pointer-events: none;
+  }
+  .campaign-footer-map img {
+    opacity: .52;
+    filter: saturate(.95) brightness(1.2) contrast(1.08);
+  }
   .campaign-footer-map::before { display: none; }
   .campaign-footer-banner > a { right: 10px; bottom: 7px; font-size: 6px; }
 }
@@ -6717,7 +6771,7 @@ body.campaign-active .campaign-footer-pennants {
   .campaign-star,
   .campaign-transition-track { animation: none !important; }
   .campaign-three-flag { transform: rotate(-5deg); }
-  .campaign-side-cloth i,
+  .campaign-side-cloth,
   .campaign-bunting i,
   .campaign-rosette { animation: none !important; }
   .campaign-confetti { display: none !important; }
