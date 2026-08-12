@@ -2,7 +2,7 @@
 const { home = false } = Astro.props;
 
 const defaults = {
-  enabled: true,
+  enabled: false,
   start_date: "2026-08-12",
   end_date: "2026-08-31",
   discount_amount: 81000,
@@ -300,8 +300,12 @@ const defaultsJson = JSON.stringify(defaults);
     };
 
     const closePopup = () => {
-      if (!popup || popup.hidden) return;
       window.cancelAnimationFrame(confettiFrame);
+      document.getElementById("party-js-container")?.replaceChildren();
+      const confettiCanvas = popup?.querySelector("[data-campaign-confetti-canvas]");
+      const confettiContext = confettiCanvas?.getContext?.("2d");
+      confettiContext?.clearRect(0, 0, confettiCanvas?.width || 0, confettiCanvas?.height || 0);
+      if (!popup || popup.hidden) return;
       popup.classList.remove("is-open");
       document.body.classList.remove("campaign-popup-open");
       window.setTimeout(() => { popup.hidden = true; }, 280);

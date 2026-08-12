@@ -5588,6 +5588,21 @@ h2:hover {
 }
 
 /* HUT RI 81 campaign */
+body:not(.campaign-active) .campaign-rail,
+body:not(.campaign-active) .campaign-atmosphere,
+body:not(.campaign-active) .campaign-transition,
+body:not(.campaign-active) .campaign-popup-backdrop,
+body:not(.campaign-active) .campaign-footer-pennants,
+body:not(.campaign-active) .campaign-footer-banner,
+body:not(.campaign-active) #party-js-container {
+  display: none !important;
+}
+
+body:not(.campaign-active) .campaign-price del,
+body:not(.campaign-active) .campaign-promo-chip {
+  display: none !important;
+}
+
 .campaign-rail {
   position: fixed;
   z-index: 115;
