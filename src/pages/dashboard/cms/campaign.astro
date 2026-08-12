@@ -140,7 +140,7 @@ import DashboardLayout from "../../../layouts/DashboardLayout.astro";
           return;
         }
         try {
-          const data = await window.adminApi("/api/admin/campaign", { method: "PUT", body: JSON.stringify(payload()) });
+          const data = await window.adminApi("/api/admin/data?resource=campaign", { method: "PUT", body: JSON.stringify(payload()) });
           populate(data.campaign);
           stateNode.textContent = "Tersimpan dan langsung berlaku";
           window.showAdminToast("Kampanye tersimpan.");
@@ -169,7 +169,7 @@ import DashboardLayout from "../../../layouts/DashboardLayout.astro";
       });
 
       try {
-        const data = await window.adminApi("/api/admin/campaign");
+        const data = await window.adminApi("/api/admin/data?resource=campaign");
         populate(data.campaign);
         stateNode.textContent = data.updated_at ? `Terakhir disimpan ${window.formatDate(data.updated_at)}` : "Menggunakan konfigurasi default";
       } catch (error) {

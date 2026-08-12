@@ -149,12 +149,12 @@ const defaultsJson = JSON.stringify(defaults);
     });
     new MutationObserver(updateCopy).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
 
-    Promise.all([
-      fetch("/api/public/campaign", { cache: "no-store" }).then((response) => response.ok ? response.json() : null),
-      fetch("/api/public/cms", { cache: "no-store" }).then((response) => response.ok ? response.json() : null)
-    ]).then(([campaignData, cmsData]) => {
-      whatsapp = String(cmsData?.entries?.contact_whatsapp || whatsapp).replace(/\D/g, "") || whatsapp;
-      apply(campaignData?.campaign || defaults);
-    }).catch(() => apply(defaults));
+    fetch("/api/public/cms", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        whatsapp = String(data?.entries?.contact_whatsapp || whatsapp).replace(/\D/g, "") || whatsapp;
+        apply(data?.campaign || defaults);
+      })
+      .catch(() => apply(defaults));
   })();
 </script>
